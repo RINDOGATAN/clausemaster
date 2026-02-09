@@ -1,0 +1,218 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["clausemaster"]
+}
+
+// ============================================================
+// AUTHENTICATION & USERS
+// ============================================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts  Account[]
+  sessions  Session[]
+  documents Document[]
+
+  @@map("users")
+  @@schema("clausemaster")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+  @@schema("clausemaster")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+  @@schema("clausemaster")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+  @@schema("clausemaster")
+}
+
+// ============================================================
+// DOCUMENTS & ANALYSIS
+// ============================================================
+
+enum FileType {
+  PDF
+  DOCX
+  TXT
+
+  @@schema("clausemaster")
+}
+
+enum DocumentStatus {
+  UPLOADED
+  EXTRACTING
+  ANALYZING
+  COMPLETED
+  FAILED
+
+  @@schema("clausemaster")
+}
+
+enum Jurisdiction {
+  CALIFORNIA
+  ENGLAND_WALES
+  SPAIN
+  UNKNOWN
+
+  @@schema("clausemaster")
+}
+
+enum IssueType {
+  MISSING_CLAUSE
+  UNUSUAL_TERM
+  JURISDICTION_CONCERN
+  AMBIGUITY
+  IMBALANCE
+  COMPLIANCE_RISK
+
+  @@schema("clausemaster")
+}
+
+enum IssueSeverity {
+  INFO
+  WARNING
+  CRITICAL
+
+  @@schema("clausemaster")
+}
+
+enum BiasAssessment {
+  NEUTRAL
+  FAVORS_PARTY_A
+  FAVORS_PARTY_B
+
+  @@schema("clausemaster")
+}
+
+model Document {
+  id           String         @id @default(cuid())
+  userId       String
+  fileName     String
+  fileType     FileType
+  fileSize     Int
+  status       DocumentStatus @default(UPLOADED)
+  errorMessage String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analysis Analysis?
+
+  @@index([userId])
+  @@map("documents")
+  @@schema("clausemaster")
+}
+
+model Analysis {
+  id                 String       @id @default(cuid())
+  documentId         String       @unique
+  contractType       String?
+  contractTypeLabel  String?
+  jurisdiction       Jurisdiction @default(UNKNOWN)
+  jurisdictionNotes  String?
+  summary            String?      @db.Text
+  partyNames         String[]
+  effectiveDate      String?
+  aiProvider         String?
+  aiModel            String?
+  processingTimeMs   Int?
+  rawExtractedText   String?      @db.Text
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  document Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  clauses  AnalyzedClause[]
+  issues   Issue[]
+
+  @@map("analyses")
+  @@schema("clausemaster")
+}
+
+model AnalyzedClause {
+  id                String          @id @default(cuid())
+  analysisId        String
+  order             Int
+  title             String
+  category          String?
+  originalText      String          @db.Text
+  summary           String?         @db.Text
+  legalSignificance String?         @db.Text
+  skillClauseMatch  String?
+  biasAssessment    BiasAssessment  @default(NEUTRAL)
+  createdAt         DateTime        @default(now())
+
+  analysis Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  issues   Issue[]
+
+  @@index([analysisId])
+  @@map("analyzed_clauses")
+  @@schema("clausemaster")
+}
+
+model Issue {
+  id               String        @id @default(cuid())
+  analysisId       String
+  clauseId         String?
+  type             IssueType
+  severity         IssueSeverity
+  title            String
+  description      String        @db.Text
+  recommendation   String?       @db.Text
+  jurisdictionNote String?
+  createdAt        DateTime      @default(now())
+
+  analysis Analysis       @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  clause   AnalyzedClause? @relation(fields: [clauseId], references: [id], onDelete: SetNull)
+
+  @@index([analysisId])
+  @@index([clauseId])
+  @@map("issues")
+  @@schema("clausemaster")
+}
