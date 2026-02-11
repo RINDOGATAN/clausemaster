@@ -13,10 +13,15 @@ export async function analyzeDocument(documentId: string): Promise<void> {
   try {
     const document = await prisma.document.findUnique({
       where: { id: documentId },
+      select: { id: true, fileName: true, fileType: true, fileData: true },
     });
 
     if (!document) {
       throw new Error("Document not found");
+    }
+
+    if (!document.fileData) {
+      throw new Error("Document file data not found");
     }
 
     // Step 0: Extract text
@@ -25,8 +30,7 @@ export async function analyzeDocument(documentId: string): Promise<void> {
       data: { status: "EXTRACTING" },
     });
 
-    const filePath = `uploads/${documentId}/${document.fileName}`;
-    const extractedText = await extractText(filePath, document.fileType);
+    const extractedText = await extractText(Buffer.from(document.fileData), document.fileType);
 
     if (!extractedText || extractedText.trim().length === 0) {
       throw new Error("Failed to extract text from document");
