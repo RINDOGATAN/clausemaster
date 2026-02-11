@@ -72,10 +72,21 @@ When working in this project, do not touch anything in `/Users/sme/NEL/deal-room
 
 ## Deployment
 
-- **Host**: Vercel (serverless)
+- **Host**: Vercel (serverless) — currently on **Hobby plan**
 - **Domain**: clausemaster.todo.law
 - **Important**: Vercel has a **read-only filesystem** — never write files to disk in API routes. File uploads are stored as `Bytes` in the database (Document.fileData column).
 - Skill draft export (`skill-exporter.ts`) writes to `legalskills/` directory — this only works locally, not on Vercel.
+
+## Known Blocker: Analysis timeout on Vercel Hobby (Feb 2026)
+
+The AI analysis pipeline (3 sequential calls: classify → extract clauses → flag issues) exceeds the **10-second function timeout** on Vercel Hobby. The upload route uses `after()` + `maxDuration=120` which are already in place, but Hobby caps at 10s regardless.
+
+**To unblock — upgrade to Vercel Pro**, then:
+1. Upload + analysis should work as-is (`after()` keeps the function alive, `maxDuration=120` is respected on Pro)
+2. Test by uploading `manual-samples/Series A Term Sheet.pdf`
+3. Verify: document status progresses UPLOADED → EXTRACTING → ANALYZING → COMPLETED
+
+**Alternative if Pro is not an option**: split the 3 AI steps into separate API routes, each called sequentially by the client (each fits within 10s). This would require refactoring the analyzer and the client polling logic.
 
 ## AI Analysis Pipeline
 
