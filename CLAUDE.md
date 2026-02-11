@@ -58,6 +58,25 @@ npx prisma studio    # Open Prisma Studio
 - `OLLAMA_BASE_URL` - Ollama server URL
 - `LEGALSKILLS_DIR` - Path to legalskills repo (defaults to `../legalskills`)
 
+## Relationship with Deal Room
+
+Clausemaster is a **standalone** project that connects to Deal Room (`deal-room-todo`) in one direction:
+
+- **Clausemaster reads** the `legalskills/` repo to use as reference context during analysis (knowledge/loader.ts)
+- **Clausemaster writes** skill drafts that can be exported to `legalskills/` for Deal Room to consume
+- **Clausemaster NEVER modifies** `deal-room-todo` files, database, or configuration
+- Both share the same Neon PostgreSQL cluster but use **separate schemas** (`clausemaster` vs Deal Room's default)
+- Auth cookie domain is `.todo.law` (shared SSO across `clausemaster.todo.law` and `dealroom.todo.law`)
+
+When working in this project, do not touch anything in `/Users/sme/NEL/deal-room-todo`.
+
+## Deployment
+
+- **Host**: Vercel (serverless)
+- **Domain**: clausemaster.todo.law
+- **Important**: Vercel has a **read-only filesystem** — never write files to disk in API routes. File uploads are stored as `Bytes` in the database (Document.fileData column).
+- Skill draft export (`skill-exporter.ts`) writes to `legalskills/` directory — this only works locally, not on Vercel.
+
 ## AI Analysis Pipeline
 
 Three sequential steps using Vercel AI SDK `generateObject`:
