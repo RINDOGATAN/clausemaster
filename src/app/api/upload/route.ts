@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
+import { after } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { analyzeDocument } from "@/server/services/ai/analyzer";
+
+export const maxDuration = 120;
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain"];
@@ -53,9 +56,13 @@ export async function POST(request: Request) {
       },
     });
 
-    // Trigger analysis in background
-    analyzeDocument(document.id).catch((error) => {
-      console.error("Background analysis failed:", error);
+    // Run analysis after response is sent (keeps function alive on Vercel)
+    after(async () => {
+      try {
+        await analyzeDocument(document.id);
+      } catch (error) {
+        console.error("Background analysis failed:", error);
+      }
     });
 
     return NextResponse.json({
