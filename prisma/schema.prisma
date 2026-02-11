@@ -137,6 +137,7 @@ model Document {
   fileName     String
   fileType     FileType
   fileSize     Int
+  fileData     Bytes?
   status       DocumentStatus @default(UPLOADED)
   errorMessage String?
   createdAt    DateTime       @default(now())

@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { mkdir, writeFile } from "fs/promises";
-import { join } from "path";
 import { analyzeDocument } from "@/server/services/ai/analyzer";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -41,23 +39,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unsupported file type" }, { status: 400 });
     }
 
-    // Create document record
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    // Create document record with file data stored in DB
     const document = await prisma.document.create({
       data: {
         userId: session.user.id,
         fileName: file.name,
         fileType,
         fileSize: file.size,
+        fileData: buffer,
         status: "UPLOADED",
       },
     });
-
-    // Save file to disk
-    const uploadDir = join(process.cwd(), "uploads", document.id);
-    await mkdir(uploadDir, { recursive: true });
-    const filePath = join(uploadDir, file.name);
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(filePath, buffer);
 
     // Trigger analysis in background
     analyzeDocument(document.id).catch((error) => {

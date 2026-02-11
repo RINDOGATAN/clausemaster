@@ -1,33 +1,24 @@
-import { readFile } from "fs/promises";
-
-export async function extractText(filePath: string, fileType: string): Promise<string> {
+export async function extractText(buffer: Buffer, fileType: string): Promise<string> {
   switch (fileType) {
     case "PDF":
-      return extractPdfText(filePath);
+      return extractPdfText(buffer);
     case "DOCX":
-      return extractDocxText(filePath);
+      return extractDocxText(buffer);
     case "TXT":
-      return extractTxtText(filePath);
+      return buffer.toString("utf-8");
     default:
       throw new Error(`Unsupported file type: ${fileType}`);
   }
 }
 
-async function extractPdfText(filePath: string): Promise<string> {
+async function extractPdfText(buffer: Buffer): Promise<string> {
   const pdfParse = (await import("pdf-parse")).default;
-  const buffer = await readFile(filePath);
   const data = await pdfParse(buffer);
   return data.text;
 }
 
-async function extractDocxText(filePath: string): Promise<string> {
+async function extractDocxText(buffer: Buffer): Promise<string> {
   const mammoth = await import("mammoth");
-  const buffer = await readFile(filePath);
   const result = await mammoth.extractRawText({ buffer });
   return result.value;
-}
-
-async function extractTxtText(filePath: string): Promise<string> {
-  const buffer = await readFile(filePath, "utf-8");
-  return buffer;
 }
