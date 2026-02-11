@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { ArrowLeft, Loader2, RefreshCw, Trash2 } from "lucide-react";
+import { ArrowLeft, Loader2, RefreshCw, Trash2, Sparkles, ExternalLink } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { AnalysisSummary } from "@/components/analysis/AnalysisSummary";
@@ -18,6 +18,7 @@ export default function DocumentDetailPage() {
   const router = useRouter();
   const t = useTranslations("analysis");
   const tDoc = useTranslations("documents");
+  const tSkill = useTranslations("skillDraft");
   const documentId = params.id as string;
   const [selectedClauseId, setSelectedClauseId] = useState<string | null>(null);
 
@@ -43,6 +44,40 @@ export default function DocumentDetailPage() {
     onSuccess: () => {
       toast.success("Re-analysis started");
       refetch();
+    },
+  });
+
+  // Skill draft queries
+  const analysisId = document?.analysis?.id;
+  const { data: skillDraft, refetch: refetchDraft } = trpc.skillDraft.get.useQuery(
+    { analysisId: analysisId! },
+    {
+      enabled: !!analysisId && document?.status === "COMPLETED",
+      refetchInterval: (query) => {
+        const status = query.state.data?.status;
+        if (!status || status === "REVIEW" || status === "EXPORTED" || status === "FAILED") return false;
+        return 2000;
+      },
+    }
+  );
+
+  const generateSkillMutation = trpc.skillDraft.generate.useMutation({
+    onSuccess: () => {
+      refetchDraft();
+      router.push(`/documents/${documentId}/skill-draft`);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const regenerateSkillMutation = trpc.skillDraft.regenerate.useMutation({
+    onSuccess: () => {
+      refetchDraft();
+      router.push(`/documents/${documentId}/skill-draft`);
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
@@ -140,6 +175,58 @@ export default function DocumentDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {/* Skill Draft button */}
+          {analysisId && (
+            <>
+              {!skillDraft && (
+                <button
+                  onClick={() => generateSkillMutation.mutate({ analysisId })}
+                  disabled={generateSkillMutation.isPending}
+                  className="btn-brutal text-sm px-4 py-2 inline-flex items-center gap-2"
+                >
+                  {generateSkillMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-4 h-4" />
+                  )}
+                  {tSkill("generateSkill")}
+                </button>
+              )}
+              {skillDraft?.status === "GENERATING" && (
+                <button
+                  disabled
+                  className="btn-brutal text-sm px-4 py-2 inline-flex items-center gap-2 opacity-70"
+                >
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  {tSkill("generatingSkill")}
+                </button>
+              )}
+              {(skillDraft?.status === "REVIEW" || skillDraft?.status === "EXPORTED") && (
+                <Link
+                  href={`/documents/${documentId}/skill-draft`}
+                  className="btn-brutal text-sm px-4 py-2 inline-flex items-center gap-2"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  {tSkill("viewSkillDraft")}
+                </Link>
+              )}
+              {skillDraft?.status === "FAILED" && (
+                <button
+                  onClick={() => regenerateSkillMutation.mutate({ analysisId })}
+                  disabled={regenerateSkillMutation.isPending}
+                  className="btn-brutal text-sm px-4 py-2 inline-flex items-center gap-2"
+                >
+                  {regenerateSkillMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-4 h-4" />
+                  )}
+                  {tSkill("retryGeneration")}
+                </button>
+              )}
+            </>
+          )}
+
           <button
             onClick={() => reanalyzeMutation.mutate({ id: documentId })}
             disabled={reanalyzeMutation.isPending}

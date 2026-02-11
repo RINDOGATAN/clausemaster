@@ -167,9 +167,10 @@ model Analysis {
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
 
-  document Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  clauses  AnalyzedClause[]
-  issues   Issue[]
+  document   Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  clauses    AnalyzedClause[]
+  issues     Issue[]
+  skillDraft SkillDraft?
 
   @@map("analyses")
   @@schema("clausemaster")
@@ -214,5 +215,51 @@ model Issue {
   @@index([analysisId])
   @@index([clauseId])
   @@map("issues")
+  @@schema("clausemaster")
+}
+
+// ============================================================
+// SKILL DRAFTS (Deal Room Skill Generation)
+// ============================================================
+
+enum SkillDraftStatus {
+  GENERATING
+  REVIEW
+  EXPORTED
+  FAILED
+
+  @@schema("clausemaster")
+}
+
+model SkillDraft {
+  id            String           @id @default(cuid())
+  analysisId    String           @unique
+  status        SkillDraftStatus @default(GENERATING)
+  errorMessage  String?
+
+  // Generated skill data (stored as JSON)
+  skillId         String?
+  contractType    String?
+  displayName     String?
+  clausesJson     Json?
+  boilerplateJson Json?
+  metadataJson    Json?
+  manifestJson    Json?
+
+  // AI tracking
+  aiProvider       String?
+  aiModel          String?
+  processingTimeMs Int?
+
+  // Export tracking
+  exportedAt DateTime?
+  exportPath String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  analysis Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
+  @@map("skill_drafts")
   @@schema("clausemaster")
 }

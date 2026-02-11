@@ -1,4 +1,4 @@
-import type { ClassificationResult } from "./schemas";
+import type { ClassificationResult, ClauseExtractionResult } from "./schemas";
 
 export function buildClassificationPrompt(text: string): string {
   // Use first ~8K tokens worth of text for classification
@@ -111,6 +111,104 @@ For each issue, assign severity:
 - CRITICAL: Issues that could invalidate the contract or cause significant legal exposure
 - WARNING: Issues that should be reviewed and potentially addressed
 - INFO: Minor observations or suggestions for improvement`;
+}
+
+export function buildOptionGenerationPrompt(
+  contractText: string,
+  classification: ClassificationResult,
+  clauses: ClauseExtractionResult["clauses"]
+): string {
+  const clauseSummary = clauses.map((c, i) =>
+    `${i + 1}. "${c.title}" (${c.category || "General"}) — ${c.summary}\n   Bias: ${c.biasAssessment}\n   Original: ${c.originalText.slice(0, 300)}...`
+  ).join("\n\n");
+
+  return `You are a legal negotiation expert specializing in two-party deal room software. Your task is to transform an analyzed contract into negotiation clauses with multiple options for a Deal Room platform.
+
+CONTEXT:
+- Contract Type: ${classification.contractTypeLabel} (${classification.contractType})
+- Jurisdiction: ${classification.jurisdiction}
+- Parties: ${classification.partyNames.join(" and ")}
+- Summary: ${classification.summary}
+
+EXTRACTED CLAUSES FROM THE CONTRACT:
+${clauseSummary}
+
+INSTRUCTIONS:
+For each extracted clause, generate a negotiation clause with 3-5 options representing genuine negotiation positions along a spectrum from Party-A-favorable to Party-B-favorable.
+
+For each clause:
+1. Create a slug "id" (lowercase, hyphenated, e.g. "data-retention", "liability-cap")
+2. Assign a clear category (e.g. Equity, Term, Liability, IP, Confidentiality, Payment, Governance, Termination)
+3. Write a plainDescription explaining what the clause covers in plain language
+4. Optionally provide legalContext with regulatory/legal background
+5. Set isRequired to true for clauses essential to contract validity
+
+For each option within a clause:
+1. Create a descriptive id (e.g. "narrow", "standard", "broad", "aggressive", "balanced")
+2. Provide a short code (e.g. "NARROW", "STANDARD", "BROAD")
+3. Write a clear label (e.g. "Narrow Scope", "Standard Terms", "Broad Protection")
+4. Write prosPartyA (2-4 advantages for Party A — "${classification.partyNames[0] || "Party A"}")
+5. Write consPartyA (2-4 disadvantages for Party A)
+6. Write prosPartyB (2-4 advantages for Party B — "${classification.partyNames[1] || "Party B"}")
+7. Write consPartyB (2-4 disadvantages for Party B)
+8. Write the FULL legal text as it would appear in the contract
+9. Set biasPartyA: 1.0 = strongly favors Party A, 0.0 = neutral, -1.0 = strongly against Party A
+10. Set biasPartyB: inverse of biasPartyA (biasPartyB ≈ -biasPartyA)
+
+CRITICAL RULES:
+- Options must represent GENUINE negotiation positions, not just word variations
+- Always include at least one "balanced/standard" option near bias 0
+- Bias scores must be realistic: most balanced options near 0, partisan options at ±0.3 to ±0.8, extreme positions at ±0.9 to ±1.0
+- Legal text must be complete, precise, and professionally drafted
+- Pros and cons must be substantive and reflect real legal/business tradeoffs
+- Order options from most Party-A-favorable to most Party-B-favorable
+
+ORIGINAL CONTRACT TEXT (for reference):
+${contractText.slice(0, 16000)}`;
+}
+
+export function buildBoilerplateGenerationPrompt(
+  classification: ClassificationResult,
+  clauseTitles: string[]
+): string {
+  return `You are a legal document architect. Generate the boilerplate framework for a contract template that will be used in a Deal Room negotiation platform.
+
+CONTRACT DETAILS:
+- Type: ${classification.contractTypeLabel} (${classification.contractType})
+- Jurisdiction: ${classification.jurisdiction}
+- Parties: ${classification.partyNames.join(" and ")}
+
+NEGOTIABLE CLAUSES (these will be inserted separately — do NOT include them in the boilerplate):
+${clauseTitles.map((t, i) => `${i + 1}. ${t}`).join("\n")}
+
+INSTRUCTIONS:
+Generate the non-negotiable framework of the contract. This includes the preamble, background/recitals, definitions, standard (non-negotiable) clauses, general provisions, and signature block.
+
+PLACEHOLDER VARIABLES (use these exactly):
+- {effectiveDate} — date the contract takes effect
+- {partyAName} — full legal name of Party A
+- {partyBName} — full legal name of Party B
+- {partyAAddress} — registered address of Party A
+- {partyBAddress} — registered address of Party B
+- {partyASignatureBlock} — signature block for Party A
+- {partyBSignatureBlock} — signature block for Party B
+
+REQUIREMENTS:
+1. contractTitle: The contract name in ALL CAPS
+2. preamble: Opening paragraph identifying the parties and the date, using placeholder variables
+3. background: WHEREAS/recitals section establishing why the parties are entering the agreement
+4. definitions: Key defined terms used throughout the contract (5-15 terms)
+5. standardClauses: Non-negotiable clauses (e.g. "Entire Agreement", "Severability") — 3-6 clauses
+6. generalProvisions: General/boilerplate provisions (e.g. "Notices", "Amendments", "Waiver", "Assignment") — 3-8 provisions
+7. jurisdictionProvisions: If the contract references a specific jurisdiction (${classification.jurisdiction}), provide jurisdiction-specific provisions. Use keys like "CALIFORNIA", "ENGLAND_WALES", or "SPAIN".
+8. signatureBlock: Template for signatures using the placeholder variables
+9. partyLabels: Appropriate labels for the parties (e.g. "Company"/"Investor", "Employer"/"Employee", "Controller"/"Processor")
+
+CRITICAL RULES:
+- Do NOT include any of the negotiable clauses listed above
+- Use professional legal language appropriate for the jurisdiction
+- Definitions should only include terms that appear in the boilerplate sections
+- All provisions should be self-contained and properly cross-referenced`;
 }
 
 function getJurisdictionWarnings(jurisdiction: string): string {
