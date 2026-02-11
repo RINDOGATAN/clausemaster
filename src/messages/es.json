@@ -112,5 +112,83 @@
       "IMBALANCE": "Desequilibrio",
       "COMPLIANCE_RISK": "Riesgo de Cumplimiento"
     }
+  },
+  "skillDraft": {
+    "generateSkill": "Generar Skill para Deal Room",
+    "viewSkillDraft": "Ver Borrador de Skill",
+    "generatingSkill": "Generando skill...",
+    "retryGeneration": "Reintentar",
+    "generationFailed": "Fallo la generacion del skill",
+    "skillDraftReview": "Revision del Borrador de Skill",
+    "reviewDescription": "Revisa y edita el skill generado antes de exportar a Deal Room",
+    "status": {
+      "GENERATING": "Generando",
+      "REVIEW": "Listo para Revision",
+      "EXPORTED": "Exportado",
+      "FAILED": "Fallido"
+    },
+    "tabs": {
+      "clauses": "Clausulas",
+      "boilerplate": "Plantilla",
+      "metadata": "Metadatos"
+    },
+    "clauses": {
+      "title": "Clausula",
+      "category": "Categoria",
+      "options": "Opciones",
+      "option": "Opcion",
+      "bias": "Sesgo",
+      "biasPartyA": "Sesgo A",
+      "biasPartyB": "Sesgo B",
+      "prosPartyA": "Ventajas (Parte A)",
+      "consPartyA": "Desventajas (Parte A)",
+      "prosPartyB": "Ventajas (Parte B)",
+      "consPartyB": "Desventajas (Parte B)",
+      "legalText": "Texto Legal",
+      "required": "Obligatorio",
+      "optional": "Opcional",
+      "noOptions": "No se generaron opciones"
+    },
+    "boilerplate": {
+      "contractTitle": "Titulo del Contrato",
+      "preamble": "Preambulo",
+      "background": "Antecedentes",
+      "definitions": "Definiciones",
+      "standardClauses": "Clausulas Estandar",
+      "generalProvisions": "Disposiciones Generales",
+      "jurisdictionProvisions": "Disposiciones Jurisdiccionales",
+      "signatureBlock": "Bloque de Firma",
+      "partyLabels": "Etiquetas de Partes",
+      "partyA": "Parte A",
+      "partyB": "Parte B",
+      "term": "Termino",
+      "definition": "Definicion"
+    },
+    "metadata": {
+      "skillId": "ID del Skill",
+      "contractType": "Tipo de Contrato",
+      "displayName": "Nombre",
+      "version": "Version",
+      "clauseCount": "Cantidad de Clausulas",
+      "jurisdictions": "Jurisdicciones",
+      "languages": "Idiomas",
+      "author": "Autor",
+      "templateFamily": "Familia de Plantilla"
+    },
+    "export": {
+      "exportToDealRoom": "Exportar a Deal Room",
+      "exporting": "Exportando...",
+      "exported": "Exportado exitosamente",
+      "exportedTo": "Exportado a: {path}",
+      "exportFailed": "Fallo la exportacion"
+    },
+    "regenerate": "Regenerar",
+    "regenerating": "Regenerando...",
+    "saving": "Guardando...",
+    "saved": "Cambios guardados",
+    "aiProvider": "Proveedor IA",
+    "aiModel": "Modelo IA",
+    "processingTime": "Tiempo de Procesamiento",
+    "processingTimeMs": "{ms}ms"
   }
 }

@@ -112,5 +112,83 @@
       "IMBALANCE": "Imbalance",
       "COMPLIANCE_RISK": "Compliance Risk"
     }
+  },
+  "skillDraft": {
+    "generateSkill": "Generate Deal Room Skill",
+    "viewSkillDraft": "View Skill Draft",
+    "generatingSkill": "Generating skill...",
+    "retryGeneration": "Retry",
+    "generationFailed": "Skill generation failed",
+    "skillDraftReview": "Skill Draft Review",
+    "reviewDescription": "Review and edit the generated skill before exporting to Deal Room",
+    "status": {
+      "GENERATING": "Generating",
+      "REVIEW": "Ready for Review",
+      "EXPORTED": "Exported",
+      "FAILED": "Failed"
+    },
+    "tabs": {
+      "clauses": "Clauses",
+      "boilerplate": "Boilerplate",
+      "metadata": "Metadata"
+    },
+    "clauses": {
+      "title": "Clause",
+      "category": "Category",
+      "options": "Options",
+      "option": "Option",
+      "bias": "Bias",
+      "biasPartyA": "Bias A",
+      "biasPartyB": "Bias B",
+      "prosPartyA": "Pros (Party A)",
+      "consPartyA": "Cons (Party A)",
+      "prosPartyB": "Pros (Party B)",
+      "consPartyB": "Cons (Party B)",
+      "legalText": "Legal Text",
+      "required": "Required",
+      "optional": "Optional",
+      "noOptions": "No options generated"
+    },
+    "boilerplate": {
+      "contractTitle": "Contract Title",
+      "preamble": "Preamble",
+      "background": "Background",
+      "definitions": "Definitions",
+      "standardClauses": "Standard Clauses",
+      "generalProvisions": "General Provisions",
+      "jurisdictionProvisions": "Jurisdiction Provisions",
+      "signatureBlock": "Signature Block",
+      "partyLabels": "Party Labels",
+      "partyA": "Party A",
+      "partyB": "Party B",
+      "term": "Term",
+      "definition": "Definition"
+    },
+    "metadata": {
+      "skillId": "Skill ID",
+      "contractType": "Contract Type",
+      "displayName": "Display Name",
+      "version": "Version",
+      "clauseCount": "Clause Count",
+      "jurisdictions": "Jurisdictions",
+      "languages": "Languages",
+      "author": "Author",
+      "templateFamily": "Template Family"
+    },
+    "export": {
+      "exportToDealRoom": "Export to Deal Room",
+      "exporting": "Exporting...",
+      "exported": "Exported successfully",
+      "exportedTo": "Exported to: {path}",
+      "exportFailed": "Export failed"
+    },
+    "regenerate": "Regenerate",
+    "regenerating": "Regenerating...",
+    "saving": "Saving...",
+    "saved": "Changes saved",
+    "aiProvider": "AI Provider",
+    "aiModel": "AI Model",
+    "processingTime": "Processing Time",
+    "processingTimeMs": "{ms}ms"
   }
 }
