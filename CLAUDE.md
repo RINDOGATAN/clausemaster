@@ -57,6 +57,7 @@ npx prisma studio    # Open Prisma Studio
 - `ANTHROPIC_API_KEY` - Anthropic API key
 - `OLLAMA_BASE_URL` - Ollama server URL
 - `LEGALSKILLS_DIR` - Path to legalskills repo (defaults to `../legalskills`)
+- `INVITE_CODE` - Optional invite code to gate the sign-in page (unset = open access)
 
 ## Relationship with Deal Room
 

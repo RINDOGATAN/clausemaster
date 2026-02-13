@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { Loader2, Mail } from "lucide-react";
+import { Loader2, Mail, Lock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -14,6 +14,48 @@ export default function SignInPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Invite code gate state
+  const [inviteRequired, setInviteRequired] = useState<boolean | null>(null);
+  const [inviteCode, setInviteCode] = useState("");
+  const [inviteUnlocked, setInviteUnlocked] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [inviteLoading, setInviteLoading] = useState(false);
+
+  // Check if invite gate is active on mount
+  useEffect(() => {
+    fetch("/api/verify-invite")
+      .then((res) => res.json())
+      .then((data) => setInviteRequired(data.required))
+      .catch(() => setInviteRequired(false));
+  }, []);
+
+  const handleInviteSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inviteCode.trim()) return;
+
+    setInviteLoading(true);
+    setInviteError(null);
+
+    try {
+      const res = await fetch("/api/verify-invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: inviteCode }),
+      });
+      const data = await res.json();
+
+      if (data.valid) {
+        setInviteUnlocked(true);
+      } else {
+        setInviteError(t("invalidInviteCode"));
+      }
+    } catch {
+      setInviteError(t("invalidInviteCode"));
+    } finally {
+      setInviteLoading(false);
+    }
+  };
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,6 +96,90 @@ export default function SignInPage() {
       setIsGoogleLoading(false);
     }
   };
+
+  // Loading state while checking invite requirement
+  if (inviteRequired === null) {
+    return (
+      <div className="w-full max-w-md">
+        <div className="card-brutal">
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Invite code gate
+  if (inviteRequired && !inviteUnlocked) {
+    return (
+      <div className="w-full max-w-md">
+        <div className="card-brutal">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold mb-2 text-white uppercase tracking-wide">Clausemaster</h1>
+            <p className="text-muted-foreground mb-4">
+              {t.rich("poweredBy", {
+                link: () => (
+                  <a
+                    href="https://todo.law"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    TODO.LAW
+                  </a>
+                ),
+              })}
+            </p>
+          </div>
+
+          <div className="w-16 h-16 bg-primary/20 flex items-center justify-center mx-auto mb-6 rounded-full">
+            <Lock className="w-8 h-8 text-primary" />
+          </div>
+
+          <p className="text-center text-muted-foreground mb-6">
+            {t("enterInviteCode")}
+          </p>
+
+          {inviteError && (
+            <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500 text-yellow-600 text-sm rounded-xl">
+              {inviteError}
+            </div>
+          )}
+
+          <form onSubmit={handleInviteSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="invite-code">{t("inviteCode")}</Label>
+              <Input
+                id="invite-code"
+                type="text"
+                value={inviteCode}
+                onChange={(e) => setInviteCode(e.target.value)}
+                required
+                autoFocus
+                className="bg-background"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={inviteLoading || !inviteCode.trim()}
+              className="btn-brutal w-full flex items-center justify-center gap-3 py-3 disabled:opacity-50"
+            >
+              {inviteLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  {t("verifying")}
+                </>
+              ) : (
+                t("verifyCode")
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   if (emailSent) {
     return (
