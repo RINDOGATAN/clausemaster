@@ -33,7 +33,12 @@
     "failedMagicLink": "Error al enviar el enlace magico. Por favor intenta de nuevo.",
     "unexpectedError": "Ocurrio un error inesperado.",
     "googleSignInFailed": "Error al iniciar sesion con Google.",
-    "poweredBy": "Analisis de contratos con IA por {link}"
+    "poweredBy": "Analisis de contratos con IA por {link}",
+    "inviteCode": "Codigo de Invitacion",
+    "enterInviteCode": "Ingresa tu codigo de invitacion para acceder a Clausemaster",
+    "invalidInviteCode": "Codigo de invitacion invalido. Por favor intenta de nuevo.",
+    "verifyCode": "Verificar Codigo",
+    "verifying": "Verificando..."
   },
   "documents": {
     "myDocuments": "Mis Documentos",
