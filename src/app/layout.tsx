@@ -23,6 +23,12 @@ const archivoBlack = Archivo_Black({
 export const metadata: Metadata = {
   title: `CLAUSEMASTER - ${brand.tagline}`,
   description: brand.description,
+  icons: {
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+    ],
+    apple: "/logo-icon.png",
+  },
 };
 
 export default async function RootLayout({
