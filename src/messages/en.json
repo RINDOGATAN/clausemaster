@@ -12,6 +12,7 @@
   "nav": {
     "myDocuments": "My Documents",
     "uploadNew": "Upload New",
+    "settings": "Settings",
     "signOut": "Sign Out"
   },
   "auth": {
@@ -117,6 +118,31 @@
       "IMBALANCE": "Imbalance",
       "COMPLIANCE_RISK": "Compliance Risk"
     }
+  },
+  "setup": {
+    "title": "Set Up Your API Key",
+    "description": "To analyze contracts, you need an Anthropic API key. Your key is encrypted and stored securely.",
+    "apiKeyLabel": "Anthropic API Key",
+    "saveAndContinue": "Save & Continue",
+    "saving": "Saving...",
+    "keySaved": "API key saved successfully",
+    "encryptionNotice": "Your key is encrypted at rest using AES-256-GCM and never exposed in plain text.",
+    "getApiKey": "Get an API key from Anthropic Console"
+  },
+  "settings": {
+    "title": "Settings",
+    "apiKeySection": "Anthropic API Key",
+    "apiKeyLabel": "Anthropic API Key",
+    "currentKey": "Current Key",
+    "changeKey": "Change Key",
+    "deleteConfirm": "Are you sure? You won't be able to analyze documents without an API key.",
+    "keySaved": "API key updated successfully",
+    "keyDeleted": "API key removed",
+    "saving": "Saving...",
+    "platformKeyActive": "Platform Key Active",
+    "platformKeyDescription": "Your organization uses a shared platform key. No setup needed.",
+    "encryptionNotice": "Your key is encrypted at rest using AES-256-GCM and never exposed in plain text.",
+    "getApiKey": "Get an API key from Anthropic Console"
   },
   "skillDraft": {
     "generateSkill": "Generate Deal Room Skill",

@@ -7,7 +7,10 @@ import { loadSkillContext } from "../knowledge/loader";
 import { extractText } from "../document/parser";
 import prisma from "@/lib/prisma";
 
-export async function analyzeDocument(documentId: string): Promise<void> {
+export async function analyzeDocument(
+  documentId: string,
+  options?: { anthropicApiKey?: string }
+): Promise<void> {
   const startTime = Date.now();
 
   try {
@@ -49,7 +52,7 @@ export async function analyzeDocument(documentId: string): Promise<void> {
       },
     });
 
-    const model = getAIModel();
+    const model = getAIModel(options);
     const providerInfo = getProviderInfo();
 
     // Step 1: Classification

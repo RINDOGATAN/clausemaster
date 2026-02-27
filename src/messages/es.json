@@ -12,6 +12,7 @@
   "nav": {
     "myDocuments": "Mis Documentos",
     "uploadNew": "Subir Nuevo",
+    "settings": "Configuracion",
     "signOut": "Cerrar Sesion"
   },
   "auth": {
@@ -117,6 +118,31 @@
       "IMBALANCE": "Desequilibrio",
       "COMPLIANCE_RISK": "Riesgo de Cumplimiento"
     }
+  },
+  "setup": {
+    "title": "Configura tu Clave API",
+    "description": "Para analizar contratos, necesitas una clave API de Anthropic. Tu clave se cifra y almacena de forma segura.",
+    "apiKeyLabel": "Clave API de Anthropic",
+    "saveAndContinue": "Guardar y Continuar",
+    "saving": "Guardando...",
+    "keySaved": "Clave API guardada exitosamente",
+    "encryptionNotice": "Tu clave se cifra en reposo con AES-256-GCM y nunca se expone en texto plano.",
+    "getApiKey": "Obtener una clave API en Anthropic Console"
+  },
+  "settings": {
+    "title": "Configuracion",
+    "apiKeySection": "Clave API de Anthropic",
+    "apiKeyLabel": "Clave API de Anthropic",
+    "currentKey": "Clave Actual",
+    "changeKey": "Cambiar Clave",
+    "deleteConfirm": "Estas seguro? No podras analizar documentos sin una clave API.",
+    "keySaved": "Clave API actualizada exitosamente",
+    "keyDeleted": "Clave API eliminada",
+    "saving": "Guardando...",
+    "platformKeyActive": "Clave de Plataforma Activa",
+    "platformKeyDescription": "Tu organizacion usa una clave de plataforma compartida. No se necesita configuracion.",
+    "encryptionNotice": "Tu clave se cifra en reposo con AES-256-GCM y nunca se expone en texto plano.",
+    "getApiKey": "Obtener una clave API en Anthropic Console"
   },
   "skillDraft": {
     "generateSkill": "Generar Skill para Deal Room",

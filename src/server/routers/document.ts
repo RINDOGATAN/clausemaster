@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { resolveApiKeyForUser } from "../services/resolve-api-key";
 
 export const documentRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
@@ -98,9 +99,12 @@ export const documentRouter = createTRPCRouter({
         },
       });
 
+      // Resolve the user's API key
+      const anthropicApiKey = await resolveApiKeyForUser(ctx.session.user.id);
+
       // Trigger analysis in background
       const { analyzeDocument } = await import("@/server/services/ai/analyzer");
-      analyzeDocument(document.id).catch(console.error);
+      analyzeDocument(document.id, { anthropicApiKey }).catch(console.error);
 
       return { success: true };
     }),

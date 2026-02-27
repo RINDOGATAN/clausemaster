@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { resolveApiKeyForUser } from "../services/resolve-api-key";
 
 export const skillDraftRouter = createTRPCRouter({
   generate: protectedProcedure
@@ -28,9 +29,12 @@ export const skillDraftRouter = createTRPCRouter({
         });
       }
 
+      // Resolve the user's API key
+      const anthropicApiKey = await resolveApiKeyForUser(ctx.session.user.id);
+
       // Start generation in background
       const { generateSkillDraft } = await import("@/server/services/ai/skill-generator");
-      generateSkillDraft(input.analysisId).catch(console.error);
+      generateSkillDraft(input.analysisId, { anthropicApiKey }).catch(console.error);
 
       return { analysisId: input.analysisId };
     }),
@@ -140,9 +144,12 @@ export const skillDraftRouter = createTRPCRouter({
         where: { analysisId: input.analysisId },
       });
 
+      // Resolve the user's API key
+      const anthropicApiKey = await resolveApiKeyForUser(ctx.session.user.id);
+
       // Start generation in background
       const { generateSkillDraft } = await import("@/server/services/ai/skill-generator");
-      generateSkillDraft(input.analysisId).catch(console.error);
+      generateSkillDraft(input.analysisId, { anthropicApiKey }).catch(console.error);
 
       return { analysisId: input.analysisId };
     }),

@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { analyzeDocument } from "@/server/services/ai/analyzer";
+import { resolveApiKeyForUser } from "@/server/services/resolve-api-key";
 
 export const maxDuration = 120;
 
@@ -20,6 +21,17 @@ export async function POST(request: Request) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Resolve the user's API key before proceeding
+    let anthropicApiKey: string;
+    try {
+      anthropicApiKey = await resolveApiKeyForUser(session.user.id);
+    } catch {
+      return NextResponse.json(
+        { error: "No API key configured. Please add your Anthropic API key in Settings." },
+        { status: 403 }
+      );
     }
 
     const formData = await request.formData();
@@ -59,7 +71,7 @@ export async function POST(request: Request) {
     // Run analysis after response is sent (keeps function alive on Vercel)
     after(async () => {
       try {
-        await analyzeDocument(document.id);
+        await analyzeDocument(document.id, { anthropicApiKey });
       } catch (error) {
         console.error("Background analysis failed:", error);
       }

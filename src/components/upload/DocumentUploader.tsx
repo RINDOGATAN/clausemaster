@@ -37,6 +37,11 @@ export function DocumentUploader() {
 
       if (!response.ok) {
         const data = await response.json();
+        if (response.status === 403) {
+          toast.error(data.error || "API key required");
+          router.push("/setup");
+          return;
+        }
         throw new Error(data.error || "Upload failed");
       }
 
