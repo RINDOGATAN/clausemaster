@@ -322,3 +322,41 @@
 .animate-slide-in-right {
   animation: slide-in-right 0.6s ease-out both;
 }
+
+/* Print styles for report page */
+@media print {
+  .no-print,
+  nav,
+  header,
+  footer:not(.print-report footer) {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  body::before {
+    display: none !important;
+  }
+
+  .print-report {
+    background: white !important;
+    color: #111 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .print-clause {
+    page-break-inside: avoid;
+  }
+
+  @page {
+    size: A4;
+    margin: 2cm;
+  }
+}
