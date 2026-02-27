@@ -117,7 +117,37 @@
       "AMBIGUITY": "Ambiguedad",
       "IMBALANCE": "Desequilibrio",
       "COMPLIANCE_RISK": "Riesgo de Cumplimiento"
-    }
+    },
+    "executiveSummary": "Resumen Ejecutivo",
+    "riskLevel": "Nivel de Riesgo",
+    "riskLow": "Riesgo Bajo",
+    "riskModerate": "Riesgo Moderado",
+    "riskHigh": "Riesgo Alto",
+    "riskCritical": "Riesgo Critico",
+    "topFindings": "Hallazgos Principales",
+    "totalClauses": "Total de Clausulas",
+    "jumpToClause": "Ir a clausula",
+    "downloadReport": "Descargar Reporte",
+    "copySummary": "Copiar Resumen",
+    "copiedToClipboard": "Resumen copiado al portapapeles",
+    "reanalyze": "Reanalizar"
+  },
+  "report": {
+    "title": "Reporte de Analisis de Contrato",
+    "generatedBy": "Generado por",
+    "generatedOn": "Generado el",
+    "printReport": "Imprimir / Guardar como PDF",
+    "backToAnalysis": "Volver al Analisis",
+    "classification": "Clasificacion",
+    "executiveSummary": "Resumen Ejecutivo",
+    "issuesOverview": "Resumen de Problemas",
+    "clauseBreakdown": "Desglose de Clausulas",
+    "severity": "Severidad",
+    "type": "Tipo",
+    "description": "Descripcion",
+    "recommendation": "Recomendacion",
+    "relatedClause": "Clausula Relacionada",
+    "confidential": "Confidencial — Solo para revision autorizada"
   },
   "setup": {
     "title": "Configura tu Clave API",

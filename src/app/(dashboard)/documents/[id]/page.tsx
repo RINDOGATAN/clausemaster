@@ -4,10 +4,11 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { ArrowLeft, Loader2, RefreshCw, Trash2, Sparkles, ExternalLink } from "lucide-react";
+import { ArrowLeft, Loader2, Sparkles, ExternalLink, RefreshCw } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { AnalysisSummary } from "@/components/analysis/AnalysisSummary";
+import { ExecutiveSummary } from "@/components/analysis/ExecutiveSummary";
+import { generateTextSummary } from "@/lib/report-text";
 import { ClauseList } from "@/components/analysis/ClauseList";
 import { ClauseDetail } from "@/components/analysis/ClauseDetail";
 import { IssuePanel } from "@/components/analysis/IssuePanel";
@@ -226,31 +227,29 @@ export default function DocumentDetailPage() {
               )}
             </>
           )}
-
-          <button
-            onClick={() => reanalyzeMutation.mutate({ id: documentId })}
-            disabled={reanalyzeMutation.isPending}
-            className="btn-brutal-outline text-sm px-4 py-2 inline-flex items-center gap-2"
-          >
-            <RefreshCw className={`w-4 h-4 ${reanalyzeMutation.isPending ? "animate-spin" : ""}`} />
-            {tDoc("reanalyze")}
-          </button>
-          <button
-            onClick={() => {
-              if (confirm(tDoc("deleteConfirm"))) {
-                deleteMutation.mutate({ id: documentId });
-              }
-            }}
-            disabled={deleteMutation.isPending}
-            className="p-2 text-muted-foreground hover:text-destructive transition-colors rounded-full hover:bg-destructive/10"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
         </div>
       </div>
 
-      {/* Analysis Summary */}
-      <AnalysisSummary analysis={analysis} />
+      {/* Executive Summary */}
+      <ExecutiveSummary
+        analysis={analysis}
+        onDownloadReport={() => router.push(`/documents/${documentId}/report`)}
+        onCopyToClipboard={() => {
+          const text = generateTextSummary(document, analysis);
+          navigator.clipboard.writeText(text).then(() => {
+            toast.success(t("copiedToClipboard"));
+          });
+        }}
+        onReanalyze={() => reanalyzeMutation.mutate({ id: documentId })}
+        onDelete={() => {
+          if (confirm(tDoc("deleteConfirm"))) {
+            deleteMutation.mutate({ id: documentId });
+          }
+        }}
+        onJumpToClause={(clauseId) => setSelectedClauseId(clauseId)}
+        isReanalyzing={reanalyzeMutation.isPending}
+        isDeleting={deleteMutation.isPending}
+      />
 
       {/* 3-Panel Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_300px] gap-4 min-h-[600px]">
