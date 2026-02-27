@@ -4,13 +4,13 @@ import type { LanguageModelV1 } from "ai";
 
 export type AIProviderType = "anthropic" | "ollama" | "openai-compatible";
 
-export function getAIModel(): LanguageModelV1 {
+export function getAIModel(options?: { anthropicApiKey?: string }): LanguageModelV1 {
   const provider = (process.env.AI_PROVIDER || "anthropic") as AIProviderType;
 
   switch (provider) {
     case "anthropic": {
       const anthropic = createAnthropic({
-        apiKey: process.env.ANTHROPIC_API_KEY,
+        apiKey: options?.anthropicApiKey || process.env.ANTHROPIC_API_KEY,
       });
       const model = process.env.AI_MODEL || "claude-sonnet-4-20250514";
       return anthropic(model);

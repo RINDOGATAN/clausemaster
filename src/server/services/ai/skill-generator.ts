@@ -14,7 +14,10 @@ import {
 } from "./prompts";
 import prisma from "@/lib/prisma";
 
-export async function generateSkillDraft(analysisId: string): Promise<string> {
+export async function generateSkillDraft(
+  analysisId: string,
+  options?: { anthropicApiKey?: string }
+): Promise<string> {
   const startTime = Date.now();
 
   // Load analysis with clauses and issues
@@ -50,7 +53,7 @@ export async function generateSkillDraft(analysisId: string): Promise<string> {
   });
 
   try {
-    const model = getAIModel();
+    const model = getAIModel(options);
     const providerInfo = getProviderInfo();
 
     // Build classification object from analysis fields

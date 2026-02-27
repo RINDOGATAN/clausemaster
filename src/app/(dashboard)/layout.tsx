@@ -13,9 +13,11 @@ import {
   User,
   Menu,
   X,
+  Settings,
 } from "lucide-react";
 import { brand } from "@/config/brand";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { trpc } from "@/lib/trpc";
 
 export default function DashboardLayout({
   children,
@@ -28,7 +30,12 @@ export default function DashboardLayout({
   const tCommon = useTranslations("common");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  if (status === "loading") {
+  const { data: apiKeyStatus, isLoading: apiKeyLoading } = trpc.settings.getApiKeyStatus.useQuery(
+    undefined,
+    { enabled: status === "authenticated" }
+  );
+
+  if (status === "loading" || (status === "authenticated" && apiKeyLoading)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-muted-foreground">{tCommon("loading")}</div>
@@ -40,9 +47,19 @@ export default function DashboardLayout({
     redirect("/sign-in");
   }
 
+  // Redirect to setup if no API key configured (skip for /setup and /settings pages)
+  const needsSetup = apiKeyStatus && !apiKeyStatus.hasApiKey;
+  const isSetupPage = pathname === "/setup";
+  const isSettingsPage = pathname === "/settings";
+
+  if (needsSetup && !isSetupPage && !isSettingsPage) {
+    redirect("/setup");
+  }
+
   const navItems = [
     { href: "/documents", label: t("myDocuments"), icon: FileText },
     { href: "/documents/new", label: t("uploadNew"), icon: Plus },
+    { href: "/settings", label: t("settings"), icon: Settings },
   ];
 
   return (
