@@ -15,10 +15,10 @@ export default function ClientDocsPage() {
       {/* Hero */}
       <section>
         <div className="flex items-center gap-2 mb-1">
-          <span className="tag-accent">Client</span>
+          <span className="tag-accent">Startup</span>
         </div>
         <h1 className="text-3xl font-bold text-foreground mb-3">
-          For Clients
+          For Startups
         </h1>
         <p className="text-base text-muted-foreground leading-relaxed max-w-2xl">
           Upload contracts, get instant AI analysis, and request expert lawyer
@@ -211,7 +211,7 @@ export default function ClientDocsPage() {
           <WorkflowStep
             number={1}
             title="Request Review"
-            actor="Client"
+            actor="Startup"
             description="From your document's analysis page, click 'Request Review' to submit the contract for lawyer review."
           />
           <WorkflowStep
@@ -234,7 +234,7 @@ export default function ClientDocsPage() {
           <WorkflowStep
             number={5}
             title="View Notes"
-            actor="Client"
+            actor="Startup"
             description="You receive a notification and can view the lawyer's notes directly on your document's page."
             isLast
           />

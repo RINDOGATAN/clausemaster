@@ -14,7 +14,7 @@ export default function ReviewsDocsPage() {
           Review System
         </h1>
         <p className="text-base text-muted-foreground leading-relaxed max-w-2xl">
-          Clausemaster connects clients with qualified lawyers for expert review
+          Clausemaster connects startups with qualified lawyers for expert review
           of AI-analyzed contracts. The review system manages the full lifecycle
           from request to completion.
         </p>
@@ -32,7 +32,7 @@ export default function ReviewsDocsPage() {
         <div className="card-brutal">
           <FlowDiagram
             steps={[
-              { label: "Requested", description: "Client submits" },
+              { label: "Requested", description: "Startup submits" },
               { label: "Pending", description: "Awaiting claim" },
               { label: "In Review", description: "Lawyer working" },
               { label: "Completed", description: "Notes delivered" },
@@ -77,29 +77,29 @@ export default function ReviewsDocsPage() {
       {/* Client Side */}
       <section id="client-flow" className="scroll-mt-20">
         <h2 className="text-xl font-semibold text-foreground mb-4">
-          Client Flow
+          Startup Flow
         </h2>
         <p className="text-sm text-muted-foreground mb-6">
-          How a client requests and receives a lawyer review.
+          How a startup requests and receives a lawyer review.
         </p>
 
         <div className="card-brutal">
           <WorkflowStep
             number={1}
             title="Navigate to Analysis"
-            actor="Client"
+            actor="Startup"
             description="Open the analysis results for a completed document from your dashboard."
           />
           <WorkflowStep
             number={2}
             title="Request Review"
-            actor="Client"
+            actor="Startup"
             description="Click the 'Request Review' button. You can optionally include notes about specific areas you'd like the lawyer to focus on."
           />
           <WorkflowStep
             number={3}
             title="Track Status"
-            actor="Client"
+            actor="Startup"
             description="Monitor the review status on your document page. You'll see when a lawyer claims your review."
           />
           <WorkflowStep
@@ -110,7 +110,7 @@ export default function ReviewsDocsPage() {
           <WorkflowStep
             number={5}
             title="View Review Notes"
-            actor="Client"
+            actor="Startup"
             description="Read the lawyer's expert observations, corrections, and recommendations on your document page."
             isLast
           />
@@ -131,7 +131,7 @@ export default function ReviewsDocsPage() {
             number={1}
             title="Browse Available Reviews"
             actor="Lawyer"
-            description="Visit the Reviews dashboard to see all pending review requests. Each shows the contract type, date, and any client notes."
+            description="Visit the Reviews dashboard to see all pending review requests. Each shows the contract type, date, and any startup notes."
           />
           <WorkflowStep
             number={2}
@@ -155,7 +155,7 @@ export default function ReviewsDocsPage() {
             number={5}
             title="Complete the Review"
             actor="Lawyer"
-            description="Submit your notes to complete the review. The client is notified automatically."
+            description="Submit your notes to complete the review. The startup is notified automatically."
             isLast
           />
         </div>
@@ -188,12 +188,12 @@ export default function ReviewsDocsPage() {
               },
               {
                 event: "Review Claimed",
-                recipient: "Client",
+                recipient: "Startup",
                 desc: "A lawyer has started reviewing your contract",
               },
               {
                 event: "Review Completed",
-                recipient: "Client",
+                recipient: "Startup",
                 desc: "The lawyer has submitted their review notes",
               },
             ].map((notif) => (

@@ -30,7 +30,7 @@ export default function PublisherDocsPage() {
         </h1>
         <p className="text-base text-muted-foreground leading-relaxed max-w-2xl">
           Analyze contracts, generate legal skills for the marketplace, and
-          provide expert reviews to clients.
+          provide expert reviews to startups.
         </p>
       </section>
 
@@ -78,7 +78,7 @@ export default function PublisherDocsPage() {
           Document Analysis
         </h2>
         <p className="text-sm text-muted-foreground mb-6">
-          Like clients, you can upload contracts and get AI analysis. The same
+          Like startups, you can upload contracts and get AI analysis. The same
           pipeline runs for all users: classification, clause extraction, and
           issue flagging.
         </p>
@@ -359,10 +359,10 @@ export default function PublisherDocsPage() {
       {/* Client Reviews */}
       <section id="client-reviews" className="scroll-mt-20">
         <h2 className="text-xl font-semibold text-foreground mb-4">
-          Reviewing Client Contracts
+          Reviewing Startup Contracts
         </h2>
         <p className="text-sm text-muted-foreground mb-6">
-          Clients can request expert reviews of their AI-analyzed contracts.
+          Startups can request expert reviews of their AI-analyzed contracts.
           As a lawyer, you can claim and complete these reviews.
         </p>
 
@@ -371,7 +371,7 @@ export default function PublisherDocsPage() {
             number={1}
             title="Browse Available Reviews"
             actor="Lawyer"
-            description="Visit the Reviews dashboard to see pending review requests from clients."
+            description="Visit the Reviews dashboard to see pending review requests from startups."
           />
           <WorkflowStep
             number={2}
@@ -395,7 +395,7 @@ export default function PublisherDocsPage() {
             number={5}
             title="Complete Review"
             actor="Lawyer"
-            description="Submit your notes. The client is notified and can view your feedback on their document page."
+            description="Submit your notes. The startup is notified and can view your feedback on their document page."
             isLast
           />
         </div>
@@ -408,7 +408,7 @@ export default function PublisherDocsPage() {
         </h2>
         <p className="text-sm text-muted-foreground mb-6">
           Manage your professional profile from the Settings page. This
-          information is visible to clients and admins.
+          information is visible to startups and admins.
         </p>
 
         <div className="card-brutal">

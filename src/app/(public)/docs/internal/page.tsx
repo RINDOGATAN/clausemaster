@@ -222,14 +222,14 @@ export default function InternalDocsPage() {
         </h2>
         <p className="text-sm text-muted-foreground mb-6">
           Internal users have access to all features available to publishers and
-          clients, in addition to admin tools.
+          startups, in addition to admin tools.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[
             {
               title: "Upload & Analyze",
-              desc: "Upload contracts and run AI analysis, just like clients.",
+              desc: "Upload contracts and run AI analysis, just like startups.",
             },
             {
               title: "Generate Skills",
@@ -237,7 +237,7 @@ export default function InternalDocsPage() {
             },
             {
               title: "Review Contracts",
-              desc: "Claim and complete client review requests.",
+              desc: "Claim and complete startup review requests.",
             },
             {
               title: "Admin Tools",
