@@ -53,3 +53,35 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
 });
 
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+
+const enforceUserIsInternal = t.middleware(({ ctx, next }) => {
+  if (!ctx.session || !ctx.session.user) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  if (ctx.session.user.role !== "INTERNAL") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Internal access only" });
+  }
+  return next({
+    ctx: {
+      session: { ...ctx.session, user: ctx.session.user },
+    },
+  });
+});
+
+export const internalProcedure = t.procedure.use(enforceUserIsInternal);
+
+const enforceUserIsPublisherOrInternal = t.middleware(({ ctx, next }) => {
+  if (!ctx.session || !ctx.session.user) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  if (ctx.session.user.role !== "INTERNAL" && ctx.session.user.role !== "PUBLISHER") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Publisher or internal access only" });
+  }
+  return next({
+    ctx: {
+      session: { ...ctx.session, user: ctx.session.user },
+    },
+  });
+});
+
+export const publisherProcedure = t.procedure.use(enforceUserIsPublisherOrInternal);

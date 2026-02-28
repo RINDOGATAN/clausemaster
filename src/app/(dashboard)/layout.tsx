@@ -14,10 +14,20 @@ import {
   Menu,
   X,
   Settings,
+  Layers,
+  Shield,
 } from "lucide-react";
 import { brand } from "@/config/brand";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { trpc } from "@/lib/trpc";
+import type { UserRole } from "@prisma/client";
+
+type NavItem = {
+  href: string;
+  label: string;
+  icon: typeof FileText;
+  roles: UserRole[];
+};
 
 export default function DashboardLayout({
   children,
@@ -35,7 +45,12 @@ export default function DashboardLayout({
     { enabled: status === "authenticated" }
   );
 
-  if (status === "loading" || (status === "authenticated" && apiKeyLoading)) {
+  const { data: userInfo, isLoading: userInfoLoading } = trpc.user.getRole.useQuery(
+    undefined,
+    { enabled: status === "authenticated" }
+  );
+
+  if (status === "loading" || (status === "authenticated" && (apiKeyLoading || userInfoLoading))) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-muted-foreground">{tCommon("loading")}</div>
@@ -47,20 +62,33 @@ export default function DashboardLayout({
     redirect("/sign-in");
   }
 
-  // Redirect to setup if no API key configured (skip for /setup and /settings pages)
+  const userRole: UserRole = userInfo?.role as UserRole ?? "CLIENT";
+  const isOnboarded = !!userInfo?.onboardedAt;
+  const isOnboardingPage = pathname === "/onboarding";
+
+  // Redirect to onboarding if not onboarded (but don't redirect if already on onboarding page)
+  if (!isOnboarded && !isOnboardingPage) {
+    redirect("/onboarding");
+  }
+
+  // Redirect to setup if no API key configured (skip for /setup, /settings, and /onboarding pages)
   const needsSetup = apiKeyStatus && !apiKeyStatus.hasApiKey;
   const isSetupPage = pathname === "/setup";
   const isSettingsPage = pathname === "/settings";
 
-  if (needsSetup && !isSetupPage && !isSettingsPage) {
+  if (needsSetup && !isSetupPage && !isSettingsPage && !isOnboardingPage) {
     redirect("/setup");
   }
 
-  const navItems = [
-    { href: "/documents", label: t("myDocuments"), icon: FileText },
-    { href: "/documents/new", label: t("uploadNew"), icon: Plus },
-    { href: "/settings", label: t("settings"), icon: Settings },
+  const allNavItems: NavItem[] = [
+    { href: "/documents", label: t("myDocuments"), icon: FileText, roles: ["INTERNAL", "PUBLISHER", "CLIENT"] },
+    { href: "/documents/new", label: t("uploadNew"), icon: Plus, roles: ["INTERNAL", "PUBLISHER", "CLIENT"] },
+    { href: "/my-skills", label: t("mySkills"), icon: Layers, roles: ["PUBLISHER"] },
+    { href: "/admin", label: t("admin"), icon: Shield, roles: ["INTERNAL"] },
+    { href: "/settings", label: t("settings"), icon: Settings, roles: ["INTERNAL", "PUBLISHER", "CLIENT"] },
   ];
+
+  const navItems = allNavItems.filter((item) => item.roles.includes(userRole));
 
   return (
     <div className="min-h-screen bg-background">
