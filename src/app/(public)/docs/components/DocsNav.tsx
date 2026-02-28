@@ -13,7 +13,7 @@ import {
 
 const sections = [
   { title: "Getting Started", href: "/docs", icon: BookOpen },
-  { title: "For Clients", href: "/docs/client", icon: Briefcase },
+  { title: "For Startups", href: "/docs/client", icon: Briefcase },
   { title: "For Lawyers", href: "/docs/publisher", icon: Scale },
   { title: "For Admins", href: "/docs/internal", icon: Shield },
   { title: "AI Analysis", href: "/docs/analysis", icon: Brain },

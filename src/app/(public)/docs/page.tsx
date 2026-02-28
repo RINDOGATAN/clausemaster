@@ -82,7 +82,7 @@ export default function DocsOverviewPage() {
             <div className="card-brutal h-full transition-all group-hover:border-primary/40 group-hover:shadow-hover">
               <Briefcase className="w-8 h-8 text-primary mb-3" />
               <h3 className="text-sm font-semibold text-foreground mb-1">
-                Client
+                Startup
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Upload contracts, get AI-powered analysis, download reports, and
@@ -99,7 +99,7 @@ export default function DocsOverviewPage() {
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Generate legal skills, earn 70% revenue on the AAS marketplace,
-                and review client contracts.
+                and review startup contracts.
               </p>
             </div>
           </Link>
