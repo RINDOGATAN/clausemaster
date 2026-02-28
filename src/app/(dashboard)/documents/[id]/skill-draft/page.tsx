@@ -13,7 +13,9 @@ import {
   ChevronRight,
   Check,
   Save,
+  Send,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
@@ -103,8 +105,10 @@ function localizedArray(obj: Record<string, string[]> | string[] | undefined): s
 export default function SkillDraftPage() {
   const params = useParams();
   const router = useRouter();
+  const { data: session } = useSession();
   const t = useTranslations("skillDraft");
   const documentId = params.id as string;
+  const userRole = session?.user?.role;
   const [activeTab, setActiveTab] = useState<Tab>("clauses");
   const [expandedClauses, setExpandedClauses] = useState<Set<string>>(new Set());
   const [expandedOptions, setExpandedOptions] = useState<Set<string>>(new Set());
@@ -122,7 +126,8 @@ export default function SkillDraftPage() {
       enabled: !!analysisId,
       refetchInterval: (query) => {
         const status = query.state.data?.status;
-        if (status === "REVIEW" || status === "EXPORTED" || status === "FAILED") return false;
+        if (status === "REVIEW" || status === "EXPORTED" || status === "FAILED" ||
+            status === "SUBMITTED" || status === "APPROVED" || status === "REJECTED") return false;
         return 2000;
       },
     }
@@ -141,6 +146,16 @@ export default function SkillDraftPage() {
   const regenerateMutation = trpc.skillDraft.regenerate.useMutation({
     onSuccess: () => {
       toast.success(t("regenerating"));
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const submitMutation = trpc.skillDraft.submit.useMutation({
+    onSuccess: () => {
+      toast.success(t("submit.submitted"));
       refetch();
     },
     onError: (error) => {
@@ -344,6 +359,26 @@ export default function SkillDraftPage() {
         )}
       </div>
 
+      {/* Submission status banner */}
+      {draft.status === "SUBMITTED" && (
+        <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-sm text-blue-400">
+          {t("submit.pendingReview")}
+        </div>
+      )}
+      {draft.status === "APPROVED" && (
+        <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 text-sm text-green-400">
+          {t("submit.approved")}
+        </div>
+      )}
+      {draft.status === "REJECTED" && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 space-y-2">
+          <p className="text-sm text-red-400">{t("submit.rejected")}</p>
+          {draft.reviewNotes && (
+            <p className="text-sm text-muted-foreground">{draft.reviewNotes}</p>
+          )}
+        </div>
+      )}
+
       {/* Footer actions */}
       <div className="flex items-center justify-between pt-4 border-t border-border">
         <button
@@ -354,24 +389,46 @@ export default function SkillDraftPage() {
           <RefreshCw className={`w-4 h-4 ${regenerateMutation.isPending ? "animate-spin" : ""}`} />
           {regenerateMutation.isPending ? t("regenerating") : t("regenerate")}
         </button>
-        <button
-          onClick={() => exportMutation.mutate({ skillDraftId: draft.id })}
-          disabled={exportMutation.isPending || draft.status === "EXPORTED"}
-          className="btn-brutal inline-flex items-center gap-2"
-        >
-          {exportMutation.isPending ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : draft.status === "EXPORTED" ? (
-            <Check className="w-4 h-4" />
-          ) : (
-            <Download className="w-4 h-4" />
+
+        <div className="flex items-center gap-3">
+          {/* PUBLISHER: Submit to Marketplace */}
+          {userRole === "PUBLISHER" && (draft.status === "REVIEW" || draft.status === "REJECTED") && (
+            <button
+              onClick={() => submitMutation.mutate({ skillDraftId: draft.id })}
+              disabled={submitMutation.isPending}
+              className="btn-brutal inline-flex items-center gap-2"
+            >
+              {submitMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
+              {submitMutation.isPending ? t("submit.submitting") : t("submit.submitToMarketplace")}
+            </button>
           )}
-          {exportMutation.isPending
-            ? t("export.exporting")
-            : draft.status === "EXPORTED"
-            ? t("export.exported")
-            : t("export.exportToDealRoom")}
-        </button>
+
+          {/* INTERNAL: Export to Deal Room */}
+          {userRole === "INTERNAL" && (
+            <button
+              onClick={() => exportMutation.mutate({ skillDraftId: draft.id })}
+              disabled={exportMutation.isPending || draft.status === "EXPORTED"}
+              className="btn-brutal inline-flex items-center gap-2"
+            >
+              {exportMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : draft.status === "EXPORTED" ? (
+                <Check className="w-4 h-4" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
+              {exportMutation.isPending
+                ? t("export.exporting")
+                : draft.status === "EXPORTED"
+                ? t("export.exported")
+                : t("export.exportToDealRoom")}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

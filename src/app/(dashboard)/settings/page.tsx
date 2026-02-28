@@ -1,18 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Key, Shield, Trash2, Loader2, ExternalLink } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { Key, Shield, Trash2, Loader2, ExternalLink, Briefcase } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 
 export default function SettingsPage() {
+  const { data: session } = useSession();
   const t = useTranslations("settings");
   const tCommon = useTranslations("common");
   const utils = trpc.useUtils();
   const [apiKey, setApiKey] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const userRole = session?.user?.role;
+  const isPublisher = userRole === "PUBLISHER" || userRole === "INTERNAL";
 
   const { data: status, isLoading } = trpc.settings.getApiKeyStatus.useQuery();
 
@@ -182,6 +186,124 @@ export default function SettingsPage() {
           </form>
         )}
       </div>
+
+      {/* Publisher Profile Section */}
+      {isPublisher && <PublisherProfileSection />}
+    </div>
+  );
+}
+
+function PublisherProfileSection() {
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
+  const utils = trpc.useUtils();
+
+  const { data: profile, isLoading } = trpc.user.getPublisherProfile.useQuery();
+
+  const [firmName, setFirmName] = useState("");
+  const [bio, setBio] = useState("");
+  const [specialties, setSpecialties] = useState("");
+  const [website, setWebsite] = useState("");
+
+  useEffect(() => {
+    if (profile) {
+      setFirmName(profile.firmName || "");
+      setBio(profile.bio || "");
+      setSpecialties(profile.specialties.join(", "));
+      setWebsite(profile.website || "");
+    }
+  }, [profile]);
+
+  const updateProfile = trpc.user.updatePublisherProfile.useMutation({
+    onSuccess: () => {
+      toast.success(t("profileSaved"));
+      utils.user.getPublisherProfile.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateProfile.mutate({
+      firmName: firmName.trim() || undefined,
+      bio: bio.trim() || undefined,
+      specialties: specialties
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+      website: website.trim() || "",
+    });
+  };
+
+  if (isLoading) return null;
+
+  return (
+    <div className="card-brutal bg-card border border-border rounded-2xl p-6 shadow-card mt-6">
+      <div className="flex items-center gap-3 mb-4">
+        <Briefcase className="w-5 h-5 text-primary" />
+        <h2 className="text-lg font-semibold text-foreground">{t("publisherProfile")}</h2>
+      </div>
+
+      <form onSubmit={handleSave} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">{t("firmName")}</label>
+          <input
+            value={firmName}
+            onChange={(e) => setFirmName(e.target.value)}
+            placeholder={t("firmNamePlaceholder")}
+            className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">{t("bio")}</label>
+          <textarea
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            placeholder={t("bioPlaceholder")}
+            rows={3}
+            className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">{t("specialties")}</label>
+          <input
+            value={specialties}
+            onChange={(e) => setSpecialties(e.target.value)}
+            placeholder={t("specialtiesPlaceholder")}
+            className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+          />
+          <p className="text-xs text-muted-foreground mt-1">{t("specialtiesHint")}</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">{t("website")}</label>
+          <input
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+            placeholder="https://example.com"
+            className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={updateProfile.isPending}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
+        >
+          {updateProfile.isPending ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              {t("saving")}
+            </>
+          ) : (
+            tCommon("save")
+          )}
+        </button>
+      </form>
     </div>
   );
 }

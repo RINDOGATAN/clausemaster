@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, internalProcedure, publisherProcedure } from "../trpc";
 import { resolveApiKeyForUser } from "../services/resolve-api-key";
 
 export const skillDraftRouter = createTRPCRouter({
@@ -38,6 +38,25 @@ export const skillDraftRouter = createTRPCRouter({
 
       return { analysisId: input.analysisId };
     }),
+
+  listMine: publisherProcedure.query(async ({ ctx }) => {
+    return ctx.prisma.skillDraft.findMany({
+      where: {
+        analysis: {
+          document: { userId: ctx.session.user.id },
+        },
+      },
+      include: {
+        analysis: {
+          select: {
+            contractType: true,
+            document: { select: { id: true, fileName: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }),
 
   get: protectedProcedure
     .input(z.object({ analysisId: z.string() }))
@@ -115,7 +134,7 @@ export const skillDraftRouter = createTRPCRouter({
       });
     }),
 
-  export: protectedProcedure
+  export: internalProcedure
     .input(z.object({ skillDraftId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       await verifyDraftOwnership(ctx, input.skillDraftId);
@@ -124,6 +143,39 @@ export const skillDraftRouter = createTRPCRouter({
       const exportPath = await exportSkillDraft(input.skillDraftId);
 
       return { exportPath };
+    }),
+
+  submit: publisherProcedure
+    .input(z.object({ skillDraftId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const draft = await verifyDraftOwnership(ctx, input.skillDraftId);
+
+      if (draft.status !== "REVIEW" && draft.status !== "REJECTED") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Can only submit drafts in REVIEW or REJECTED status",
+        });
+      }
+
+      const updated = await ctx.prisma.skillDraft.update({
+        where: { id: input.skillDraftId },
+        data: {
+          status: "SUBMITTED",
+          submittedAt: new Date(),
+          reviewNotes: null,
+          reviewedByUser: null,
+        },
+      });
+
+      // Notify admins
+      try {
+        const { notifyAdminNewSubmission } = await import("../services/notifications");
+        await notifyAdminNewSubmission(input.skillDraftId);
+      } catch (e) {
+        console.error("Failed to send submission notification:", e);
+      }
+
+      return updated;
     }),
 
   regenerate: protectedProcedure

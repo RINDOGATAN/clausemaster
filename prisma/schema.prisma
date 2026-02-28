@@ -35,9 +35,10 @@ model User {
   encryptedApiKey String? @db.Text
   apiKeyIv        String?
 
-  accounts  Account[]
-  sessions  Session[]
-  documents Document[]
+  accounts         Account[]
+  sessions         Session[]
+  documents        Document[]
+  publisherProfile PublisherProfile?
 
   @@map("users")
   @@schema("clausemaster")
@@ -54,6 +55,22 @@ model PublisherInvite {
   createdAt DateTime  @default(now())
 
   @@map("publisher_invites")
+  @@schema("clausemaster")
+}
+
+model PublisherProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  firmName    String?
+  bio         String?  @db.Text
+  specialties String[]
+  website     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("publisher_profiles")
   @@schema("clausemaster")
 }
 
@@ -253,6 +270,9 @@ model Issue {
 enum SkillDraftStatus {
   GENERATING
   REVIEW
+  SUBMITTED
+  APPROVED
+  REJECTED
   EXPORTED
   FAILED
 
@@ -278,6 +298,11 @@ model SkillDraft {
   aiProvider       String?
   aiModel          String?
   processingTimeMs Int?
+
+  // Submission tracking (publisher flow)
+  submittedAt    DateTime?
+  reviewedByUser String?
+  reviewNotes    String?  @db.Text
 
   // Export tracking
   exportedAt DateTime?
