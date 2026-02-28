@@ -4,7 +4,12 @@ import prisma from "@/lib/prisma";
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const FROM = process.env.EMAIL_FROM || "onboarding@resend.dev";
 
-const PRIVILEGED_DOMAINS = ["todo.law", "rindogatan.com"];
+const EMAIL_WRAPPER = (body: string) => `
+  <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto;">
+    <h1 style="color: #f5a623; background: #1a1a1a; padding: 20px; margin: 0;">Clausemaster</h1>
+    <div style="padding: 20px; background: #f5f5f5;">${body}</div>
+  </div>
+`;
 
 /**
  * Notify internal (admin) users that a publisher has submitted a skill for review.
@@ -119,5 +124,123 @@ export async function notifyPublisherReviewResult(skillDraftId: string, approved
     });
   } catch (e) {
     console.error(`Failed to send review notification to ${publisherEmail}:`, e);
+  }
+}
+
+// ── Review Request Notifications ──
+
+/**
+ * Notify all active publishers that a new review request is available.
+ */
+export async function notifyPublishersNewReview(reviewRequestId: string) {
+  const request = await prisma.reviewRequest.findUnique({
+    where: { id: reviewRequestId },
+    include: {
+      document: {
+        select: {
+          fileName: true,
+          analysis: { select: { contractType: true, contractTypeLabel: true } },
+        },
+      },
+    },
+  });
+
+  if (!request) return;
+
+  const publishers = await prisma.user.findMany({
+    where: { role: "PUBLISHER" },
+    select: { email: true },
+  });
+
+  const contractLabel = request.document.analysis?.contractTypeLabel || request.document.analysis?.contractType || "Contract";
+
+  if (publishers.length === 0 || !resend) {
+    console.log(`[Notifications] New review request for ${contractLabel} (${request.document.fileName})`);
+    return;
+  }
+
+  for (const pub of publishers) {
+    try {
+      await resend.emails.send({
+        from: FROM,
+        to: pub.email,
+        subject: `New review request: ${contractLabel}`,
+        html: EMAIL_WRAPPER(`
+          <p>A client has requested a lawyer review for a <strong>${contractLabel}</strong>.</p>
+          ${request.clientNotes ? `<p><em>"${request.clientNotes}"</em></p>` : ""}
+          <p>Log in to Clausemaster to claim this review.</p>
+        `),
+      });
+    } catch (e) {
+      console.error(`Failed to send review notification to ${pub.email}:`, e);
+    }
+  }
+}
+
+/**
+ * Notify a client that a publisher has claimed their review request.
+ */
+export async function notifyClientReviewClaimed(reviewRequestId: string) {
+  const request = await prisma.reviewRequest.findUnique({
+    where: { id: reviewRequestId },
+    include: {
+      client: { select: { email: true } },
+      document: { select: { fileName: true } },
+    },
+  });
+
+  if (!request) return;
+
+  if (!resend) {
+    console.log(`[Notifications] Review claimed for ${request.client.email}: ${request.document.fileName}`);
+    return;
+  }
+
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: request.client.email,
+      subject: `Your review request has been claimed: ${request.document.fileName}`,
+      html: EMAIL_WRAPPER(`
+        <p>A lawyer has claimed your review request for <strong>${request.document.fileName}</strong> and is now reviewing your contract.</p>
+        <p>You'll be notified when the review is complete.</p>
+      `),
+    });
+  } catch (e) {
+    console.error(`Failed to send claim notification to ${request.client.email}:`, e);
+  }
+}
+
+/**
+ * Notify a client that their review has been completed.
+ */
+export async function notifyClientReviewCompleted(reviewRequestId: string) {
+  const request = await prisma.reviewRequest.findUnique({
+    where: { id: reviewRequestId },
+    include: {
+      client: { select: { email: true } },
+      document: { select: { fileName: true } },
+    },
+  });
+
+  if (!request) return;
+
+  if (!resend) {
+    console.log(`[Notifications] Review completed for ${request.client.email}: ${request.document.fileName}`);
+    return;
+  }
+
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: request.client.email,
+      subject: `Your lawyer review is ready: ${request.document.fileName}`,
+      html: EMAIL_WRAPPER(`
+        <p>Your lawyer review for <strong>${request.document.fileName}</strong> is complete!</p>
+        <p>Log in to Clausemaster to view the review notes on your document page.</p>
+      `),
+    });
+  } catch (e) {
+    console.error(`Failed to send completion notification to ${request.client.email}:`, e);
   }
 }

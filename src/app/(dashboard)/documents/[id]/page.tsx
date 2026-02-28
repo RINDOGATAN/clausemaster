@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { ArrowLeft, Loader2, Sparkles, ExternalLink, RefreshCw } from "lucide-react";
+import { ArrowLeft, Loader2, Sparkles, ExternalLink, RefreshCw, Gavel, Clock, CheckCircle, MessageSquare } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -22,9 +22,13 @@ export default function DocumentDetailPage() {
   const t = useTranslations("analysis");
   const tDoc = useTranslations("documents");
   const tSkill = useTranslations("skillDraft");
+  const tReview = useTranslations("review");
   const documentId = params.id as string;
   const [selectedClauseId, setSelectedClauseId] = useState<string | null>(null);
+  const [showReviewDialog, setShowReviewDialog] = useState(false);
+  const [reviewNotes, setReviewNotes] = useState("");
   const userRole = session?.user?.role;
+  const isClient = userRole === "CLIENT";
 
   const { data: document, isLoading, refetch } = trpc.document.getById.useQuery(
     { id: documentId },
@@ -80,6 +84,24 @@ export default function DocumentDetailPage() {
     onSuccess: () => {
       refetchDraft();
       router.push(`/documents/${documentId}/skill-draft`);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  // Review request — only for CLIENT role
+  const { data: reviewRequest, refetch: refetchReview } = trpc.review.getByDocument.useQuery(
+    { documentId },
+    { enabled: isClient && !!document && document.status === "COMPLETED" }
+  );
+
+  const requestReviewMutation = trpc.review.requestReview.useMutation({
+    onSuccess: () => {
+      toast.success(tReview("requestSubmitted"));
+      setShowReviewDialog(false);
+      setReviewNotes("");
+      refetchReview();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -256,6 +278,99 @@ export default function DocumentDetailPage() {
         isReanalyzing={reanalyzeMutation.isPending}
         isDeleting={deleteMutation.isPending}
       />
+
+      {/* Review Request Section — CLIENT only */}
+      {isClient && document.status === "COMPLETED" && (
+        <div className="card-brutal p-5">
+          {!reviewRequest || reviewRequest.status === "CANCELLED" ? (
+            // No active request — show request button or dialog
+            !showReviewDialog ? (
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-sm">{tReview("needLawyerReview")}</h3>
+                  <p className="text-xs text-muted-foreground mt-1">{tReview("needLawyerDescription")}</p>
+                </div>
+                <button
+                  onClick={() => setShowReviewDialog(true)}
+                  className="btn-brutal text-sm px-4 py-2 inline-flex items-center gap-2"
+                >
+                  <Gavel className="w-4 h-4" />
+                  {tReview("requestReview")}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <h3 className="font-semibold text-sm">{tReview("requestReview")}</h3>
+                <div>
+                  <label className="block text-sm font-medium mb-1">{tReview("whatNeedHelp")}</label>
+                  <textarea
+                    value={reviewNotes}
+                    onChange={(e) => setReviewNotes(e.target.value)}
+                    placeholder={tReview("notesPlaceholder")}
+                    rows={3}
+                    className="w-full px-3 py-2 bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => requestReviewMutation.mutate({
+                      documentId,
+                      clientNotes: reviewNotes.trim() || undefined,
+                    })}
+                    disabled={requestReviewMutation.isPending}
+                    className="btn-brutal text-sm px-4 py-2 inline-flex items-center gap-2"
+                  >
+                    {requestReviewMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Gavel className="w-4 h-4" />
+                    )}
+                    {tReview("submitRequest")}
+                  </button>
+                  <button
+                    onClick={() => { setShowReviewDialog(false); setReviewNotes(""); }}
+                    className="px-4 py-2 text-sm bg-secondary hover:bg-secondary/80 rounded-xl transition-colors"
+                  >
+                    {tReview("cancel")}
+                  </button>
+                </div>
+              </div>
+            )
+          ) : reviewRequest.status === "PENDING" ? (
+            <div className="flex items-center gap-3">
+              <Clock className="w-5 h-5 text-blue-400" />
+              <div>
+                <p className="text-sm font-medium text-blue-400">{tReview("statusPending")}</p>
+                <p className="text-xs text-muted-foreground">{tReview("statusPendingDescription")}</p>
+              </div>
+            </div>
+          ) : reviewRequest.status === "CLAIMED" ? (
+            <div className="flex items-center gap-3">
+              <MessageSquare className="w-5 h-5 text-amber-400" />
+              <div>
+                <p className="text-sm font-medium text-amber-400">{tReview("statusClaimed")}</p>
+                <p className="text-xs text-muted-foreground">{tReview("statusClaimedDescription")}</p>
+              </div>
+            </div>
+          ) : reviewRequest.status === "COMPLETED" ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-green-400" />
+                <div>
+                  <p className="text-sm font-medium text-green-400">{tReview("statusCompleted")}</p>
+                  <p className="text-xs text-muted-foreground">{tReview("statusCompletedDescription")}</p>
+                </div>
+              </div>
+              {reviewRequest.reviewNotes && (
+                <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-4">
+                  <h4 className="section-label mb-2">{tReview("lawyerNotes")}</h4>
+                  <p className="text-sm text-foreground whitespace-pre-wrap">{reviewRequest.reviewNotes}</p>
+                </div>
+              )}
+            </div>
+          ) : null}
+        </div>
+      )}
 
       {/* 3-Panel Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_300px] gap-4 min-h-[600px]">
