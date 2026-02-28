@@ -16,6 +16,7 @@
     "admin": "Admin",
     "reviews": "Revisiones",
     "settings": "Configuracion",
+    "userGuide": "Guía de Usuario",
     "signOut": "Cerrar Sesion"
   },
   "auth": {
