@@ -10,7 +10,15 @@ import { EmptyState } from "@/components/documents/EmptyState";
 export default function DocumentsPage() {
   const t = useTranslations("documents");
   const { data: documents, isLoading } = trpc.document.list.useQuery(undefined, {
-    refetchInterval: 5000,
+    refetchInterval: (query) => {
+      const docs = query.state.data;
+      if (!docs) return false;
+      const hasInProgress = docs.some(
+        (d: { status: string }) =>
+          d.status !== "COMPLETED" && d.status !== "FAILED"
+      );
+      return hasInProgress ? 5000 : false;
+    },
   });
 
   if (isLoading) {

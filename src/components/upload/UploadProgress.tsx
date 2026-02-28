@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { CheckCircle2, Loader2, Circle } from "lucide-react";
+import { CheckCircle2, Loader2, Circle, AlertTriangle } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { Progress } from "@/components/ui/progress";
 
 const POLL_INTERVAL = 2000;
+const STALL_TIMEOUT = 60_000; // 60 seconds without status change = stalled
 
 interface UploadProgressProps {
   documentId: string;
@@ -16,6 +17,9 @@ interface UploadProgressProps {
 export function UploadProgress({ documentId }: UploadProgressProps) {
   const t = useTranslations("upload");
   const router = useRouter();
+  const [stalled, setStalled] = useState(false);
+  const lastStatusRef = useRef<string | undefined>(undefined);
+  const lastChangeRef = useRef(Date.now());
 
   const { data: document } = trpc.document.getById.useQuery(
     { id: documentId },
@@ -29,6 +33,25 @@ export function UploadProgress({ documentId }: UploadProgressProps) {
   );
 
   const status = document?.status;
+
+  // Track stalled analysis
+  useEffect(() => {
+    if (status !== lastStatusRef.current) {
+      lastStatusRef.current = status;
+      lastChangeRef.current = Date.now();
+      setStalled(false);
+    }
+
+    if (status === "COMPLETED" || status === "FAILED") return;
+
+    const interval = setInterval(() => {
+      if (Date.now() - lastChangeRef.current > STALL_TIMEOUT) {
+        setStalled(true);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [status]);
 
   useEffect(() => {
     if (status === "COMPLETED") {
@@ -108,6 +131,25 @@ export function UploadProgress({ documentId }: UploadProgressProps) {
           );
         })}
       </div>
+
+      {stalled && status !== "COMPLETED" && status !== "FAILED" && (
+        <div className="mt-6 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 flex items-start gap-3">
+          <AlertTriangle className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm text-yellow-500 font-medium">Taking longer than expected</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              The analysis may have timed out. You can return to{" "}
+              <button
+                onClick={() => router.push("/documents")}
+                className="text-primary hover:underline"
+              >
+                your documents
+              </button>
+              {" "}and check back later, or try uploading again.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -41,17 +41,21 @@ export default function DashboardLayout({
   const tCommon = useTranslations("common");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const { data: apiKeyStatus, isLoading: apiKeyLoading } = trpc.settings.getApiKeyStatus.useQuery(
+  const { data: apiKeyStatus, isLoading: apiKeyLoading, isError: apiKeyError } = trpc.settings.getApiKeyStatus.useQuery(
     undefined,
-    { enabled: status === "authenticated" }
+    { enabled: status === "authenticated", retry: 1 }
   );
 
-  const { data: userInfo, isLoading: userInfoLoading } = trpc.user.getRole.useQuery(
+  const { data: userInfo, isLoading: userInfoLoading, isError: userInfoError } = trpc.user.getRole.useQuery(
     undefined,
-    { enabled: status === "authenticated" }
+    { enabled: status === "authenticated", retry: 1 }
   );
 
-  if (status === "loading" || (status === "authenticated" && (apiKeyLoading || userInfoLoading))) {
+  const queriesStillLoading = status === "authenticated"
+    && (apiKeyLoading || userInfoLoading)
+    && !apiKeyError && !userInfoError;
+
+  if (status === "loading" || queriesStillLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-muted-foreground">{tCommon("loading")}</div>

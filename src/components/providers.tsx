@@ -21,6 +21,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           queries: {
             staleTime: 5 * 1000,
             refetchOnWindowFocus: false,
+            retry: 1,
           },
         },
       })
