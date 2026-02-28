@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publisherProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 
 const PRIVILEGED_DOMAINS = ["todo.law", "rindogatan.com"];
@@ -92,5 +92,39 @@ export const userRouter = createTRPCRouter({
       });
 
       return { role: updated.role };
+    }),
+
+  getPublisherProfile: publisherProcedure.query(async ({ ctx }) => {
+    return ctx.prisma.publisherProfile.findUnique({
+      where: { userId: ctx.session.user.id },
+    });
+  }),
+
+  updatePublisherProfile: publisherProcedure
+    .input(
+      z.object({
+        firmName: z.string().max(200).optional(),
+        bio: z.string().max(2000).optional(),
+        specialties: z.array(z.string()).max(10).optional(),
+        website: z.string().url().max(500).optional().or(z.literal("")),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.prisma.publisherProfile.upsert({
+        where: { userId: ctx.session.user.id },
+        create: {
+          userId: ctx.session.user.id,
+          firmName: input.firmName,
+          bio: input.bio,
+          specialties: input.specialties ?? [],
+          website: input.website || null,
+        },
+        update: {
+          firmName: input.firmName,
+          bio: input.bio,
+          specialties: input.specialties ?? [],
+          website: input.website || null,
+        },
+      });
     }),
 });
