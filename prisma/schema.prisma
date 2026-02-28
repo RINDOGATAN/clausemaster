@@ -39,6 +39,8 @@ model User {
   sessions         Session[]
   documents        Document[]
   publisherProfile PublisherProfile?
+  clientRequests   ReviewRequest[]  @relation("clientRequests")
+  publisherReviews ReviewRequest[]  @relation("publisherReviews")
 
   @@map("users")
   @@schema("clausemaster")
@@ -187,8 +189,9 @@ model Document {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  analysis Analysis?
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analysis       Analysis?
+  reviewRequests ReviewRequest[]
 
   @@index([userId])
   @@map("documents")
@@ -314,5 +317,37 @@ model SkillDraft {
   analysis Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
 
   @@map("skill_drafts")
+  @@schema("clausemaster")
+}
+
+// ============================================================
+// REVIEW REQUESTS (Client → Publisher)
+// ============================================================
+
+enum ReviewStatus {
+  PENDING
+  CLAIMED
+  COMPLETED
+  CANCELLED
+
+  @@schema("clausemaster")
+}
+
+model ReviewRequest {
+  id           String       @id @default(cuid())
+  documentId   String
+  clientId     String
+  publisherId  String?
+  status       ReviewStatus @default(PENDING)
+  clientNotes  String?      @db.Text
+  reviewNotes  String?      @db.Text
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  document  Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  client    User     @relation("clientRequests", fields: [clientId], references: [id])
+  publisher User?    @relation("publisherReviews", fields: [publisherId], references: [id])
+
+  @@map("review_requests")
   @@schema("clausemaster")
 }

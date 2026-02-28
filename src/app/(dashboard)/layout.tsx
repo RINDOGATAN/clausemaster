@@ -16,6 +16,7 @@ import {
   Settings,
   Layers,
   Shield,
+  Scale,
 } from "lucide-react";
 import { brand } from "@/config/brand";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -84,6 +85,7 @@ export default function DashboardLayout({
     { href: "/documents", label: t("myDocuments"), icon: FileText, roles: ["INTERNAL", "PUBLISHER", "CLIENT"] },
     { href: "/documents/new", label: t("uploadNew"), icon: Plus, roles: ["INTERNAL", "PUBLISHER", "CLIENT"] },
     { href: "/my-skills", label: t("mySkills"), icon: Layers, roles: ["PUBLISHER"] },
+    { href: "/reviews", label: t("reviews"), icon: Scale, roles: ["PUBLISHER"] },
     { href: "/admin", label: t("admin"), icon: Shield, roles: ["INTERNAL"] },
     { href: "/settings", label: t("settings"), icon: Settings, roles: ["INTERNAL", "PUBLISHER", "CLIENT"] },
   ];
