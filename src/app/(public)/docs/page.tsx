@@ -98,8 +98,8 @@ export default function DocsOverviewPage() {
                 Lawyer / Publisher
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Generate legal skills, submit to the marketplace, and review
-                client contracts.
+                Generate legal skills, earn 70% revenue on the AAS marketplace,
+                and review client contracts.
               </p>
             </div>
           </Link>
