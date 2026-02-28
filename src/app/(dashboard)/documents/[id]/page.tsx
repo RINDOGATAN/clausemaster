@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { ArrowLeft, Loader2, Sparkles, ExternalLink, RefreshCw } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { ExecutiveSummary } from "@/components/analysis/ExecutiveSummary";
@@ -17,11 +18,13 @@ import { UploadProgress } from "@/components/upload/UploadProgress";
 export default function DocumentDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { data: session } = useSession();
   const t = useTranslations("analysis");
   const tDoc = useTranslations("documents");
   const tSkill = useTranslations("skillDraft");
   const documentId = params.id as string;
   const [selectedClauseId, setSelectedClauseId] = useState<string | null>(null);
+  const userRole = session?.user?.role;
 
   const { data: document, isLoading, refetch } = trpc.document.getById.useQuery(
     { id: documentId },
@@ -48,12 +51,13 @@ export default function DocumentDetailPage() {
     },
   });
 
-  // Skill draft queries
+  // Skill draft queries — only for INTERNAL and PUBLISHER
+  const canGenerateSkill = userRole === "INTERNAL" || userRole === "PUBLISHER";
   const analysisId = document?.analysis?.id;
   const { data: skillDraft, refetch: refetchDraft } = trpc.skillDraft.get.useQuery(
     { analysisId: analysisId! },
     {
-      enabled: !!analysisId && document?.status === "COMPLETED",
+      enabled: canGenerateSkill && !!analysisId && document?.status === "COMPLETED",
       refetchInterval: (query) => {
         const status = query.state.data?.status;
         if (!status || status === "REVIEW" || status === "EXPORTED" || status === "FAILED") return false;
@@ -176,8 +180,8 @@ export default function DocumentDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* Skill Draft button */}
-          {analysisId && (
+          {/* Skill Draft button — hidden for CLIENT role */}
+          {canGenerateSkill && analysisId && (
             <>
               {!skillDraft && (
                 <button
@@ -190,7 +194,9 @@ export default function DocumentDetailPage() {
                   ) : (
                     <Sparkles className="w-4 h-4" />
                   )}
-                  {tSkill("generateSkill")}
+                  {userRole === "PUBLISHER"
+                    ? tSkill("generateForMarketplace")
+                    : tSkill("generateSkill")}
                 </button>
               )}
               {skillDraft?.status === "GENERATING" && (

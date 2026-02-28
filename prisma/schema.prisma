@@ -13,12 +13,22 @@ datasource db {
 // AUTHENTICATION & USERS
 // ============================================================
 
+enum UserRole {
+  INTERNAL
+  PUBLISHER
+  CLIENT
+
+  @@schema("clausemaster")
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
   email         String    @unique
   emailVerified DateTime?
   image         String?
+  role          UserRole  @default(CLIENT)
+  onboardedAt   DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -30,6 +40,20 @@ model User {
   documents Document[]
 
   @@map("users")
+  @@schema("clausemaster")
+}
+
+model PublisherInvite {
+  id        String    @id @default(cuid())
+  code      String    @unique
+  label     String?
+  maxUses   Int?
+  usedCount Int       @default(0)
+  expiresAt DateTime?
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+
+  @@map("publisher_invites")
   @@schema("clausemaster")
 }
 

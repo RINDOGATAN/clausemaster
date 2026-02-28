@@ -12,6 +12,8 @@
   "nav": {
     "myDocuments": "My Documents",
     "uploadNew": "Upload New",
+    "mySkills": "My Skills",
+    "admin": "Admin",
     "settings": "Settings",
     "signOut": "Sign Out"
   },
@@ -174,8 +176,25 @@
     "encryptionNotice": "Your key is encrypted at rest using AES-256-GCM and never exposed in plain text.",
     "getApiKey": "Get an API key from Anthropic Console"
   },
+  "onboarding": {
+    "title": "Welcome to Clausemaster",
+    "subtitle": "Let's set up your account so we can tailor your experience.",
+    "publisherQuestion": "Are you a lawyer with a publisher invite code?",
+    "yesImALawyer": "Yes, I have an invite code",
+    "yesDescription": "Enter your publisher invite code to publish skills on the marketplace.",
+    "skipAsClient": "Continue as a client",
+    "skipDescription": "Upload contracts and get AI-powered analysis and reports.",
+    "enterCode": "Publisher Invite Code",
+    "codePlaceholder": "Enter your code...",
+    "verifyCode": "Verify Code",
+    "back": "Back",
+    "welcomeInternal": "Welcome! You have internal access.",
+    "welcomePublisher": "Welcome! You are now a registered publisher.",
+    "welcomeClient": "Welcome! Your account is ready."
+  },
   "skillDraft": {
     "generateSkill": "Generate Deal Room Skill",
+    "generateForMarketplace": "Generate Skill for Marketplace",
     "viewSkillDraft": "View Skill Draft",
     "generatingSkill": "Generating skill...",
     "retryGeneration": "Retry",
