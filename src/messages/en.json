@@ -16,6 +16,7 @@
     "admin": "Admin",
     "reviews": "Reviews",
     "settings": "Settings",
+    "userGuide": "User Guide",
     "signOut": "Sign Out"
   },
   "auth": {

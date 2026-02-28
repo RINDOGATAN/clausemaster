@@ -17,6 +17,7 @@ import {
   Layers,
   Shield,
   Scale,
+  BookOpen,
 } from "lucide-react";
 import { brand } from "@/config/brand";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -28,6 +29,7 @@ type NavItem = {
   label: string;
   icon: typeof FileText;
   roles: UserRole[];
+  external?: boolean;
 };
 
 export default function DashboardLayout({
@@ -92,6 +94,7 @@ export default function DashboardLayout({
     { href: "/reviews", label: t("reviews"), icon: Scale, roles: ["PUBLISHER"] },
     { href: "/admin", label: t("admin"), icon: Shield, roles: ["INTERNAL"] },
     { href: "/settings", label: t("settings"), icon: Settings, roles: ["INTERNAL", "PUBLISHER", "CLIENT"] },
+    { href: "/docs", label: t("userGuide"), icon: BookOpen, roles: ["INTERNAL", "PUBLISHER", "CLIENT"], external: true },
   ];
 
   const navItems = allNavItems.filter((item) => item.roles.includes(userRole));
@@ -118,6 +121,7 @@ export default function DashboardLayout({
                   <Link
                     key={item.href}
                     href={item.href}
+                    {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                     className={`
                       flex items-center gap-2 px-4 py-2 text-sm font-medium
                       rounded-full transition-colors
@@ -188,6 +192,7 @@ export default function DashboardLayout({
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
+                    {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                     className={`
                       flex items-center gap-3 px-4 py-3 text-lg font-medium
                       rounded-xl transition-colors
