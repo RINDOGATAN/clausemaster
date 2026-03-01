@@ -118,18 +118,7 @@ export default function SignInPage() {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2 text-white uppercase tracking-wide">Clausemaster</h1>
             <p className="text-muted-foreground mb-4">
-              {t.rich("poweredBy", {
-                link: () => (
-                  <a
-                    href="https://todo.law"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    TODO.LAW
-                  </a>
-                ),
-              })}
+              {t("poweredBy")}
             </p>
           </div>
 

@@ -38,7 +38,7 @@
     "failedMagicLink": "Failed to send magic link. Please try again.",
     "unexpectedError": "An unexpected error occurred.",
     "googleSignInFailed": "Google sign-in failed.",
-    "poweredBy": "AI-powered contract analysis by {link}",
+    "poweredBy": "AI-powered contract analysis",
     "inviteCode": "Invite Code",
     "enterInviteCode": "Enter your invite code to access Clausemaster",
     "invalidInviteCode": "Invalid invite code. Please try again.",
