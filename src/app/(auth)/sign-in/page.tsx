@@ -283,7 +283,7 @@ export default function SignInPage() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={isGoogleLoading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white text-gray-700 border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-colors disabled:opacity-50 rounded-full"
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-zinc-800 text-zinc-200 border-2 border-zinc-700 hover:bg-zinc-700 hover:border-zinc-600 transition-colors disabled:opacity-50 rounded-full"
           >
             {isGoogleLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
