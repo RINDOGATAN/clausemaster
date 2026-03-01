@@ -32,7 +32,7 @@
     "orContinueWith": "O continuar con",
     "continueWithGoogle": "Continuar con Google",
     "signingIn": "Iniciando sesion...",
-    "bySigningIn": "Al iniciar sesion, aceptas nuestros {termsLink} y {privacyLink}",
+    "bySigningIn": "Al iniciar sesion, aceptas nuestros <termsLink>Terminos de Uso</termsLink> y <privacyLink>Politica de Privacidad</privacyLink>",
     "termsOfUse": "Terminos de Uso",
     "privacyPolicy": "Politica de Privacidad",
     "failedMagicLink": "Error al enviar el enlace magico. Por favor intenta de nuevo.",
