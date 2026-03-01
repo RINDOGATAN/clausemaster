@@ -21,6 +21,14 @@ import {
 } from "lucide-react";
 import { brand } from "@/config/brand";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { trpc } from "@/lib/trpc";
 import type { UserRole } from "@prisma/client";
 
@@ -87,16 +95,22 @@ export default function DashboardLayout({
     redirect("/setup");
   }
 
-  const allNavItems: NavItem[] = [
+  const primaryNavItems: NavItem[] = [
     { href: "/documents", label: t("myDocuments"), icon: FileText, roles: ["INTERNAL", "PUBLISHER", "CLIENT"] },
     { href: "/documents/new", label: t("uploadNew"), icon: Plus, roles: ["INTERNAL", "PUBLISHER", "CLIENT"] },
     { href: "/my-skills", label: t("mySkills"), icon: Layers, roles: ["PUBLISHER"] },
     { href: "/reviews", label: t("reviews"), icon: Scale, roles: ["PUBLISHER"] },
     { href: "/admin", label: t("admin"), icon: Shield, roles: ["INTERNAL"] },
+  ];
+
+  const secondaryNavItems: NavItem[] = [
     { href: "/settings", label: t("settings"), icon: Settings, roles: ["INTERNAL", "PUBLISHER", "CLIENT"] },
     { href: "/docs", label: t("userGuide"), icon: BookOpen, roles: ["INTERNAL", "PUBLISHER", "CLIENT"], external: true },
   ];
 
+  const filteredPrimaryItems = primaryNavItems.filter((item) => item.roles.includes(userRole));
+  const filteredSecondaryItems = secondaryNavItems.filter((item) => item.roles.includes(userRole));
+  const allNavItems = [...primaryNavItems, ...secondaryNavItems];
   const navItems = allNavItems.filter((item) => item.roles.includes(userRole));
 
   return (
@@ -112,7 +126,7 @@ export default function DashboardLayout({
 
             {/* Desktop nav */}
             <nav className="hidden md:flex items-center gap-1">
-              {navItems.map((item) => {
+              {filteredPrimaryItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href ||
                   (item.href !== "/documents" && pathname.startsWith(item.href));
@@ -138,19 +152,44 @@ export default function DashboardLayout({
               })}
             </nav>
 
-            <div className="hidden md:flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-3">
               <LanguageSwitcher />
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <User className="w-4 h-4" />
-                <span>{session?.user?.email}</span>
-              </div>
-              <button
-                onClick={() => signOut({ callbackUrl: "/sign-in" })}
-                className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground rounded-full hover:bg-secondary transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                {t("signOut")}
-              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center justify-center w-9 h-9 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-sm font-bold">
+                    {session?.user?.email?.[0]?.toUpperCase() ?? <User className="w-4 h-4" />}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="text-xs text-muted-foreground font-normal truncate">
+                    {session?.user?.email}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {filteredSecondaryItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <DropdownMenuItem key={item.href} asChild>
+                        <Link
+                          href={item.href}
+                          {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                          className="flex items-center gap-2"
+                        >
+                          <Icon className="w-4 h-4" />
+                          {item.label}
+                        </Link>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => signOut({ callbackUrl: "/sign-in" })}
+                    className="flex items-center gap-2 text-muted-foreground"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    {t("signOut")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Mobile hamburger */}
