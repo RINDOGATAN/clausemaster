@@ -15,10 +15,8 @@ export default function PublicLayout({
             href="/"
             className="text-lg font-bold tracking-tight text-foreground"
           >
-            {brand.name}{" "}
-            <span className="text-muted-foreground text-sm font-normal">
-              by {brand.company}
-            </span>
+            TODO.LAW<sup className="text-xs align-super">&#8482;</sup>{" "}
+            <span className="text-primary">CLAUSEMASTER</span>
           </Link>
           <div className="flex items-center gap-6">
             <Link
