@@ -304,14 +304,14 @@ export default function SignInPage() {
         <div className="mt-6 pt-6 border-t border-border text-center">
           <p className="text-xs text-muted-foreground">
             {t.rich("bySigningIn", {
-              termsLink: () => (
+              termsLink: (chunks) => (
                 <a href="https://todo.law/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  {t("termsOfUse")}
+                  {chunks}
                 </a>
               ),
-              privacyLink: () => (
+              privacyLink: (chunks) => (
                 <a href="https://todo.law/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  {t("privacyPolicy")}
+                  {chunks}
                 </a>
               ),
             })}
