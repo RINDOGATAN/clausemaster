@@ -62,9 +62,21 @@ export default function MySkillsPage() {
                   {tSkill(`status.${skill.status}`)}
                 </span>
               </div>
-              {skill.contractType && (
-                <span className="tag-accent text-xs">{skill.contractType}</span>
-              )}
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Skill type badge */}
+                <span className={`text-xs px-2 py-0.5 rounded-full ${skill.skillType === "ASSESSMENT" ? "bg-purple-500/10 text-purple-500" : "bg-blue-500/10 text-blue-500"}`}>
+                  {tSkill(`type.${skill.skillType === "ASSESSMENT" ? "assessment" : "contract"}`)}
+                </span>
+                {/* Destination badge */}
+                {skill.destination && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                    {tSkill(`destination.${skill.destination}`)}
+                  </span>
+                )}
+                {skill.contractType && (
+                  <span className="tag-accent text-xs">{skill.contractType}</span>
+                )}
+              </div>
               <p className="text-xs text-muted-foreground">
                 {skill.analysis.document.fileName}
               </p>

@@ -32,9 +32,14 @@ export const skillDraftRouter = createTRPCRouter({
       // Resolve the user's API key
       const anthropicApiKey = await resolveApiKeyForUser(ctx.session.user.id);
 
-      // Start generation in background
-      const { generateSkillDraft } = await import("@/server/services/ai/skill-generator");
-      generateSkillDraft(input.analysisId, { anthropicApiKey }).catch(console.error);
+      // Route by document category
+      if (analysis.documentCategory === "assessment") {
+        const { generateAssessmentSkillDraft } = await import("@/server/services/ai/assessment-generator");
+        generateAssessmentSkillDraft(input.analysisId, { anthropicApiKey }).catch(console.error);
+      } else {
+        const { generateSkillDraft } = await import("@/server/services/ai/skill-generator");
+        generateSkillDraft(input.analysisId, { anthropicApiKey }).catch(console.error);
+      }
 
       return { analysisId: input.analysisId };
     }),
@@ -134,6 +139,60 @@ export const skillDraftRouter = createTRPCRouter({
       });
     }),
 
+  updateAssessment: protectedProcedure
+    .input(z.object({
+      skillDraftId: z.string(),
+      assessmentJson: z.any(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const draft = await verifyDraftOwnership(ctx, input.skillDraftId);
+
+      if (draft.status !== "REVIEW") {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Can only edit drafts in REVIEW status" });
+      }
+
+      return ctx.prisma.skillDraft.update({
+        where: { id: input.skillDraftId },
+        data: { assessmentJson: input.assessmentJson },
+      });
+    }),
+
+  updateGuidance: protectedProcedure
+    .input(z.object({
+      skillDraftId: z.string(),
+      guidanceJson: z.any(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const draft = await verifyDraftOwnership(ctx, input.skillDraftId);
+
+      if (draft.status !== "REVIEW") {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Can only edit drafts in REVIEW status" });
+      }
+
+      return ctx.prisma.skillDraft.update({
+        where: { id: input.skillDraftId },
+        data: { guidanceJson: input.guidanceJson },
+      });
+    }),
+
+  updateDestination: protectedProcedure
+    .input(z.object({
+      skillDraftId: z.string(),
+      destination: z.enum(["DEAL_ROOM", "DPO_CENTRAL", "AI_SENTINEL"]),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const draft = await verifyDraftOwnership(ctx, input.skillDraftId);
+
+      if (draft.status !== "REVIEW" && draft.status !== "REJECTED") {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Can only change destination in REVIEW or REJECTED status" });
+      }
+
+      return ctx.prisma.skillDraft.update({
+        where: { id: input.skillDraftId },
+        data: { destination: input.destination },
+      });
+    }),
+
   export: internalProcedure
     .input(z.object({ skillDraftId: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -199,9 +258,14 @@ export const skillDraftRouter = createTRPCRouter({
       // Resolve the user's API key
       const anthropicApiKey = await resolveApiKeyForUser(ctx.session.user.id);
 
-      // Start generation in background
-      const { generateSkillDraft } = await import("@/server/services/ai/skill-generator");
-      generateSkillDraft(input.analysisId, { anthropicApiKey }).catch(console.error);
+      // Route by document category
+      if (analysis.documentCategory === "assessment") {
+        const { generateAssessmentSkillDraft } = await import("@/server/services/ai/assessment-generator");
+        generateAssessmentSkillDraft(input.analysisId, { anthropicApiKey }).catch(console.error);
+      } else {
+        const { generateSkillDraft } = await import("@/server/services/ai/skill-generator");
+        generateSkillDraft(input.analysisId, { anthropicApiKey }).catch(console.error);
+      }
 
       return { analysisId: input.analysisId };
     }),

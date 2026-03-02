@@ -233,7 +233,9 @@
     "tabs": {
       "clauses": "Clauses",
       "boilerplate": "Boilerplate",
-      "metadata": "Metadata"
+      "metadata": "Metadata",
+      "criteria": "Criteria",
+      "guidance": "Guidance"
     },
     "clauses": {
       "title": "Clause",
@@ -285,6 +287,52 @@
       "exportedTo": "Exported to: {path}",
       "exportFailed": "Export failed"
     },
+    "type": {
+      "contract": "Contract",
+      "assessment": "Assessment"
+    },
+    "destination": {
+      "DEAL_ROOM": "Deal Room",
+      "DPO_CENTRAL": "DPO Central",
+      "AI_SENTINEL": "AI Sentinel"
+    },
+    "partyMode": {
+      "TWO_PARTY": "Two-Party",
+      "SOLO": "Solo"
+    },
+    "assessment": {
+      "assessmentType": "Assessment Type",
+      "scoringMethod": "Scoring Method",
+      "categories": "Categories",
+      "criteria": "Criteria",
+      "criteriaCount": "{count} criteria",
+      "categoryCount": "{count} categories",
+      "riskLevel": "Risk Level",
+      "weight": "Weight",
+      "regulatoryReference": "Regulatory Reference",
+      "guidance": "Guidance",
+      "remediation": "Remediation",
+      "evidenceRequired": "Evidence Required",
+      "scoringOptions": "Scoring Options",
+      "score": "Score",
+      "riskLow": "Low",
+      "riskMedium": "Medium",
+      "riskHigh": "High",
+      "riskCritical": "Critical",
+      "checklist": "Checklist",
+      "weighted": "Weighted",
+      "maturityModel": "Maturity Model"
+    },
+    "soloOption": {
+      "advantages": "Advantages",
+      "disadvantages": "Disadvantages"
+    },
+    "destinationLabel": "Destination",
+    "changeDestination": "Change",
+    "generateContractSkill": "Generate Contract Skill",
+    "generateAssessmentSkill": "Generate Assessment Skill",
+    "documentCategory": "Document Category",
+    "suggestedDestination": "Suggested Destination",
     "regenerate": "Regenerate",
     "regenerating": "Regenerating...",
     "saving": "Saving...",

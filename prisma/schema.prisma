@@ -199,21 +199,24 @@ model Document {
 }
 
 model Analysis {
-  id                 String       @id @default(cuid())
-  documentId         String       @unique
-  contractType       String?
-  contractTypeLabel  String?
-  jurisdiction       Jurisdiction @default(UNKNOWN)
-  jurisdictionNotes  String?
-  summary            String?      @db.Text
-  partyNames         String[]
-  effectiveDate      String?
-  aiProvider         String?
-  aiModel            String?
-  processingTimeMs   Int?
-  rawExtractedText   String?      @db.Text
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  id                   String       @id @default(cuid())
+  documentId           String       @unique
+  contractType         String?
+  contractTypeLabel    String?
+  jurisdiction         Jurisdiction @default(UNKNOWN)
+  jurisdictionNotes    String?
+  summary              String?      @db.Text
+  partyNames           String[]
+  effectiveDate        String?
+  documentCategory     String?
+  partyMode            String?
+  suggestedDestination String?
+  aiProvider           String?
+  aiModel              String?
+  processingTimeMs     Int?
+  rawExtractedText     String?      @db.Text
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
 
   document   Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
   clauses    AnalyzedClause[]
@@ -282,11 +285,38 @@ enum SkillDraftStatus {
   @@schema("clausemaster")
 }
 
+enum SkillType {
+  CONTRACT
+  ASSESSMENT
+
+  @@schema("clausemaster")
+}
+
+enum PartyMode {
+  TWO_PARTY
+  SOLO
+
+  @@schema("clausemaster")
+}
+
+enum SkillDestination {
+  DEAL_ROOM
+  DPO_CENTRAL
+  AI_SENTINEL
+
+  @@schema("clausemaster")
+}
+
 model SkillDraft {
   id            String           @id @default(cuid())
   analysisId    String           @unique
   status        SkillDraftStatus @default(GENERATING)
   errorMessage  String?
+
+  // Skill type & routing
+  skillType     SkillType        @default(CONTRACT)
+  partyMode     PartyMode?
+  destination   SkillDestination?
 
   // Generated skill data (stored as JSON)
   skillId         String?
@@ -296,6 +326,8 @@ model SkillDraft {
   boilerplateJson Json?
   metadataJson    Json?
   manifestJson    Json?
+  assessmentJson  Json?
+  guidanceJson    Json?
 
   // AI tracking
   aiProvider       String?

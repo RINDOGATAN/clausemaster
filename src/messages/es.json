@@ -233,7 +233,9 @@
     "tabs": {
       "clauses": "Clausulas",
       "boilerplate": "Plantilla",
-      "metadata": "Metadatos"
+      "metadata": "Metadatos",
+      "criteria": "Criterios",
+      "guidance": "Orientacion"
     },
     "clauses": {
       "title": "Clausula",
@@ -285,6 +287,52 @@
       "exportedTo": "Exportado a: {path}",
       "exportFailed": "Fallo la exportacion"
     },
+    "type": {
+      "contract": "Contrato",
+      "assessment": "Evaluacion"
+    },
+    "destination": {
+      "DEAL_ROOM": "Deal Room",
+      "DPO_CENTRAL": "DPO Central",
+      "AI_SENTINEL": "AI Sentinel"
+    },
+    "partyMode": {
+      "TWO_PARTY": "Dos Partes",
+      "SOLO": "Unilateral"
+    },
+    "assessment": {
+      "assessmentType": "Tipo de Evaluacion",
+      "scoringMethod": "Metodo de Puntuacion",
+      "categories": "Categorias",
+      "criteria": "Criterios",
+      "criteriaCount": "{count} criterios",
+      "categoryCount": "{count} categorias",
+      "riskLevel": "Nivel de Riesgo",
+      "weight": "Peso",
+      "regulatoryReference": "Referencia Regulatoria",
+      "guidance": "Orientacion",
+      "remediation": "Remediacion",
+      "evidenceRequired": "Evidencia Requerida",
+      "scoringOptions": "Opciones de Puntuacion",
+      "score": "Puntuacion",
+      "riskLow": "Bajo",
+      "riskMedium": "Medio",
+      "riskHigh": "Alto",
+      "riskCritical": "Critico",
+      "checklist": "Lista de Verificacion",
+      "weighted": "Ponderado",
+      "maturityModel": "Modelo de Madurez"
+    },
+    "soloOption": {
+      "advantages": "Ventajas",
+      "disadvantages": "Desventajas"
+    },
+    "destinationLabel": "Destino",
+    "changeDestination": "Cambiar",
+    "generateContractSkill": "Generar Skill de Contrato",
+    "generateAssessmentSkill": "Generar Skill de Evaluacion",
+    "documentCategory": "Categoria de Documento",
+    "suggestedDestination": "Destino Sugerido",
     "regenerate": "Regenerar",
     "regenerating": "Regenerando...",
     "saving": "Guardando...",
