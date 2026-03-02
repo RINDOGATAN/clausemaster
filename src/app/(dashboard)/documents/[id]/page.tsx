@@ -202,6 +202,22 @@ export default function DocumentDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {/* Document category + destination badges */}
+          {analysis?.documentCategory && (
+            <span className={`text-xs px-2 py-0.5 rounded-full ${analysis.documentCategory === "assessment" ? "bg-purple-500/10 text-purple-500" : "bg-blue-500/10 text-blue-500"}`}>
+              {tSkill(`type.${analysis.documentCategory}`)}
+            </span>
+          )}
+          {analysis?.suggestedDestination && (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+              {tSkill(`destination.${
+                analysis.suggestedDestination === "deal-room" ? "DEAL_ROOM"
+                : analysis.suggestedDestination === "dpo-central" ? "DPO_CENTRAL"
+                : "AI_SENTINEL"
+              }`)}
+            </span>
+          )}
+
           {/* Skill Draft button — hidden for CLIENT role */}
           {canGenerateSkill && analysisId && (
             <>
@@ -216,7 +232,9 @@ export default function DocumentDetailPage() {
                   ) : (
                     <Sparkles className="w-4 h-4" />
                   )}
-                  {userRole === "PUBLISHER"
+                  {analysis?.documentCategory === "assessment"
+                    ? tSkill("generateAssessmentSkill")
+                    : userRole === "PUBLISHER"
                     ? tSkill("generateForMarketplace")
                     : tSkill("generateSkill")}
                 </button>

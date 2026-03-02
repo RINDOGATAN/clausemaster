@@ -68,10 +68,20 @@ export default function SubmissionReviewPage() {
     );
   }
 
+  const isAssessment = submission.skillType === "ASSESSMENT";
   const clausesJson = submission.clausesJson as Record<string, unknown> | null;
   const clauseCount = clausesJson && Array.isArray((clausesJson as { clauses?: unknown[] }).clauses)
     ? (clausesJson as { clauses: unknown[] }).clauses.length
     : 0;
+  const assessmentJson = submission.assessmentJson as {
+    assessmentType?: string;
+    scoringMethod?: string;
+    categories?: Array<{ criteria: unknown[] }>;
+  } | null;
+  const categoryCount = assessmentJson?.categories?.length || 0;
+  const criteriaCount = assessmentJson?.categories?.reduce(
+    (sum: number, cat: { criteria: unknown[] }) => sum + cat.criteria.length, 0
+  ) || 0;
 
   return (
     <div className="space-y-6">
@@ -91,9 +101,19 @@ export default function SubmissionReviewPage() {
             <p className="text-sm text-muted-foreground">{t("reviewSubmission")}</p>
           </div>
         </div>
-        <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_COLORS[submission.status] || ""}`}>
-          {tSkill(`status.${submission.status}`)}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_COLORS[submission.status] || ""}`}>
+            {tSkill(`status.${submission.status}`)}
+          </span>
+          <span className={`text-xs px-2 py-0.5 rounded-full ${submission.skillType === "ASSESSMENT" ? "bg-purple-500/10 text-purple-500" : "bg-blue-500/10 text-blue-500"}`}>
+            {tSkill(`type.${submission.skillType === "ASSESSMENT" ? "assessment" : "contract"}`)}
+          </span>
+          {submission.destination && (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+              {tSkill(`destination.${submission.destination}`)}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Submission info */}
@@ -106,7 +126,17 @@ export default function SubmissionReviewPage() {
           )}
           <InfoRow label={t("sourceDocument")} value={submission.analysis.document.fileName} />
           <InfoRow label={t("contractType")} value={submission.contractType || "—"} />
-          <InfoRow label={t("clauseCount")} value={String(clauseCount)} />
+          {isAssessment ? (
+            <>
+              <InfoRow label="Categories" value={String(categoryCount)} />
+              <InfoRow label="Criteria" value={String(criteriaCount)} />
+              {assessmentJson?.scoringMethod && (
+                <InfoRow label="Scoring Method" value={assessmentJson.scoringMethod} />
+              )}
+            </>
+          ) : (
+            <InfoRow label={t("clauseCount")} value={String(clauseCount)} />
+          )}
           {submission.submittedAt && (
             <InfoRow label={t("submittedDate", { date: "" })} value={new Date(submission.submittedAt).toLocaleString()} />
           )}

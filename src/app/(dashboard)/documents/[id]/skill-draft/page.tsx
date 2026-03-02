@@ -19,7 +19,7 @@ import { useSession } from "next-auth/react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
-type Tab = "clauses" | "boilerplate" | "metadata";
+type Tab = "clauses" | "boilerplate" | "metadata" | "criteria" | "guidance";
 
 // Type helpers for JSON data
 interface ClauseOption {
@@ -28,13 +28,15 @@ interface ClauseOption {
   label: Record<string, string>;
   order: number;
   plainDescription: Record<string, string>;
-  prosPartyA: Record<string, string[]>;
-  consPartyA: Record<string, string[]>;
-  prosPartyB: Record<string, string[]>;
-  consPartyB: Record<string, string[]>;
+  prosPartyA?: Record<string, string[]>;
+  consPartyA?: Record<string, string[]>;
+  prosPartyB?: Record<string, string[]>;
+  consPartyB?: Record<string, string[]>;
+  advantages?: Record<string, string[]>;
+  disadvantages?: Record<string, string[]>;
   legalText: Record<string, string>;
-  biasPartyA: number;
-  biasPartyB: number;
+  biasPartyA?: number;
+  biasPartyB?: number;
 }
 
 interface Clause {
@@ -88,6 +90,67 @@ interface ManifestJson {
   templateFamily: string;
   nativeJurisdiction: string;
 }
+
+// Assessment JSON types
+interface ScoringOption {
+  id: string;
+  label: string;
+  score: number;
+  description: string;
+}
+
+interface AssessmentCriterion {
+  id: string;
+  title: string;
+  description: string;
+  order: number;
+  riskLevel: "low" | "medium" | "high" | "critical";
+  regulatoryReference?: string;
+  guidance?: string;
+  remediation?: string;
+  evidenceRequired?: string;
+  scoringOptions?: ScoringOption[];
+}
+
+interface AssessmentCategory {
+  id: string;
+  title: string;
+  description: string;
+  order: number;
+  weight: number;
+  criteria: AssessmentCriterion[];
+}
+
+interface AssessmentJson {
+  assessmentType: string;
+  scoringMethod: "checklist" | "weighted" | "maturity-model";
+  categories: AssessmentCategory[];
+}
+
+interface GuidanceCriterion {
+  criterionId: string;
+  guidance: string;
+  remediation: string;
+  evidenceRequired?: string;
+  scoringOptions: ScoringOption[];
+}
+
+interface GuidanceJson {
+  criteria: GuidanceCriterion[];
+}
+
+const DESTINATION_LABELS: Record<string, string> = {
+  DEAL_ROOM: "Deal Room",
+  DPO_CENTRAL: "DPO Central",
+  AI_SENTINEL: "AI Sentinel",
+};
+
+const RISK_COLORS: Record<string, string> = {
+  low: "bg-green-500/10 text-green-500",
+  medium: "bg-yellow-500/10 text-yellow-500",
+  high: "bg-orange-500/10 text-orange-500",
+  critical: "bg-red-500/10 text-red-500",
+};
 
 // Helper to get localized text from i18n object
 function localized(obj: Record<string, string> | string | undefined): string {
@@ -252,10 +315,19 @@ export default function SkillDraftPage() {
     );
   }
 
+  const isAssessment = draft.skillType === "ASSESSMENT";
+  const isSoloParty = draft.partyMode === "SOLO";
+
+  // Set default tab based on skill type (assessment defaults to criteria)
+  if (isAssessment && activeTab === "clauses") {
+    setActiveTab("criteria");
+  }
   const clausesJson = draft.clausesJson as ClausesJson | null;
   const boilerplateJson = draft.boilerplateJson as BoilerplateJson | null;
   const metadataJson = draft.metadataJson as MetadataJson | null;
   const manifestJson = draft.manifestJson as ManifestJson | null;
+  const assessmentJson = draft.assessmentJson as AssessmentJson | null;
+  const guidanceJson = draft.guidanceJson as GuidanceJson | null;
 
   const toggleClause = (clauseId: string) => {
     setExpandedClauses((prev) => {
@@ -275,11 +347,17 @@ export default function SkillDraftPage() {
     });
   };
 
-  const tabs: { id: Tab; label: string }[] = [
-    { id: "clauses", label: t("tabs.clauses") },
-    { id: "boilerplate", label: t("tabs.boilerplate") },
-    { id: "metadata", label: t("tabs.metadata") },
-  ];
+  const tabs: { id: Tab; label: string }[] = isAssessment
+    ? [
+        { id: "criteria", label: t("tabs.criteria") },
+        { id: "guidance", label: t("tabs.guidance") },
+        { id: "metadata", label: t("tabs.metadata") },
+      ]
+    : [
+        { id: "clauses", label: t("tabs.clauses") },
+        { id: "boilerplate", label: t("tabs.boilerplate") },
+        { id: "metadata", label: t("tabs.metadata") },
+      ];
 
   return (
     <div className="space-y-6">
@@ -305,9 +383,23 @@ export default function SkillDraftPage() {
           {draft.status === "EXPORTED" && draft.exportPath && (
             <span className="text-xs text-muted-foreground">{draft.exportPath}</span>
           )}
+          {/* Skill type badge */}
+          <span className={`text-xs px-2 py-0.5 rounded-full ${isAssessment ? "bg-purple-500/10 text-purple-500" : "bg-blue-500/10 text-blue-500"}`}>
+            {t(`type.${isAssessment ? "assessment" : "contract"}`)}
+          </span>
+          {/* Party mode badge (contracts only) */}
+          {!isAssessment && draft.partyMode && (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
+              {t(`partyMode.${draft.partyMode}`)}
+            </span>
+          )}
+          {/* Destination badge */}
+          {draft.destination && (
+            <span className="tag-accent">{DESTINATION_LABELS[draft.destination] || draft.destination}</span>
+          )}
           {/* Contract type badge */}
           {draft.contractType && (
-            <span className="tag-accent">{draft.contractType}</span>
+            <span className="tag">{draft.contractType}</span>
           )}
         </div>
       </div>
@@ -336,6 +428,7 @@ export default function SkillDraftPage() {
             expandedOptions={expandedOptions}
             toggleClause={toggleClause}
             toggleOption={toggleOption}
+            isSoloParty={isSoloParty}
             t={t}
           />
         )}
@@ -347,6 +440,22 @@ export default function SkillDraftPage() {
             t={t}
           />
         )}
+        {activeTab === "criteria" && assessmentJson && (
+          <CriteriaTab
+            assessmentJson={assessmentJson}
+            expandedClauses={expandedClauses}
+            toggleClause={toggleClause}
+            t={t}
+          />
+        )}
+        {activeTab === "guidance" && assessmentJson && (
+          <GuidanceTab
+            assessmentJson={assessmentJson}
+            expandedClauses={expandedClauses}
+            toggleClause={toggleClause}
+            t={t}
+          />
+        )}
         {activeTab === "metadata" && metadataJson && manifestJson && (
           <MetadataTab
             metadataJson={metadataJson}
@@ -354,6 +463,8 @@ export default function SkillDraftPage() {
             draft={draft}
             draftId={draft.id}
             updateMutation={updateMetadataMutation}
+            isAssessment={isAssessment}
+            destination={draft.destination}
             t={t}
           />
         )}
@@ -458,6 +569,7 @@ function ClausesTab({
   expandedOptions,
   toggleClause,
   toggleOption,
+  isSoloParty,
   t,
 }: {
   clausesJson: ClausesJson;
@@ -467,6 +579,7 @@ function ClausesTab({
   expandedOptions: Set<string>;
   toggleClause: (id: string) => void;
   toggleOption: (key: string) => void;
+  isSoloParty?: boolean;
   t: ReturnType<typeof useTranslations>;
 }) {
   return (
@@ -526,78 +639,112 @@ function ClausesTab({
                             <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0" />
                           )}
                           <span className="text-sm font-medium flex-1">{localized(option.label)}</span>
-                          <div className="flex items-center gap-2 w-48">
-                            <span className="text-xs text-muted-foreground w-6 text-right">A</span>
-                            <div className="flex-1">
-                              <BiasBar value={option.biasPartyA} />
+                          {!isSoloParty && option.biasPartyA != null && (
+                            <div className="flex items-center gap-2 w-48">
+                              <span className="text-xs text-muted-foreground w-6 text-right">A</span>
+                              <div className="flex-1">
+                                <BiasBar value={option.biasPartyA} />
+                              </div>
+                              <span className="text-xs font-mono w-10 text-right">{option.biasPartyA.toFixed(1)}</span>
                             </div>
-                            <span className="text-xs font-mono w-10 text-right">{option.biasPartyA.toFixed(1)}</span>
-                          </div>
+                          )}
                         </button>
 
                         {isOptExpanded && (
                           <div className="border-t border-border px-3 py-3 space-y-3">
                             <p className="text-sm text-muted-foreground">{localized(option.plainDescription)}</p>
 
-                            {/* Pros/Cons grid */}
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <p className="section-label mb-1">{t("clauses.prosPartyA")}</p>
-                                <ul className="text-xs text-muted-foreground space-y-1">
-                                  {localizedArray(option.prosPartyA).map((pro, i) => (
-                                    <li key={i} className="flex gap-1">
-                                      <span className="text-green-500 shrink-0">+</span>
-                                      {pro}
-                                    </li>
-                                  ))}
-                                </ul>
+                            {isSoloParty ? (
+                              /* Solo-party: advantages/disadvantages */
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <p className="section-label mb-1">{t("soloOption.advantages")}</p>
+                                  <ul className="text-xs text-muted-foreground space-y-1">
+                                    {localizedArray(option.advantages).map((adv, i) => (
+                                      <li key={i} className="flex gap-1">
+                                        <span className="text-green-500 shrink-0">+</span>
+                                        {adv}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                                <div>
+                                  <p className="section-label mb-1">{t("soloOption.disadvantages")}</p>
+                                  <ul className="text-xs text-muted-foreground space-y-1">
+                                    {localizedArray(option.disadvantages).map((dis, i) => (
+                                      <li key={i} className="flex gap-1">
+                                        <span className="text-red-500 shrink-0">-</span>
+                                        {dis}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
                               </div>
-                              <div>
-                                <p className="section-label mb-1">{t("clauses.consPartyA")}</p>
-                                <ul className="text-xs text-muted-foreground space-y-1">
-                                  {localizedArray(option.consPartyA).map((con, i) => (
-                                    <li key={i} className="flex gap-1">
-                                      <span className="text-red-500 shrink-0">-</span>
-                                      {con}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                              <div>
-                                <p className="section-label mb-1">{t("clauses.prosPartyB")}</p>
-                                <ul className="text-xs text-muted-foreground space-y-1">
-                                  {localizedArray(option.prosPartyB).map((pro, i) => (
-                                    <li key={i} className="flex gap-1">
-                                      <span className="text-green-500 shrink-0">+</span>
-                                      {pro}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                              <div>
-                                <p className="section-label mb-1">{t("clauses.consPartyB")}</p>
-                                <ul className="text-xs text-muted-foreground space-y-1">
-                                  {localizedArray(option.consPartyB).map((con, i) => (
-                                    <li key={i} className="flex gap-1">
-                                      <span className="text-red-500 shrink-0">-</span>
-                                      {con}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            </div>
+                            ) : (
+                              /* Two-party: pros/cons for each party */
+                              <>
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div>
+                                    <p className="section-label mb-1">{t("clauses.prosPartyA")}</p>
+                                    <ul className="text-xs text-muted-foreground space-y-1">
+                                      {localizedArray(option.prosPartyA).map((pro, i) => (
+                                        <li key={i} className="flex gap-1">
+                                          <span className="text-green-500 shrink-0">+</span>
+                                          {pro}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                  <div>
+                                    <p className="section-label mb-1">{t("clauses.consPartyA")}</p>
+                                    <ul className="text-xs text-muted-foreground space-y-1">
+                                      {localizedArray(option.consPartyA).map((con, i) => (
+                                        <li key={i} className="flex gap-1">
+                                          <span className="text-red-500 shrink-0">-</span>
+                                          {con}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                  <div>
+                                    <p className="section-label mb-1">{t("clauses.prosPartyB")}</p>
+                                    <ul className="text-xs text-muted-foreground space-y-1">
+                                      {localizedArray(option.prosPartyB).map((pro, i) => (
+                                        <li key={i} className="flex gap-1">
+                                          <span className="text-green-500 shrink-0">+</span>
+                                          {pro}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                  <div>
+                                    <p className="section-label mb-1">{t("clauses.consPartyB")}</p>
+                                    <ul className="text-xs text-muted-foreground space-y-1">
+                                      {localizedArray(option.consPartyB).map((con, i) => (
+                                        <li key={i} className="flex gap-1">
+                                          <span className="text-red-500 shrink-0">-</span>
+                                          {con}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                </div>
 
-                            {/* Bias scores */}
-                            <div className="flex gap-6 text-xs">
-                              <div className="flex items-center gap-2">
-                                <span className="text-muted-foreground">{t("clauses.biasPartyA")}:</span>
-                                <span className="font-mono">{option.biasPartyA.toFixed(2)}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-muted-foreground">{t("clauses.biasPartyB")}:</span>
-                                <span className="font-mono">{option.biasPartyB.toFixed(2)}</span>
-                              </div>
-                            </div>
+                                {/* Bias scores */}
+                                {option.biasPartyA != null && option.biasPartyB != null && (
+                                  <div className="flex gap-6 text-xs">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-muted-foreground">{t("clauses.biasPartyA")}:</span>
+                                      <span className="font-mono">{option.biasPartyA.toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-muted-foreground">{t("clauses.biasPartyB")}:</span>
+                                      <span className="font-mono">{option.biasPartyB.toFixed(2)}</span>
+                                    </div>
+                                  </div>
+                                )}
+                              </>
+                            )}
 
                             {/* Legal text */}
                             <div>
@@ -768,6 +915,8 @@ function MetadataTab({
   draft,
   draftId,
   updateMutation,
+  isAssessment,
+  destination,
   t,
 }: {
   metadataJson: MetadataJson;
@@ -775,8 +924,17 @@ function MetadataTab({
   draft: { aiProvider: string | null; aiModel: string | null; processingTimeMs: number | null };
   draftId: string;
   updateMutation: ReturnType<typeof trpc.skillDraft.updateMetadata.useMutation>;
+  isAssessment?: boolean;
+  destination?: string | null;
   t: ReturnType<typeof useTranslations>;
 }) {
+  const assessmentMeta = metadataJson as MetadataJson & {
+    assessmentType?: string;
+    scoringMethod?: string;
+    categoryCount?: number;
+    criteriaCount?: number;
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Manifest info */}
@@ -790,6 +948,9 @@ function MetadataTab({
         <MetaField label={t("metadata.author")} value={manifestJson.author} />
         <MetaField label={t("metadata.jurisdictions")} value={manifestJson.jurisdictions.join(", ")} />
         <MetaField label={t("metadata.languages")} value={manifestJson.languages.join(", ")} />
+        {destination && (
+          <MetaField label={t("destinationLabel")} value={DESTINATION_LABELS[destination] || destination} />
+        )}
       </div>
 
       {/* Metadata info */}
@@ -799,7 +960,21 @@ function MetadataTab({
           <MetaField label={t("metadata.contractType")} value={metadataJson.contractType} />
           <MetaField label={t("metadata.displayName")} value={metadataJson.displayName} />
           <MetaField label={t("metadata.version")} value={metadataJson.version} />
-          <MetaField label={t("metadata.clauseCount")} value={String(metadataJson.clauseCount)} />
+          {!isAssessment && metadataJson.clauseCount != null && (
+            <MetaField label={t("metadata.clauseCount")} value={String(metadataJson.clauseCount)} />
+          )}
+          {isAssessment && assessmentMeta.assessmentType && (
+            <MetaField label={t("assessment.assessmentType")} value={assessmentMeta.assessmentType} />
+          )}
+          {isAssessment && assessmentMeta.scoringMethod && (
+            <MetaField label={t("assessment.scoringMethod")} value={assessmentMeta.scoringMethod} />
+          )}
+          {isAssessment && assessmentMeta.categoryCount != null && (
+            <MetaField label={t("assessment.categories")} value={String(assessmentMeta.categoryCount)} />
+          )}
+          {isAssessment && assessmentMeta.criteriaCount != null && (
+            <MetaField label={t("assessment.criteria")} value={String(assessmentMeta.criteriaCount)} />
+          )}
         </div>
 
         {/* AI Info */}
@@ -812,6 +987,180 @@ function MetadataTab({
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+// ---------- Criteria Tab (Assessment) ----------
+
+function CriteriaTab({
+  assessmentJson,
+  expandedClauses,
+  toggleClause,
+  t,
+}: {
+  assessmentJson: AssessmentJson;
+  expandedClauses: Set<string>;
+  toggleClause: (id: string) => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const totalCriteria = assessmentJson.categories.reduce(
+    (sum, cat) => sum + cat.criteria.length, 0
+  );
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <p className="text-sm text-muted-foreground">
+            {assessmentJson.categories.length} {t("assessment.categories").toLowerCase()} &middot; {totalCriteria} {t("assessment.criteria").toLowerCase()}
+          </p>
+          <span className="tag text-xs">{assessmentJson.scoringMethod}</span>
+        </div>
+      </div>
+
+      {assessmentJson.categories.map((category) => {
+        const isExpanded = expandedClauses.has(category.id);
+        return (
+          <div key={category.id} className="bg-card border border-border rounded-2xl overflow-hidden">
+            <button
+              onClick={() => toggleClause(category.id)}
+              className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-secondary/50 transition-colors"
+            >
+              {isExpanded ? (
+                <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
+              ) : (
+                <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+              )}
+              <span className="metric text-sm text-muted-foreground w-8">{category.order}</span>
+              <span className="font-semibold flex-1">{category.title}</span>
+              <span className="text-xs text-muted-foreground">{t("assessment.weight")}: {(category.weight * 100).toFixed(0)}%</span>
+              <span className="text-xs text-muted-foreground">{category.criteria.length} {t("assessment.criteria").toLowerCase()}</span>
+            </button>
+
+            {isExpanded && (
+              <div className="border-t border-border px-4 py-4 space-y-3">
+                <p className="text-sm text-muted-foreground">{category.description}</p>
+                {category.criteria.map((criterion) => (
+                  <div key={criterion.id} className="bg-secondary/30 border border-border rounded-xl px-4 py-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-sm">{criterion.title}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${RISK_COLORS[criterion.riskLevel] || ""}`}>
+                        {t(`assessment.risk${criterion.riskLevel.charAt(0).toUpperCase() + criterion.riskLevel.slice(1)}`)}
+                      </span>
+                      {criterion.regulatoryReference && (
+                        <span className="text-xs text-primary font-mono">{criterion.regulatoryReference}</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">{criterion.description}</p>
+                    {criterion.scoringOptions && criterion.scoringOptions.length > 0 && (
+                      <div className="flex gap-1 flex-wrap">
+                        {criterion.scoringOptions.map((opt) => (
+                          <span key={opt.id} className="text-xs bg-background/50 border border-border rounded px-2 py-0.5">
+                            {opt.label} ({opt.score})
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ---------- Guidance Tab (Assessment) ----------
+
+function GuidanceTab({
+  assessmentJson,
+  expandedClauses,
+  toggleClause,
+  t,
+}: {
+  assessmentJson: AssessmentJson;
+  expandedClauses: Set<string>;
+  toggleClause: (id: string) => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  return (
+    <div className="space-y-3">
+      {assessmentJson.categories.map((category) => {
+        const isExpanded = expandedClauses.has(`guidance-${category.id}`);
+        const criteriaWithGuidance = category.criteria.filter((c) => c.guidance);
+        if (criteriaWithGuidance.length === 0) return null;
+
+        return (
+          <div key={category.id} className="bg-card border border-border rounded-2xl overflow-hidden">
+            <button
+              onClick={() => toggleClause(`guidance-${category.id}`)}
+              className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-secondary/50 transition-colors"
+            >
+              {isExpanded ? (
+                <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
+              ) : (
+                <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+              )}
+              <span className="font-semibold flex-1">{category.title}</span>
+              <span className="text-xs text-muted-foreground">{criteriaWithGuidance.length} {t("assessment.criteria").toLowerCase()}</span>
+            </button>
+
+            {isExpanded && (
+              <div className="border-t border-border px-4 py-4 space-y-4">
+                {criteriaWithGuidance.map((criterion) => (
+                  <div key={criterion.id} className="bg-secondary/30 border border-border rounded-xl px-4 py-3 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-sm">{criterion.title}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${RISK_COLORS[criterion.riskLevel] || ""}`}>
+                        {t(`assessment.risk${criterion.riskLevel.charAt(0).toUpperCase() + criterion.riskLevel.slice(1)}`)}
+                      </span>
+                    </div>
+
+                    {criterion.guidance && (
+                      <div>
+                        <p className="section-label mb-1">{t("assessment.guidance")}</p>
+                        <p className="text-xs text-muted-foreground">{criterion.guidance}</p>
+                      </div>
+                    )}
+
+                    {criterion.remediation && (
+                      <div>
+                        <p className="section-label mb-1">{t("assessment.remediation")}</p>
+                        <p className="text-xs text-muted-foreground">{criterion.remediation}</p>
+                      </div>
+                    )}
+
+                    {criterion.evidenceRequired && (
+                      <div>
+                        <p className="section-label mb-1">{t("assessment.evidenceRequired")}</p>
+                        <p className="text-xs text-muted-foreground">{criterion.evidenceRequired}</p>
+                      </div>
+                    )}
+
+                    {criterion.scoringOptions && criterion.scoringOptions.length > 0 && (
+                      <div>
+                        <p className="section-label mb-1">{t("assessment.scoringOptions")}</p>
+                        <div className="space-y-1">
+                          {criterion.scoringOptions.map((opt) => (
+                            <div key={opt.id} className="flex items-center gap-2 text-xs">
+                              <span className="font-mono w-8 text-right text-primary">{opt.score}</span>
+                              <span className="font-medium">{opt.label}</span>
+                              <span className="text-muted-foreground">— {opt.description}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
