@@ -7,10 +7,9 @@ interface LandingHeaderProps {
   t: (key: string) => string;
   locale: "en" | "es";
   onLocaleToggle: () => void;
-  onSignup: () => void;
 }
 
-export default function LandingHeader({ t, locale, onLocaleToggle, onSignup }: LandingHeaderProps) {
+export default function LandingHeader({ t, locale, onLocaleToggle }: LandingHeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const closeMenu = () => setIsMenuOpen(false);
 
@@ -35,9 +34,9 @@ export default function LandingHeader({ t, locale, onLocaleToggle, onSignup }: L
               <Globe className="w-4 h-4" />
               {locale === "en" ? "ES" : "EN"}
             </button>
-            <button onClick={onSignup} className="btn-primary text-sm py-2 px-4">
+            <a href="/sign-in" className="btn-primary text-sm py-2 px-4 inline-flex items-center">
               {t("header.cta")}
-            </button>
+            </a>
           </div>
 
           <button className="md:hidden p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}>
@@ -55,12 +54,9 @@ export default function LandingHeader({ t, locale, onLocaleToggle, onSignup }: L
                 <Globe className="w-4 h-4" />
                 {locale === "en" ? "Espa\u00f1ol" : "English"}
               </button>
-              <button
-                onClick={() => { onSignup(); closeMenu(); }}
-                className="btn-primary text-sm py-2 px-4"
-              >
+              <a href="/sign-in" className="btn-primary text-sm py-2 px-4 inline-flex items-center">
                 {t("header.cta")}
-              </button>
+              </a>
             </div>
           </div>
         )}
