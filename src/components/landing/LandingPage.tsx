@@ -119,7 +119,6 @@ export default function LandingPage() {
         t={t}
         locale={locale}
         onLocaleToggle={toggleLocale}
-        onSignup={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       />
       <LandingContent
         t={t}
