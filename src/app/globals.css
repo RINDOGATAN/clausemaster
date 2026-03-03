@@ -143,6 +143,12 @@
 }
 
 @layer components {
+  /* Centered container — matches startups.todo.law (1400px max) */
+  .container {
+    @apply mx-auto w-full;
+    max-width: 1400px;
+  }
+
   /* Button variants */
   .btn-brutal {
     @apply bg-[#f5a623] text-[#1a1a1a] font-semibold px-6 py-3 rounded-full;
