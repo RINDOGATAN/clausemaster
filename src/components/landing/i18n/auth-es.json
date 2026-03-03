@@ -1,0 +1,12 @@
+{
+  "sent.heading": "Revisa tu bandeja de entrada",
+  "sent.desc": "Enviamos un enlace de inicio de sesi\u00f3n a",
+  "sent.action": "Haz clic en el enlace del email para continuar.",
+  "sent.resend": "\u00bfNo lo recibiste? Reenviar",
+  "login.heading": "Bienvenido de vuelta",
+  "login.subtitle": "Inicia sesi\u00f3n para continuar.",
+  "login.magicLink": "Enviar enlace m\u00e1gico",
+  "login.newHere": "\u00bfNuevo aqu\u00ed? Reg\u00edstrate",
+  "or": "o",
+  "continueWithGoogle": "Continuar con Google"
+}
