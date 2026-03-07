@@ -63,11 +63,22 @@ npx prisma studio    # Open Prisma Studio
 
 Clausemaster is a **standalone** project that connects to Deal Room (`deal-room-todo`) in one direction:
 
-- **Clausemaster reads** the `legalskills/` repo to use as reference context during analysis (knowledge/loader.ts)
+- **Clausemaster reads** the private `RINDOGATAN/legalskills` repo as reference context during analysis (knowledge/loader.ts)
 - **Clausemaster writes** skill drafts that can be exported to `legalskills/` for Deal Room to consume
 - **Clausemaster NEVER modifies** `deal-room-todo` files, database, or configuration
 - Both share the same Neon PostgreSQL cluster but use **separate schemas** (`clausemaster` vs Deal Room's default)
 - Auth cookie domain is `.todo.law` (shared SSO across `clausemaster.todo.law` and `dealroom.todo.law`)
+
+### LegalSkills Integration
+- **Repo**: `RINDOGATAN/legalskills` (private, premium skills with `manifest.json`)
+- **Local path**: `../legalskills` (override via `LEGALSKILLS_DIR` env var)
+- **INPUT**: `loader.ts` reads metadata/clauses and handles both flat strings and i18n objects
+- **OUTPUT**: `skill-generator.ts` outputs Deal Room's i18n format:
+  - `pros: { partyA: { en: [...] } }` / `cons: { partyA: { en: [...] } }` (nested, not flat `prosPartyA`)
+  - `bias: { partyA: 0.4 }` (nested, not flat `biasPartyA`)
+  - `category: { en: "Term" }` (i18n object, not flat string)
+  - `metadata.json` includes `languages`, `jurisdictions`, `soloModeSupported`
+  - `boilerplate.json` wraps all text fields in i18n objects
 
 When working in this project, do not touch anything in `/Users/sme/NEL/deal-room-todo`.
 

@@ -3,18 +3,24 @@ import { join } from "path";
 
 const LEGALSKILLS_DIR = process.env.LEGALSKILLS_DIR || "../legalskills";
 
+type I18nString = string | Record<string, string>;
+
 interface SkillMetadata {
   contractType: string;
-  displayName: string;
-  description: string;
+  displayName: I18nString;
+  description: I18nString;
+  category?: I18nString;
   version: string;
   clauseCount?: number;
+  languages?: string[];
+  jurisdictions?: string[];
+  soloModeSupported?: boolean;
 }
 
 interface SkillClause {
   id: string;
   title: { en: string; es?: string };
-  category: string;
+  category: I18nString;
   order: number;
   plainDescription?: { en: string; es?: string };
 }
@@ -26,13 +32,44 @@ interface SkillContext {
   clauses: SkillClause[];
 }
 
+/** Resolve a possibly-localized string to a plain string (prefers English). */
+function resolveStr(val: I18nString | undefined, fallback = ""): string {
+  if (!val) return fallback;
+  if (typeof val === "string") return val;
+  return val.en || val.es || Object.values(val)[0] || fallback;
+}
+
 // Map contract types to legalskills directory names
 const CONTRACT_TYPE_MAP: Record<string, string> = {
   FOUNDERS: "founders-agreement",
-  "FOUNDERS_AGREEMENT": "founders-agreement",
+  FOUNDERS_AGREEMENT: "founders-agreement",
   SAFE: "safe-agreement",
-  "SAFE_AGREEMENT": "safe-agreement",
+  SAFE_AGREEMENT: "safe-agreement",
   PACTO_SOCIOS: "pacto-socios",
+  SHAREHOLDERS: "shareholders-agreement",
+  SHAREHOLDERS_AGREEMENT: "shareholders-agreement",
+  CONSULTING: "consulting-agreement",
+  CONSULTING_AGREEMENT: "consulting-agreement",
+  EMPLOYMENT: "employment-agreement",
+  EMPLOYMENT_AGREEMENT: "employment-agreement",
+  IP_ASSIGNMENT: "ip-assignment",
+  CONVERTIBLE_NOTE: "convertible-note",
+  TERM_SHEET: "term-sheet",
+  SEED_INVESTMENT: "seed-investment",
+  DATA_LICENSING: "data-licensing",
+  PHANTOM_SHARES: "phantom-shares-plan",
+  PHANTOM_SHARES_PLAN: "phantom-shares-plan",
+  PHANTOM_SHARES_GRANT: "phantom-shares-grant",
+  ADVERTISING_IO: "advertising-io",
+  AFFILIATE_PROGRAM: "affiliate-program",
+  INFLUENCER_MARKETING: "influencer-marketing",
+  WHITE_LABEL: "white-label-reseller",
+  WHITE_LABEL_RESELLER: "white-label-reseller",
+  ACTA_CONSEJO: "acta-consejo",
+  ACTA_JUNTA: "acta-junta",
+  CESION_PI: "cesion-pi",
+  CONTRATO_LABORAL: "contrato-laboral",
+  CONTRATO_SERVICIOS: "contrato-servicios",
 };
 
 export async function getAvailableSkills(): Promise<string[]> {
@@ -89,6 +126,8 @@ export async function loadSkillContext(contractType: string): Promise<SkillConte
     return null;
   }
 }
+
+export { resolveStr };
 
 function resolveSkillsDir(): string {
   const dir = LEGALSKILLS_DIR;

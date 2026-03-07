@@ -192,6 +192,7 @@ async function runClauseExtraction(
     model,
     schema: clauseExtractionSchema,
     prompt,
+    maxTokens: 16384,
   });
   return result.object;
 }
@@ -213,6 +214,7 @@ async function runIssueFlagging(
     model,
     schema: issueFlaggingSchema,
     prompt,
+    maxTokens: 8192,
   });
   return result.object;
 }
