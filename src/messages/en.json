@@ -161,7 +161,8 @@
     "saving": "Saving...",
     "keySaved": "API key saved successfully",
     "encryptionNotice": "Your key is encrypted at rest using AES-256-GCM and never exposed in plain text.",
-    "getApiKey": "Get an API key from Anthropic Console"
+    "getApiKey": "Get an API key from Anthropic Console",
+    "skipForNow": "Set up my account first"
   },
   "settings": {
     "title": "Settings",

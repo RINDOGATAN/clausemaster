@@ -161,7 +161,8 @@
     "saving": "Guardando...",
     "keySaved": "Clave API guardada exitosamente",
     "encryptionNotice": "Tu clave se cifra en reposo con AES-256-GCM y nunca se expone en texto plano.",
-    "getApiKey": "Obtener una clave API en Anthropic Console"
+    "getApiKey": "Obtener una clave API en Anthropic Console",
+    "skipForNow": "Configurar mi cuenta primero"
   },
   "settings": {
     "title": "Configuracion",
