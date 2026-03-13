@@ -150,7 +150,7 @@ export function buildOptionGenerationPrompt(
     `${i + 1}. "${c.title}" (${c.category || "General"}) — ${c.summary}\n   Bias: ${c.biasAssessment}\n   Original: ${c.originalText.slice(0, 300)}...`
   ).join("\n\n");
 
-  return `You are a legal negotiation expert specializing in two-party deal room software. Your task is to transform an analyzed contract into negotiation clauses with multiple options for a Deal Room platform.
+  return `You are a legal negotiation expert specializing in two-party deal room software. Your task is to transform an analyzed contract into negotiation clauses with multiple options for a Dealroom platform.
 
 CONTEXT:
 - Contract Type: ${classification.contractTypeLabel} (${classification.contractType})
@@ -275,7 +275,7 @@ export function buildBoilerplateGenerationPrompt(
 
   const docType = isSolo ? "document" : "contract";
 
-  return `You are a legal document architect. Generate the boilerplate framework for a ${docType} template that will be used in a ${isSolo ? "document builder" : "Deal Room negotiation"} platform.
+  return `You are a legal document architect. Generate the boilerplate framework for a ${docType} template that will be used in a ${isSolo ? "document builder" : "Dealroom negotiation"} platform.
 
 ${isSolo ? "DOCUMENT" : "CONTRACT"} DETAILS:
 - Type: ${classification.contractTypeLabel} (${classification.contractType})

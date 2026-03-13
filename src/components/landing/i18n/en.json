@@ -19,7 +19,7 @@
   "value.v2.title": "AI does the heavy lifting",
   "value.v2.desc": "Upload a contract or assessment template and our AI extracts clauses, generates negotiation options, and structures everything into a production-ready skill.",
   "value.v3.title": "Reach the entire marketplace",
-  "value.v3.desc": "Your skills automatically route to the right product \u2014 Deal Room for contracts, DPO Central for privacy, AI Sentinel for AI governance \u2014 multiplying your reach.",
+  "value.v3.desc": "Your skills automatically route to the right product \u2014 Dealroom for contracts, DPO Central for privacy, AI Sentinel for AI governance \u2014 multiplying your reach.",
   "value.v4.title": "Quality you control",
   "value.v4.desc": "Review every AI-generated option before publishing. Edit clause text, adjust bias ratings, refine legal context. You stay in command of the final product.",
 
@@ -59,7 +59,7 @@
   "revenue.heading.prefix": "Earn ",
   "revenue.heading.accent": "70%",
   "revenue.heading.suffix": " of every transaction",
-  "revenue.desc": "Every time a client uses your skill on any TODO.LAW product \u2014 whether they\u2019re negotiating a contract on Deal Room, running a GDPR assessment on DPO Central, or evaluating AI governance on AI Sentinel \u2014 you earn 70% of the transaction fee.",
+  "revenue.desc": "Every time a client uses your skill on any TODO.LAW product \u2014 whether they\u2019re negotiating a contract on Dealroom, running a GDPR assessment on DPO Central, or evaluating AI governance on AI Sentinel \u2014 you earn 70% of the transaction fee.",
   "revenue.stat1.value": "70%",
   "revenue.stat1.label": "Revenue to publisher",
   "revenue.stat2.value": "30%",
@@ -83,8 +83,8 @@
 
   "feat.multi.title": "Multi-Product Marketplace",
   "feat.multi.headline": "One skill, three products.",
-  "feat.multi.desc": "Skills are automatically routed to the right TODO.LAW product based on their type. Contract skills power Deal Room negotiations, privacy assessments drive DPO Central, AI governance feeds AI Sentinel.",
-  "feat.multi.h1": "Deal Room \u2014 contract negotiation",
+  "feat.multi.desc": "Skills are automatically routed to the right TODO.LAW product based on their type. Contract skills power Dealroom negotiations, privacy assessments drive DPO Central, AI governance feeds AI Sentinel.",
+  "feat.multi.h1": "Dealroom \u2014 contract negotiation",
   "feat.multi.h2": "DPO Central \u2014 privacy compliance",
   "feat.multi.h3": "AI Sentinel \u2014 AI governance",
   "feat.multi.h4": "Automatic destination routing",

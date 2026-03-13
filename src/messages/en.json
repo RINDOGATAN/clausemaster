@@ -222,14 +222,14 @@
     "welcomeClient": "Welcome! Your account is ready."
   },
   "skillDraft": {
-    "generateSkill": "Generate Deal Room Skill",
+    "generateSkill": "Generate Dealroom Skill",
     "generateForMarketplace": "Generate Skill for Marketplace",
     "viewSkillDraft": "View Skill Draft",
     "generatingSkill": "Generating skill...",
     "retryGeneration": "Retry",
     "generationFailed": "Skill generation failed",
     "skillDraftReview": "Skill Draft Review",
-    "reviewDescription": "Review and edit the generated skill before exporting to Deal Room",
+    "reviewDescription": "Review and edit the generated skill before exporting to Dealroom",
     "status": {
       "GENERATING": "Generating",
       "REVIEW": "Ready for Review",
@@ -298,7 +298,7 @@
       "templateFamily": "Template Family"
     },
     "export": {
-      "exportToDealRoom": "Export to Deal Room",
+      "exportToDealRoom": "Export to Dealroom",
       "exporting": "Exporting...",
       "exported": "Exported successfully",
       "exportedTo": "Exported to: {path}",
@@ -309,7 +309,7 @@
       "assessment": "Assessment"
     },
     "destination": {
-      "DEAL_ROOM": "Deal Room",
+      "DEAL_ROOM": "Dealroom",
       "DPO_CENTRAL": "DPO Central",
       "AI_SENTINEL": "AI Sentinel"
     },

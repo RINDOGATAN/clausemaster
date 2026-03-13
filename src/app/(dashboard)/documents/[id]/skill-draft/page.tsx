@@ -140,7 +140,7 @@ interface GuidanceJson {
 }
 
 const DESTINATION_LABELS: Record<string, string> = {
-  DEAL_ROOM: "Deal Room",
+  DEAL_ROOM: "Dealroom",
   DPO_CENTRAL: "DPO Central",
   AI_SENTINEL: "AI Sentinel",
 };
@@ -518,7 +518,7 @@ export default function SkillDraftPage() {
             </button>
           )}
 
-          {/* INTERNAL: Export to Deal Room */}
+          {/* INTERNAL: Export to Dealroom */}
           {userRole === "INTERNAL" && (
             <button
               onClick={() => exportMutation.mutate({ skillDraftId: draft.id })}

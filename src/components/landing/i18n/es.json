@@ -19,7 +19,7 @@
   "value.v2.title": "La IA hace el trabajo pesado",
   "value.v2.desc": "Sube un contrato o plantilla de evaluaci\u00f3n y nuestra IA extrae cl\u00e1usulas, genera opciones de negociaci\u00f3n y lo estructura todo en un skill listo para producci\u00f3n.",
   "value.v3.title": "Llega a todo el marketplace",
-  "value.v3.desc": "Tus skills se enrutan autom\u00e1ticamente al producto correcto \u2014 Deal Room para contratos, DPO Central para privacidad, AI Sentinel para gobernanza IA \u2014 multiplicando tu alcance.",
+  "value.v3.desc": "Tus skills se enrutan autom\u00e1ticamente al producto correcto \u2014 Dealroom para contratos, DPO Central para privacidad, AI Sentinel para gobernanza IA \u2014 multiplicando tu alcance.",
   "value.v4.title": "Calidad que t\u00fa controlas",
   "value.v4.desc": "Revisa cada opci\u00f3n generada por IA antes de publicar. Edita el texto de cl\u00e1usulas, ajusta valoraciones de sesgo, refina el contexto legal. T\u00fa mandas sobre el producto final.",
 
@@ -59,7 +59,7 @@
   "revenue.heading.prefix": "Gana el ",
   "revenue.heading.accent": "70%",
   "revenue.heading.suffix": " de cada transacci\u00f3n",
-  "revenue.desc": "Cada vez que un cliente usa tu skill en cualquier producto de TODO.LAW \u2014 ya sea negociando un contrato en Deal Room, ejecutando una evaluaci\u00f3n RGPD en DPO Central, o evaluando gobernanza IA en AI Sentinel \u2014 ganas el 70% de la tarifa.",
+  "revenue.desc": "Cada vez que un cliente usa tu skill en cualquier producto de TODO.LAW \u2014 ya sea negociando un contrato en Dealroom, ejecutando una evaluaci\u00f3n RGPD en DPO Central, o evaluando gobernanza IA en AI Sentinel \u2014 ganas el 70% de la tarifa.",
   "revenue.stat1.value": "70%",
   "revenue.stat1.label": "Ingresos para el publicador",
   "revenue.stat2.value": "30%",
@@ -83,8 +83,8 @@
 
   "feat.multi.title": "Marketplace Multi-Producto",
   "feat.multi.headline": "Un skill, tres productos.",
-  "feat.multi.desc": "Los skills se enrutan autom\u00e1ticamente al producto TODO.LAW adecuado seg\u00fan su tipo. Los skills de contrato alimentan Deal Room, las evaluaciones de privacidad van a DPO Central, la gobernanza IA a AI Sentinel.",
-  "feat.multi.h1": "Deal Room \u2014 negociaci\u00f3n de contratos",
+  "feat.multi.desc": "Los skills se enrutan autom\u00e1ticamente al producto TODO.LAW adecuado seg\u00fan su tipo. Los skills de contrato alimentan Dealroom, las evaluaciones de privacidad van a DPO Central, la gobernanza IA a AI Sentinel.",
+  "feat.multi.h1": "Dealroom \u2014 negociaci\u00f3n de contratos",
   "feat.multi.h2": "DPO Central \u2014 cumplimiento de privacidad",
   "feat.multi.h3": "AI Sentinel \u2014 gobernanza IA",
   "feat.multi.h4": "Enrutamiento autom\u00e1tico de destino",
