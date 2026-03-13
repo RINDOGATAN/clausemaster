@@ -16,7 +16,9 @@ Each issue is categorized by severity (Info / Warning / Critical) with actionabl
 
 - **File support** — PDF, DOCX, and TXT uploads (max 10MB)
 - **LegalSkills integration** — Uses reference skill data to improve clause matching and gap detection
-- **Skill draft generation** — Generates Deal Room-compatible skill drafts from analyzed contracts
+- **Skill draft generation** — Generates Dealroom-compatible skill drafts from analyzed contracts
+- **Revenue share** — Publishers connect Stripe to earn 70% of subscription revenue from their skills (see [docs/publisher-revenue-share.md](docs/publisher-revenue-share.md))
+- **Multi-platform export** — Skills can target Dealroom, DPO Central, or AI Sentinel
 - **Internationalization** — English and Spanish (EN/ES)
 - **Auth** — Magic link email and Google OAuth sign-in, with optional invite code gating
 
@@ -68,6 +70,7 @@ RESEND_API_KEY=...
 EMAIL_FROM=noreply@yourdomain.com
 INVITE_CODE=...
 LEGALSKILLS_DIR=../legalskills
+STRIPE_SECRET_KEY=sk_test_...  # Required for publisher revenue share
 ```
 
 Push the database schema and start the dev server:

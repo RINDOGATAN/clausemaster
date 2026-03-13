@@ -188,21 +188,21 @@
     "website": "Sitio Web",
     "profileSaved": "Perfil de publicador guardado",
     "stripeConnect": "Reparto de Ingresos",
-    "stripeConnectDescription": "Conecta tu cuenta de Stripe para recibir el reparto de ingresos de tus skills publicados. Recibes el 70% de los ingresos por suscripcion de los skills que creas.",
+    "stripeConnectDescription": "Conecta tu cuenta de Stripe para recibir el reparto de ingresos de tus skills publicados. Recibes el 70% de los ingresos por suscripción de los skills que creas.",
     "stripeConnectAction": "Conectar Cuenta de Stripe",
     "stripeConnecting": "Conectando...",
     "stripeConnected": "Cuenta de Stripe Conectada",
-    "stripeConnectedDescription": "Tu cuenta esta configurada para recibir pagos de reparto de ingresos de tus skills publicados.",
-    "stripeIncomplete": "Configuracion Incompleta",
-    "stripeIncompleteDescription": "Tu cuenta de Stripe fue creada pero la configuracion no esta completa. Por favor finaliza el proceso.",
-    "stripeCompleteSetup": "Completar Configuracion",
+    "stripeConnectedDescription": "Tu cuenta está configurada para recibir pagos de reparto de ingresos de tus skills publicados.",
+    "stripeIncomplete": "Configuración Incompleta",
+    "stripeIncompleteDescription": "Tu cuenta de Stripe fue creada pero la configuración no está completa. Por favor finaliza el proceso.",
+    "stripeCompleteSetup": "Completar Configuración",
     "stripeDisconnect": "Desconectar cuenta de Stripe",
-    "stripeDisconnectConfirm": "Estas seguro/a? Dejaras de recibir pagos de reparto de ingresos hasta que te reconectes.",
+    "stripeDisconnectConfirm": "¿Estás seguro/a? Dejarás de recibir pagos de reparto de ingresos hasta que te reconectes.",
     "stripeDisconnectAction": "Desconectar",
     "stripeDisconnected": "Cuenta de Stripe desconectada",
-    "stripeReturnSuccess": "Configuracion de Stripe completa. El estado de tu cuenta se actualizara en breve.",
-    "stripeRefreshNotice": "El enlace de configuracion expiro. Por favor intenta de nuevo.",
-    "stripeConnectFooter": "El reparto de ingresos es del 70% para el autor/a del skill. Los pagos se procesan a traves de Stripe Connect Express.",
+    "stripeReturnSuccess": "Configuración de Stripe completa. El estado de tu cuenta se actualizará en breve.",
+    "stripeRefreshNotice": "El enlace de configuración expiró. Por favor intenta de nuevo.",
+    "stripeConnectFooter": "El reparto de ingresos es del 70% para el autor/a del skill. Los pagos se procesan a través de Stripe Connect Express.",
     "cancel": "Cancelar"
   },
   "onboarding": {
@@ -222,14 +222,14 @@
     "welcomeClient": "Bienvenido! Tu cuenta esta lista."
   },
   "skillDraft": {
-    "generateSkill": "Generar Skill para Deal Room",
+    "generateSkill": "Generar Skill para Dealroom",
     "generateForMarketplace": "Generar Skill para Marketplace",
     "viewSkillDraft": "Ver Borrador de Skill",
     "generatingSkill": "Generando skill...",
     "retryGeneration": "Reintentar",
     "generationFailed": "Fallo la generacion del skill",
     "skillDraftReview": "Revision del Borrador de Skill",
-    "reviewDescription": "Revisa y edita el skill generado antes de exportar a Deal Room",
+    "reviewDescription": "Revisa y edita el skill generado antes de exportar a Dealroom",
     "status": {
       "GENERATING": "Generando",
       "REVIEW": "Listo para Revision",
@@ -298,7 +298,7 @@
       "templateFamily": "Familia de Plantilla"
     },
     "export": {
-      "exportToDealRoom": "Exportar a Deal Room",
+      "exportToDealRoom": "Exportar a Dealroom",
       "exporting": "Exportando...",
       "exported": "Exportado exitosamente",
       "exportedTo": "Exportado a: {path}",
@@ -309,7 +309,7 @@
       "assessment": "Evaluacion"
     },
     "destination": {
-      "DEAL_ROOM": "Deal Room",
+      "DEAL_ROOM": "Dealroom",
       "DPO_CENTRAL": "DPO Central",
       "AI_SENTINEL": "AI Sentinel"
     },

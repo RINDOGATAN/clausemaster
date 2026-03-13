@@ -59,21 +59,21 @@ npx prisma studio    # Open Prisma Studio
 - `LEGALSKILLS_DIR` - Path to legalskills repo (defaults to `../legalskills`)
 - `INVITE_CODE` - Optional invite code to gate the sign-in page (unset = open access)
 
-## Relationship with Deal Room
+## Relationship with Dealroom
 
-Clausemaster is a **standalone** project that connects to Deal Room (`deal-room-todo`) in one direction:
+Clausemaster is a **standalone** project that connects to Dealroom (`deal-room-todo`) in one direction:
 
 - **Clausemaster reads** the private `RINDOGATAN/legalskills` repo as reference context during analysis (knowledge/loader.ts)
-- **Clausemaster writes** skill drafts that can be exported to `legalskills/` for Deal Room to consume
+- **Clausemaster writes** skill drafts that can be exported to `legalskills/` for Dealroom to consume
 - **Clausemaster NEVER modifies** `deal-room-todo` files, database, or configuration
-- Both share the same Neon PostgreSQL cluster but use **separate schemas** (`clausemaster` vs Deal Room's default)
+- Both share the same Neon PostgreSQL cluster but use **separate schemas** (`clausemaster` vs Dealroom's default)
 - Auth cookie domain is `.todo.law` (shared SSO across `clausemaster.todo.law` and `dealroom.todo.law`)
 
 ### LegalSkills Integration
 - **Repo**: `RINDOGATAN/legalskills` (private, premium skills with `manifest.json`)
 - **Local path**: `../legalskills` (override via `LEGALSKILLS_DIR` env var)
 - **INPUT**: `loader.ts` reads metadata/clauses and handles both flat strings and i18n objects
-- **OUTPUT**: `skill-generator.ts` outputs Deal Room's i18n format:
+- **OUTPUT**: `skill-generator.ts` outputs Dealroom's i18n format:
   - `pros: { partyA: { en: [...] } }` / `cons: { partyA: { en: [...] } }` (nested, not flat `prosPartyA`)
   - `bias: { partyA: 0.4 }` (nested, not flat `biasPartyA`)
   - `category: { en: "Term" }` (i18n object, not flat string)

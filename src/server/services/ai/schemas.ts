@@ -46,7 +46,7 @@ export const issueFlaggingSchema = z.object({
 
 export type IssueFlaggingResult = z.infer<typeof issueFlaggingSchema>;
 
-// Step 4: Option generation schema (for Deal Room skill generation)
+// Step 4: Option generation schema (for Dealroom skill generation)
 export const optionGenerationSchema = z.object({
   clauses: z.array(z.object({
     id: z.string().describe("Slug identifier for the clause, e.g. 'data-retention' or 'equity-split'"),
@@ -100,7 +100,7 @@ export const soloOptionGenerationSchema = z.object({
 
 export type SoloOptionGenerationResult = z.infer<typeof soloOptionGenerationSchema>;
 
-// Step 5: Boilerplate generation schema (for Deal Room skill generation)
+// Step 5: Boilerplate generation schema (for Dealroom skill generation)
 export const boilerplateGenerationSchema = z.object({
   contractTitle: z.string().describe("Contract title in ALL CAPS, e.g. 'DATA PROCESSING AGREEMENT'"),
   preamble: z.string().describe("Opening paragraph with placeholders: {effectiveDate}, {partyAName}, {partyBName}, {partyAAddress}, {partyBAddress}"),
