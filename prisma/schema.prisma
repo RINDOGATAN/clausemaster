@@ -67,8 +67,13 @@ model PublisherProfile {
   bio         String?  @db.Text
   specialties String[]
   website     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+
+  // Stripe Connect (revenue share for published skills)
+  stripeConnectAccountId String?
+  stripeConnectComplete  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

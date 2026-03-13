@@ -8,6 +8,30 @@ export async function exportSkillDraft(
 ): Promise<string> {
   const draft = await prisma.skillDraft.findUnique({
     where: { id: skillDraftId },
+    include: {
+      analysis: {
+        include: {
+          document: {
+            select: {
+              userId: true,
+              user: {
+                select: {
+                  email: true,
+                  name: true,
+                  publisherProfile: {
+                    select: {
+                      firmName: true,
+                      stripeConnectAccountId: true,
+                      stripeConnectComplete: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   });
 
   if (!draft) {
@@ -28,6 +52,21 @@ export async function exportSkillDraft(
     if (!draft.clausesJson || !draft.boilerplateJson || !draft.metadataJson || !draft.manifestJson) {
       throw new Error("Skill draft is missing required data");
     }
+  }
+
+  // Enrich manifest with publisher info for downstream platforms (Dealroom, DPO Central, AI Sentinel)
+  const publisher = draft.analysis?.document?.user;
+  const profile = publisher?.publisherProfile;
+  const manifestData = draft.manifestJson as Record<string, unknown> | null;
+
+  if (manifestData && publisher) {
+    manifestData.author = {
+      name: profile?.firmName || publisher.name || "Unknown",
+      email: publisher.email,
+      ...(profile?.stripeConnectAccountId && profile.stripeConnectComplete
+        ? { stripeConnectAccountId: profile.stripeConnectAccountId }
+        : {}),
+    };
   }
 
   const baseDir = outputDir || process.env.LEGALSKILLS_DIR || "../legalskills";

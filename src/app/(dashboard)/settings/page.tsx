@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
-import { Key, Shield, Trash2, Loader2, ExternalLink, Briefcase } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Key, Shield, Trash2, Loader2, ExternalLink, Briefcase, CreditCard, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 
@@ -189,6 +190,140 @@ export default function SettingsPage() {
 
       {/* Publisher Profile Section */}
       {isPublisher && <PublisherProfileSection />}
+
+      {/* Stripe Connect Section */}
+      {isPublisher && <StripeConnectSection />}
+    </div>
+  );
+}
+
+function StripeConnectSection() {
+  const t = useTranslations("settings");
+  const utils = trpc.useUtils();
+  const searchParams = useSearchParams();
+
+  const { data: connectStatus, isLoading } = trpc.user.getStripeConnectStatus.useQuery();
+
+  const createLink = trpc.user.createConnectOnboardingLink.useMutation({
+    onSuccess: (data) => {
+      window.location.href = data.url;
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const disconnect = trpc.user.disconnectStripeConnect.useMutation({
+    onSuccess: () => {
+      toast.success(t("stripeDisconnected"));
+      utils.user.getStripeConnectStatus.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
+
+  // Show toast on return from Stripe
+  useEffect(() => {
+    const stripeParam = searchParams.get("stripe");
+    if (stripeParam === "connected") {
+      utils.user.getStripeConnectStatus.invalidate();
+      toast.success(t("stripeReturnSuccess"));
+    } else if (stripeParam === "refresh") {
+      toast.info(t("stripeRefreshNotice"));
+    }
+  }, [searchParams, t, utils]);
+
+  if (isLoading) return null;
+  if (!connectStatus?.available) return null;
+
+  return (
+    <div className="card-brutal bg-card border border-border rounded-2xl p-6 shadow-card mt-6">
+      <div className="flex items-center gap-3 mb-4">
+        <CreditCard className="w-5 h-5 text-primary" />
+        <h2 className="text-lg font-semibold text-foreground">{t("stripeConnect")}</h2>
+      </div>
+
+      <p className="text-sm text-muted-foreground mb-4">{t("stripeConnectDescription")}</p>
+
+      {connectStatus.connected && connectStatus.complete ? (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 p-4 bg-green-500/5 border border-green-500/20 rounded-xl">
+            <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-foreground">{t("stripeConnected")}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("stripeConnectedDescription")}</p>
+            </div>
+          </div>
+
+          {!showDisconnectConfirm ? (
+            <button
+              onClick={() => setShowDisconnectConfirm(true)}
+              className="text-sm text-muted-foreground hover:text-destructive transition-colors"
+            >
+              {t("stripeDisconnect")}
+            </button>
+          ) : (
+            <div className="p-4 bg-destructive/5 border border-destructive/20 rounded-xl space-y-3">
+              <p className="text-sm text-foreground">{t("stripeDisconnectConfirm")}</p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => disconnect.mutate()}
+                  disabled={disconnect.isPending}
+                  className="px-4 py-2 text-sm font-medium bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 disabled:opacity-50 transition-colors"
+                >
+                  {disconnect.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t("stripeDisconnectAction")}
+                </button>
+                <button
+                  onClick={() => setShowDisconnectConfirm(false)}
+                  className="px-4 py-2 text-sm font-medium bg-secondary text-foreground rounded-lg hover:bg-secondary/80 transition-colors"
+                >
+                  {t("cancel")}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : connectStatus.connected && !connectStatus.complete ? (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl">
+            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-foreground">{t("stripeIncomplete")}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("stripeIncompleteDescription")}</p>
+            </div>
+          </div>
+          <button
+            onClick={() => createLink.mutate()}
+            disabled={createLink.isPending}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
+          >
+            {createLink.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t("stripeCompleteSetup")}
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => createLink.mutate()}
+          disabled={createLink.isPending}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
+        >
+          {createLink.isPending ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              {t("stripeConnecting")}
+            </>
+          ) : (
+            <>
+              <CreditCard className="w-4 h-4" />
+              {t("stripeConnectAction")}
+            </>
+          )}
+        </button>
+      )}
+
+      <p className="text-xs text-muted-foreground mt-4">{t("stripeConnectFooter")}</p>
     </div>
   );
 }
