@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Key, ExternalLink, Loader2 } from "lucide-react";
+import { Key, ExternalLink, Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 
@@ -83,6 +84,13 @@ export default function SetupPage() {
               {t("getApiKey")}
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
+            <Link
+              href="/settings"
+              className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {t("skipForNow")}
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
         </div>
       </div>
