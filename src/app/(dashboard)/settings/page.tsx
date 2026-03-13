@@ -199,6 +199,7 @@ export default function SettingsPage() {
 
 function StripeConnectSection() {
   const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
   const utils = trpc.useUtils();
   const searchParams = useSearchParams();
 
@@ -225,14 +226,16 @@ function StripeConnectSection() {
 
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
 
-  // Show toast on return from Stripe
+  // Show toast on return from Stripe (once only — clean URL after)
   useEffect(() => {
     const stripeParam = searchParams.get("stripe");
     if (stripeParam === "connected") {
       utils.user.getStripeConnectStatus.invalidate();
       toast.success(t("stripeReturnSuccess"));
+      window.history.replaceState({}, "", "/settings");
     } else if (stripeParam === "refresh") {
       toast.info(t("stripeRefreshNotice"));
+      window.history.replaceState({}, "", "/settings");
     }
   }, [searchParams, t, utils]);
 
@@ -280,7 +283,7 @@ function StripeConnectSection() {
                   onClick={() => setShowDisconnectConfirm(false)}
                   className="px-4 py-2 text-sm font-medium bg-secondary text-foreground rounded-lg hover:bg-secondary/80 transition-colors"
                 >
-                  {t("cancel")}
+                  {tCommon("cancel")}
                 </button>
               </div>
             </div>
@@ -323,7 +326,15 @@ function StripeConnectSection() {
         </button>
       )}
 
-      <p className="text-xs text-muted-foreground mt-4">{t("stripeConnectFooter")}</p>
+      <div className="flex items-center justify-between mt-4">
+        <p className="text-xs text-muted-foreground">{t("stripeConnectFooter")}</p>
+        <a
+          href="/docs/revenue-share"
+          className="text-xs text-primary hover:underline flex-shrink-0 ml-4"
+        >
+          {t("stripeLearnMore")}
+        </a>
+      </div>
     </div>
   );
 }

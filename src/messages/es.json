@@ -188,11 +188,11 @@
     "website": "Sitio Web",
     "profileSaved": "Perfil de publicador guardado",
     "stripeConnect": "Reparto de Ingresos",
-    "stripeConnectDescription": "Conecta tu cuenta de Stripe para recibir el reparto de ingresos de tus skills publicados. Recibes el 70% de los ingresos por suscripción de los skills que creas.",
+    "stripeConnectDescription": "Configura tu cuenta de Stripe para recibir el reparto de ingresos cuando tus skills se publiquen. Recibes el 70% de los ingresos por suscripción de cada skill que creas.",
     "stripeConnectAction": "Conectar Cuenta de Stripe",
     "stripeConnecting": "Conectando...",
     "stripeConnected": "Cuenta de Stripe Conectada",
-    "stripeConnectedDescription": "Tu cuenta está configurada para recibir pagos de reparto de ingresos de tus skills publicados.",
+    "stripeConnectedDescription": "Todo listo para generar ingresos. Sube un contrato para crear tu primer skill, o ve a Mis Documentos para empezar.",
     "stripeIncomplete": "Configuración Incompleta",
     "stripeIncompleteDescription": "Tu cuenta de Stripe fue creada pero la configuración no está completa. Por favor finaliza el proceso.",
     "stripeCompleteSetup": "Completar Configuración",
@@ -203,7 +203,7 @@
     "stripeReturnSuccess": "Configuración de Stripe completa. El estado de tu cuenta se actualizará en breve.",
     "stripeRefreshNotice": "El enlace de configuración expiró. Por favor intenta de nuevo.",
     "stripeConnectFooter": "El reparto de ingresos es del 70% para el autor/a del skill. Los pagos se procesan a través de Stripe Connect Express.",
-    "cancel": "Cancelar"
+    "stripeLearnMore": "Saber más"
   },
   "onboarding": {
     "title": "Bienvenido a Clausemaster",

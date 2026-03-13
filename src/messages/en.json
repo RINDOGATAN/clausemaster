@@ -188,11 +188,11 @@
     "website": "Website",
     "profileSaved": "Publisher profile saved",
     "stripeConnect": "Revenue Share",
-    "stripeConnectDescription": "Connect your Stripe account to receive revenue share from your published skills. You earn 70% of subscription revenue from skills you author.",
+    "stripeConnectDescription": "Set up your Stripe account to receive revenue share when your skills are published. You earn 70% of subscription revenue from each skill you create.",
     "stripeConnectAction": "Connect Stripe Account",
     "stripeConnecting": "Connecting...",
     "stripeConnected": "Stripe Account Connected",
-    "stripeConnectedDescription": "Your account is set up to receive revenue share payments from published skills.",
+    "stripeConnectedDescription": "You're all set to earn revenue. Upload a contract to create your first skill, or visit My Documents to get started.",
     "stripeIncomplete": "Setup Incomplete",
     "stripeIncompleteDescription": "Your Stripe account was created but onboarding is not complete. Please finish the setup.",
     "stripeCompleteSetup": "Complete Setup",
@@ -203,7 +203,7 @@
     "stripeReturnSuccess": "Stripe setup complete. Your account status will update shortly.",
     "stripeRefreshNotice": "The setup link expired. Please try again.",
     "stripeConnectFooter": "Revenue share is 70% to the skill author. Payments are processed via Stripe Connect Express.",
-    "cancel": "Cancel"
+    "stripeLearnMore": "Learn more"
   },
   "onboarding": {
     "title": "Welcome to Clausemaster",
