@@ -86,13 +86,13 @@ export default function DashboardLayout({
     redirect("/onboarding");
   }
 
-  // Redirect to setup only when accessing pages that require the AI pipeline (upload/analyze).
+  // Redirect to /setup when no API key, but allow navigation to account-related pages.
   // Publishers can configure their profile, Stripe, browse skills, reviews, and docs without an API key.
   const needsSetup = apiKeyStatus && !apiKeyStatus.hasApiKey;
-  const aiRequiredPaths = ["/documents/new"];
-  const needsApiKey = aiRequiredPaths.some((p) => pathname === p || pathname.startsWith(p + "/"));
+  const setupFreePaths = ["/setup", "/settings", "/onboarding", "/my-skills", "/reviews", "/docs"];
+  const isOnSetupFreePage = setupFreePaths.some((p) => pathname === p || pathname.startsWith(p + "/"));
 
-  if (needsSetup && needsApiKey) {
+  if (needsSetup && !isOnSetupFreePage) {
     redirect("/setup");
   }
 
