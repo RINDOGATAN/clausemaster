@@ -26,7 +26,8 @@ export default function OnboardingPage() {
             ? t("welcomeInternal")
             : t("welcomeClient")
       );
-      router.push("/documents");
+      // Send publishers to settings first (profile + Stripe), others to documents
+      router.push(data.role === "PUBLISHER" ? "/settings" : "/documents");
     },
     onError: (error) => {
       toast.error(error.message);
