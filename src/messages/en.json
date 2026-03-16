@@ -214,7 +214,13 @@
     "verifyCode": "Verify Code",
     "back": "Back",
     "welcomeInternal": "Welcome! You have internal access.",
-    "welcomePublisher": "Welcome! You are now a registered publisher."
+    "welcomePublisher": "Welcome! You are now a registered publisher.",
+    "orDivider": "or",
+    "useExpertDirectory": "I'm in the Expert Directory",
+    "expertDirectoryDescription": "If you're a registered expert on TodoLaw, we can verify your email automatically.",
+    "expertDirectoryNotFound": "Your email is not registered in the TodoLaw Expert Directory.",
+    "expertDirectoryError": "Could not verify expert directory. Please try an invite code instead.",
+    "needAccess": "Don't have an invite code? Contact us to join the Expert Directory."
   },
   "skillDraft": {
     "generateSkill": "Generate Dealroom Skill",

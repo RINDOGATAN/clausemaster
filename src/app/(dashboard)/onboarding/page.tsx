@@ -36,6 +36,10 @@ export default function OnboardingPage() {
     completeMutation.mutate({ inviteCode: inviteCode.trim() });
   };
 
+  const handleUseExpertDirectory = () => {
+    completeMutation.mutate({ useExpertDirectory: true });
+  };
+
   return (
     <div className="max-w-lg mx-auto py-16">
       <div className="card-brutal p-8 space-y-6">
@@ -69,6 +73,35 @@ export default function OnboardingPage() {
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : null}
             {t("verifyCode")}
+          </button>
+        </div>
+
+        {/* Divider */}
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="bg-card px-4 text-muted-foreground">
+              {t("orDivider")}
+            </span>
+          </div>
+        </div>
+
+        {/* Expert Directory option */}
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground text-center">
+            {t("expertDirectoryDescription")}
+          </p>
+          <button
+            onClick={handleUseExpertDirectory}
+            disabled={completeMutation.isPending}
+            className="w-full btn-brutal px-4 py-3 inline-flex items-center justify-center gap-2 bg-secondary text-secondary-foreground"
+          >
+            {completeMutation.isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : null}
+            {t("useExpertDirectory")}
           </button>
         </div>
       </div>
