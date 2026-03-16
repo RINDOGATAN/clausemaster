@@ -4,22 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BookOpen,
-  Briefcase,
   Scale,
   Shield,
   Brain,
-  MessageSquare,
   CreditCard,
 } from "lucide-react";
 
 const sections = [
   { title: "Getting Started", href: "/docs", icon: BookOpen },
-  { title: "For Startups", href: "/docs/client", icon: Briefcase },
   { title: "For Lawyers", href: "/docs/publisher", icon: Scale },
   { title: "Revenue Share", href: "/docs/revenue-share", icon: CreditCard },
   { title: "For Admins", href: "/docs/internal", icon: Shield },
   { title: "AI Analysis", href: "/docs/analysis", icon: Brain },
-  { title: "Review System", href: "/docs/reviews", icon: MessageSquare },
 ];
 
 export function DocsNav() {

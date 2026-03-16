@@ -1,13 +1,10 @@
 import Link from "next/link";
 import {
-  Briefcase,
   Scale,
   Shield,
   Brain,
   MessageSquare,
   Upload,
-  FileSearch,
-  AlertTriangle,
   Globe,
 } from "lucide-react";
 import { brand } from "@/config/brand";
@@ -21,7 +18,8 @@ export default function DocsOverviewPage() {
           {brand.name} Documentation
         </h1>
         <p className="text-base text-muted-foreground leading-relaxed max-w-2xl">
-          {brand.description}
+          Everything you need to publish legal skills, earn revenue on the
+          marketplace, and manage your practice on {brand.name}.
         </p>
       </section>
 
@@ -39,18 +37,18 @@ export default function DocsOverviewPage() {
             },
             {
               step: 2,
-              title: "Upload a Contract",
-              desc: "Drag and drop or browse for a PDF, DOCX, or TXT file.",
+              title: "Create a Skill",
+              desc: "Define clauses, set flexibility ranges, and configure jurisdiction-specific defaults.",
             },
             {
               step: 3,
-              title: "Review the Analysis",
-              desc: "Browse extracted clauses, flagged issues, and the executive summary.",
+              title: "Publish to the Marketplace",
+              desc: "Submit your skill for review and list it on the AAS marketplace.",
             },
             {
               step: 4,
-              title: "Take Action",
-              desc: "Download a report, request a lawyer review, or generate skill drafts.",
+              title: "Earn Revenue",
+              desc: "Receive 70% of subscription revenue every time a client uses your skill.",
             },
           ].map((item) => (
             <div key={item.step} className="flex items-start gap-4">
@@ -68,38 +66,25 @@ export default function DocsOverviewPage() {
         </div>
       </section>
 
-      {/* Three Paths */}
+      {/* Two Paths */}
       <section id="roles" className="scroll-mt-20">
         <h2 className="text-xl font-semibold text-foreground mb-2">
           Choose Your Path
         </h2>
         <p className="text-sm text-muted-foreground mb-6">
-          Clausemaster serves three types of users, each with tailored features.
+          {brand.name} documentation is organized by role.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Link href="/docs/client" className="group">
-            <div className="card-brutal h-full transition-all group-hover:border-primary/40 group-hover:shadow-hover">
-              <Briefcase className="w-8 h-8 text-primary mb-3" />
-              <h3 className="text-sm font-semibold text-foreground mb-1">
-                Startup
-              </h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Upload contracts, get AI-powered analysis, download reports, and
-                request lawyer reviews.
-              </p>
-            </div>
-          </Link>
-
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Link href="/docs/publisher" className="group">
             <div className="card-brutal h-full transition-all group-hover:border-primary/40 group-hover:shadow-hover">
               <Scale className="w-8 h-8 text-primary mb-3" />
               <h3 className="text-sm font-semibold text-foreground mb-1">
-                Lawyer / Publisher
+                Publisher
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Generate legal skills, earn 70% revenue on the AAS marketplace,
-                and review startup contracts.
+                Create and publish legal skills, earn 70% revenue on the AAS
+                marketplace, and manage your published catalog.
               </p>
             </div>
           </Link>
@@ -149,8 +134,8 @@ export default function DocsOverviewPage() {
                 Review System
               </h3>
               <p className="text-xs text-muted-foreground">
-                Request lawyer reviews, track status, and receive expert notes
-                on your contracts.
+                Accept review requests, provide expert notes on contracts, and
+                track review status.
               </p>
             </div>
           </Link>

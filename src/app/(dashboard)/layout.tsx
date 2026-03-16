@@ -16,7 +16,6 @@ import {
   Settings,
   Layers,
   Shield,
-  Scale,
   BookOpen,
 } from "lucide-react";
 import { brand } from "@/config/brand";
@@ -89,7 +88,7 @@ export default function DashboardLayout({
   // Redirect to /setup when no API key, but allow navigation to account-related pages.
   // Publishers can configure their profile, Stripe, browse skills, reviews, and docs without an API key.
   const needsSetup = apiKeyStatus && !apiKeyStatus.hasApiKey;
-  const setupFreePaths = ["/setup", "/settings", "/onboarding", "/publisher-setup", "/my-skills", "/reviews", "/docs"];
+  const setupFreePaths = ["/setup", "/settings", "/onboarding", "/publisher-setup", "/my-skills", "/docs"];
   const isOnSetupFreePage = setupFreePaths.some((p) => pathname === p || pathname.startsWith(p + "/"));
 
   if (needsSetup && !isOnSetupFreePage) {
@@ -100,7 +99,6 @@ export default function DashboardLayout({
     { href: "/documents", label: t("myDocuments"), icon: FileText, roles: ["INTERNAL", "PUBLISHER", "CLIENT"] },
     { href: "/documents/new", label: t("uploadNew"), icon: Plus, roles: ["INTERNAL", "PUBLISHER", "CLIENT"] },
     { href: "/my-skills", label: t("mySkills"), icon: Layers, roles: ["PUBLISHER"] },
-    { href: "/reviews", label: t("reviews"), icon: Scale, roles: ["PUBLISHER"] },
     { href: "/admin", label: t("admin"), icon: Shield, roles: ["INTERNAL"] },
   ];
 

@@ -208,19 +208,13 @@
   },
   "onboarding": {
     "title": "Bienvenido a Clausemaster",
-    "subtitle": "Configuremos tu cuenta para adaptar tu experiencia.",
-    "publisherQuestion": "Eres abogado y tienes un codigo de invitacion de publicador?",
-    "yesImALawyer": "Si, tengo un codigo de invitacion",
-    "yesDescription": "Ingresa tu codigo de invitacion para publicar skills en el marketplace.",
-    "skipAsClient": "Continuar como cliente",
-    "skipDescription": "Sube contratos y obtiene analisis e informes impulsados por IA.",
+    "subtitle": "Introduce tu codigo de invitacion de publicador para empezar.",
     "enterCode": "Codigo de Invitacion de Publicador",
     "codePlaceholder": "Ingresa tu codigo...",
     "verifyCode": "Verificar Codigo",
     "back": "Volver",
     "welcomeInternal": "Bienvenido! Tienes acceso interno.",
-    "welcomePublisher": "Bienvenido! Ahora eres un publicador registrado.",
-    "welcomeClient": "Bienvenido! Tu cuenta esta lista."
+    "welcomePublisher": "Bienvenido! Ahora eres un publicador registrado."
   },
   "skillDraft": {
     "generateSkill": "Generar Skill para Dealroom",
