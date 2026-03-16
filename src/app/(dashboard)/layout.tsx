@@ -89,7 +89,7 @@ export default function DashboardLayout({
   // Redirect to /setup when no API key, but allow navigation to account-related pages.
   // Publishers can configure their profile, Stripe, browse skills, reviews, and docs without an API key.
   const needsSetup = apiKeyStatus && !apiKeyStatus.hasApiKey;
-  const setupFreePaths = ["/setup", "/settings", "/onboarding", "/my-skills", "/reviews", "/docs"];
+  const setupFreePaths = ["/setup", "/settings", "/onboarding", "/publisher-setup", "/my-skills", "/reviews", "/docs"];
   const isOnSetupFreePage = setupFreePaths.some((p) => pathname === p || pathname.startsWith(p + "/"));
 
   if (needsSetup && !isOnSetupFreePage) {
