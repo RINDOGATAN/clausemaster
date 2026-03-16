@@ -85,7 +85,7 @@ export default function SetupPage() {
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
             <Link
-              href="/settings"
+              href="/publisher-setup"
               className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               {t("skipForNow")}
