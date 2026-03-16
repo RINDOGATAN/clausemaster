@@ -214,7 +214,13 @@
     "verifyCode": "Verificar Codigo",
     "back": "Volver",
     "welcomeInternal": "Bienvenido! Tienes acceso interno.",
-    "welcomePublisher": "Bienvenido! Ahora eres un publicador registrado."
+    "welcomePublisher": "Bienvenido! Ahora eres un publicador registrado.",
+    "orDivider": "o",
+    "useExpertDirectory": "Estoy en el Directorio de Expertos",
+    "expertDirectoryDescription": "Si eres un/a experto/a registrado/a en TodoLaw, podemos verificar tu email automaticamente.",
+    "expertDirectoryNotFound": "Tu email no esta registrado en el Directorio de Expertos de TodoLaw.",
+    "expertDirectoryError": "No se pudo verificar el directorio de expertos. Por favor usa un codigo de invitacion.",
+    "needAccess": "No tienes codigo de invitacion? Contactanos para unirte al Directorio de Expertos."
   },
   "skillDraft": {
     "generateSkill": "Generar Skill para Dealroom",

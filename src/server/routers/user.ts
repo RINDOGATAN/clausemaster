@@ -21,6 +21,7 @@ export const userRouter = createTRPCRouter({
     .input(
       z.object({
         inviteCode: z.string().optional(),
+        useExpertDirectory: z.boolean().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -85,14 +86,63 @@ export const userRouter = createTRPCRouter({
         return { role: updated.role };
       }
 
-      // Default: CLIENT
-      const updated = await ctx.prisma.user.update({
-        where: { id: userId },
-        data: { role: "CLIENT", onboardedAt: new Date() },
-        select: { role: true },
-      });
+      // Expert Directory verification flow
+      if (input.useExpertDirectory) {
+        const apiUrl = process.env.DEALROOM_API_URL || "https://dealroom.todo.law/api/v1/experts";
+        const apiKey = process.env.DEALROOM_API_KEY;
 
-      return { role: updated.role };
+        if (!apiKey) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Could not verify expert directory. Please try an invite code instead.",
+          });
+        }
+
+        try {
+          const res = await fetch(`${apiUrl}/verify?email=${encodeURIComponent(user.email)}`, {
+            headers: { Authorization: `Bearer ${apiKey}` },
+          });
+
+          if (!res.ok) {
+            throw new Error(`Expert directory returned ${res.status}`);
+          }
+
+          const data = await res.json() as { verified: boolean };
+
+          if (!data.verified) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Your email is not registered in the TodoLaw Expert Directory.",
+            });
+          }
+        } catch (err) {
+          if (err instanceof TRPCError) throw err;
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Could not verify expert directory. Please try an invite code instead.",
+          });
+        }
+
+        const updated = await ctx.prisma.user.update({
+          where: { id: userId },
+          data: { role: "PUBLISHER", onboardedAt: new Date() },
+          select: { role: true },
+        });
+
+        await ctx.prisma.publisherProfile.upsert({
+          where: { userId },
+          create: { userId },
+          update: {},
+        });
+
+        return { role: updated.role };
+      }
+
+      // No valid onboarding path
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Please provide an invite code or verify via the Expert Directory.",
+      });
     }),
 
   getPublisherProfile: publisherProcedure.query(async ({ ctx }) => {
