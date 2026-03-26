@@ -19,7 +19,8 @@ export const brand = {
   },
 
   assets: {
-    logo: "/clausemaster-logo.png",
+    logo: "/logo-negative.svg",
+    symbol: "/simbol-negative.svg",
     favicon: "/favicon.ico",
   },
 

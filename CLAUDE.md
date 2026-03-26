@@ -61,6 +61,7 @@ npx prisma studio    # Open Prisma Studio
 - `OLLAMA_BASE_URL` - Ollama server URL
 - `LEGALSKILLS_DIR` - Path to legalskills repo (defaults to `../legalskills`)
 - `INVITE_CODE` - Optional invite code to gate the sign-in page (unset = open access)
+- `E2E_CREDENTIALS_SECRET` - Optional secret enabling e2e-credentials auth provider for Playwright tests
 
 ## Relationship with Dealroom
 
@@ -128,6 +129,21 @@ LegalSkills repo is loaded as read-only reference for Steps 2 and 3.
 - Auth card embedded in hero: magic link + Google OAuth via NextAuth
 - CSS scroll-reveal animations via IntersectionObserver (no framer-motion)
 - Hero video: compressed with ffmpeg (CRF 30, 720p, no audio, ~1.4MB)
+
+## Brand Assets
+
+- **Logo**: `/public/logo-negative.svg` — full wordmark (TODO.LAW) for headers/navbars
+- **Symbol**: `/public/simbol-negative.svg` — isometric icon for favicons/compact use
+- **Favicon**: `/public/favicon.ico` + `/public/favicon.png`
+- Logo is displayed via `<img>` tag alongside a `<span>CLAUSEMASTER</span>` in Jost 600 / text-primary
+- All layouts (auth, dashboard, public, landing) use the same logo pattern
+
+## E2E Testing
+
+- **Framework**: Playwright (`playwright.config.ts`, `e2e/` directory)
+- **Auth**: Uses `e2e-credentials` provider gated by `E2E_CREDENTIALS_SECRET` env var
+- **Dev login**: Sign-in page has a `dev-credentials` provider (development mode only, no secret needed)
+- Test specs: `e2e/demo-invite-code.spec.ts`, `e2e/demo-publisher-onboarding.spec.ts`, `e2e/demo-negative-expert.spec.ts`
 
 ## Design System
 
