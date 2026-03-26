@@ -19,20 +19,23 @@ AI-powered contract analysis tool by TODO.LAW.
 src/
   app/               # Next.js app router pages
     (auth)/          # Sign-in, verify-request, auth-error
-    (dashboard)/     # Documents list, upload, analysis results
+    (dashboard)/     # Documents list, upload, analysis, skill-draft, admin
     api/             # NextAuth, tRPC, file upload endpoints
   components/
     analysis/        # AnalysisSummary, ClauseList, ClauseDetail, IssuePanel, badges
     documents/       # DocumentCard, DocumentGrid, EmptyState
+    landing/         # Landing page (V1 + V2 with i18n)
+      v2/            # V2 landing (default at /) with EN/ES i18n
     upload/          # DocumentUploader, UploadProgress, FileTypeIcon
     ui/              # Shadcn components (button, card, dialog, badge, etc.)
   config/brand.ts    # Brand config (amber accent, TODO.LAW)
   server/
     trpc.ts          # tRPC context + procedures
-    routers/         # document, analysis routers
+    routers/         # document, analysis, skill-draft, admin routers
     services/
-      ai/            # provider.ts, analyzer.ts, prompts.ts, schemas.ts
+      ai/            # provider.ts, analyzer.ts, skill-generator.ts, assessment-generator.ts
       document/      # parser.ts (PDF/DOCX/TXT extraction)
+      export/        # skill-exporter.ts (writes to legalskills/)
       knowledge/     # loader.ts (reads legalskills repo)
   lib/               # auth.ts, prisma.ts, trpc.ts, utils.ts
   i18n/              # config.ts, request.ts
@@ -104,16 +107,33 @@ The AI analysis pipeline (3 sequential calls: classify → extract clauses → f
 
 Three sequential steps using Vercel AI SDK `generateObject`:
 
-1. **Classification**: Detect contract type, jurisdiction, parties, effective date
+1. **Classification**: Detect contract type, jurisdiction, parties, document category (contract/assessment), party mode (two-party/solo), suggested destination
 2. **Clause Extraction**: Break down into individual clauses with summaries
 3. **Issue Flagging**: Flag missing clauses, unusual terms, jurisdiction concerns
 
 LegalSkills repo is loaded as read-only reference for Steps 2 and 3.
+
+## Skill Types & Destinations
+
+- **SkillType**: `CONTRACT` (two-party or solo) | `ASSESSMENT` (compliance checklists)
+- **PartyMode**: `TWO_PARTY` (negotiated) | `SOLO` (unilateral policies)
+- **SkillDestination**: `DEAL_ROOM` | `DPO_CENTRAL` | `AI_SENTINEL`
+- Contract skills → Deal Room; privacy assessments → DPO Central; AI governance → AI Sentinel
+
+## Landing Page
+
+- V2 is the default at `/`; V1 accessible via `/?v=1`
+- Components in `src/components/landing/v2/` with shared header/footer in `landing/`
+- EN/ES i18n via local JSON files (not next-intl — standalone client-side locale detection)
+- Auth card embedded in hero: magic link + Google OAuth via NextAuth
+- CSS scroll-reveal animations via IntersectionObserver (no framer-motion)
+- Hero video: compressed with ffmpeg (CRF 30, 720p, no audio, ~1.4MB)
 
 ## Design System
 
 - Dark brutalist theme (always dark, no light mode)
 - Accent color: amber/gold `#f5a623`
 - Fonts: Jost (body/display), Archivo Black (headings)
-- Card style: `.card-brutal` with rounded-2xl, shadow-card
+- Card style: `.card-brutal` / `.paper-card` with rounded-2xl, shadow-card
+- `.container` must be defined in globals.css (`mx-auto w-full max-width: 1400px`) — Tailwind v4 does not provide this by default
 - Port: 3002
