@@ -11,12 +11,9 @@ export default function PublicLayout({
       {/* Header */}
       <header className="border-b border-border sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-lg font-bold tracking-tight text-foreground"
-          >
-            TODO.LAW<sup className="text-xs align-super">&#8482;</sup>{" "}
-            <span className="text-primary">CLAUSEMASTER</span>
+          <Link href="/" className="flex items-center gap-2">
+            <img src="/logo-negative.svg" alt="TODO.LAW" style={{ height: "28px", width: "auto" }} />
+            <span className="text-primary" style={{ fontFamily: "var(--font-display), 'Jost', sans-serif", fontWeight: 600 }}>CLAUSEMASTER</span>
           </Link>
           <div className="flex items-center gap-6">
             <Link

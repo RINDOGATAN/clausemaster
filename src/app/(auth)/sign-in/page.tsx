@@ -15,6 +15,27 @@ export default function SignInPage() {
   const [emailSent, setEmailSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Dev login state
+  const isDev = process.env.NODE_ENV === "development";
+  const [devEmail, setDevEmail] = useState("demo@clausemaster.example");
+  const [isDevLoading, setIsDevLoading] = useState(false);
+
+  const handleDevSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!devEmail.trim()) return;
+    setIsDevLoading(true);
+    setError(null);
+    try {
+      await signIn("dev-credentials", {
+        email: devEmail,
+        callbackUrl: "/documents",
+      });
+    } catch {
+      setError("Dev sign-in failed");
+      setIsDevLoading(false);
+    }
+  };
+
   // Invite code gate state
   const [inviteRequired, setInviteRequired] = useState<boolean | null>(null);
   const [inviteCode, setInviteCode] = useState("");
@@ -116,7 +137,7 @@ export default function SignInPage() {
       <div className="w-full max-w-md">
         <div className="card-brutal">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2 text-white uppercase tracking-wide">Clausemaster</h1>
+            <h1 className="text-3xl mb-2 text-white uppercase tracking-wide" style={{ fontFamily: "var(--font-display), 'Jost', sans-serif", fontWeight: 600 }}>Clausemaster</h1>
             <p className="text-muted-foreground mb-4">
               {t("poweredBy")}
             </p>
@@ -203,7 +224,7 @@ export default function SignInPage() {
     <div className="w-full max-w-md">
       <div className="card-brutal">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2 text-white uppercase tracking-wide">Clausemaster</h1>
+          <h1 className="text-3xl mb-2 text-white uppercase tracking-wide" style={{ fontFamily: "var(--font-display), 'Jost', sans-serif", fontWeight: 600 }}>Clausemaster</h1>
           <p className="text-muted-foreground mb-4">
             {t.rich("poweredBy", {
               link: () => (
@@ -223,6 +244,36 @@ export default function SignInPage() {
         {error && (
           <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500 text-yellow-600 text-sm rounded-xl">
             {error}
+          </div>
+        )}
+
+        {isDev && (
+          <div className="mb-6 p-4 border-2 border-dashed border-primary/40 rounded-xl">
+            <p className="text-xs text-primary font-semibold mb-3 uppercase tracking-wider">Development Mode</p>
+            <form onSubmit={handleDevSignIn} className="space-y-3">
+              <Input
+                type="email"
+                value={devEmail}
+                onChange={(e) => setDevEmail(e.target.value)}
+                placeholder="dev@example.com"
+                className="bg-background"
+                required
+              />
+              <button
+                type="submit"
+                disabled={isDevLoading}
+                className="btn-brutal w-full flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {isDevLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  "Dev Sign In (Instant)"
+                )}
+              </button>
+            </form>
           </div>
         )}
 
