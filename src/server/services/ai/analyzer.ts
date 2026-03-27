@@ -5,11 +5,12 @@ import type { ClassificationResult, ClauseExtractionResult, IssueFlaggingResult 
 import { buildClassificationPrompt, buildClauseExtractionPrompt, buildIssueFlaggingPrompt } from "./prompts";
 import { loadSkillContext } from "../knowledge/loader";
 import { extractText } from "../document/parser";
+import type { AIConfig } from "../resolve-ai-config";
 import prisma from "@/lib/prisma";
 
 export async function analyzeDocument(
   documentId: string,
-  options?: { anthropicApiKey?: string }
+  aiConfig: AIConfig
 ): Promise<void> {
   const startTime = Date.now();
 
@@ -52,8 +53,8 @@ export async function analyzeDocument(
       },
     });
 
-    const model = getAIModel(options);
-    const providerInfo = getProviderInfo();
+    const model = getAIModel(aiConfig);
+    const providerInfo = getProviderInfo(aiConfig);
 
     // Step 1: Classification
     const classification = await runClassification(model, extractedText);

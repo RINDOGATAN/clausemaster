@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import {
   Briefcase,
   CreditCard,
-  Key,
+  Cpu,
   Rocket,
   Check,
   ArrowRight,
@@ -15,11 +15,13 @@ import {
   ExternalLink,
   CheckCircle2,
   AlertCircle,
+  Zap,
+  Key,
 } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 
-const STEPS = ["profile", "stripe", "apiKey", "ready"] as const;
+const STEPS = ["profile", "stripe", "aiProvider", "ready"] as const;
 type Step = (typeof STEPS)[number];
 
 export default function PublisherSetupPage() {
@@ -64,7 +66,7 @@ export default function PublisherSetupPage() {
           {STEPS.map((step, i) => {
             const isCompleted = i < currentIndex;
             const isCurrent = i === currentIndex;
-            const icons = [Briefcase, CreditCard, Key, Rocket];
+            const icons = [Briefcase, CreditCard, Cpu, Rocket];
             const Icon = icons[i];
 
             return (
@@ -101,7 +103,7 @@ export default function PublisherSetupPage() {
       <div className="card-brutal bg-card border border-border rounded-2xl p-8 shadow-card">
         {currentStep === "profile" && <ProfileStep onNext={goNext} />}
         {currentStep === "stripe" && <StripeStep onNext={goNext} onBack={goBack} />}
-        {currentStep === "apiKey" && <ApiKeyStep onNext={goNext} onBack={goBack} />}
+        {currentStep === "aiProvider" && <AIProviderStep onNext={goNext} onBack={goBack} />}
         {currentStep === "ready" && <ReadyStep />}
       </div>
     </div>
@@ -366,41 +368,54 @@ function StripeStep({ onNext, onBack }: { onNext: () => void; onBack: () => void
   );
 }
 
-// ── Step 3: API Key ──────────────────────────────────────────────
+// ── Step 3: AI Provider ──────────────────────────────────────────
 
-function ApiKeyStep({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
+function AIProviderStep({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
   const t = useTranslations("publisherSetup");
   const tCommon = useTranslations("common");
+  const [showProForm, setShowProForm] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState("ANTHROPIC");
   const [apiKey, setApiKey] = useState("");
 
-  const { data: status } = trpc.settings.getApiKeyStatus.useQuery();
+  const { data: status } = trpc.settings.getAIProviderStatus.useQuery();
+  const { data: providerOpts } = trpc.settings.getProviderOptions.useQuery();
   const utils = trpc.useUtils();
 
-  const saveKey = trpc.settings.saveApiKey.useMutation({
+  const saveProvider = trpc.settings.saveAIProvider.useMutation({
     onSuccess: () => {
       toast.success(t("apiKeySaved"));
+      utils.settings.getAIProviderStatus.invalidate();
       utils.settings.getApiKeyStatus.invalidate();
       onNext();
     },
     onError: (error) => toast.error(error.message),
   });
 
-  const hasKey = status?.hasApiKey || status?.isPrivileged;
+  const providers = providerOpts?.providers ?? [];
+  const currentProviderDef = providers.find((p) => p.value === selectedProvider);
+  const isConfigured = status?.hasApiKey || status?.isPrivileged;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleCommunity = () => {
+    saveProvider.mutate({ provider: "COMMUNITY" });
+  };
+
+  const handleProSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!apiKey.trim()) return;
-    saveKey.mutate({ apiKey: apiKey.trim() });
+    saveProvider.mutate({
+      provider: selectedProvider as "ANTHROPIC" | "OPENAI" | "GROQ" | "MISTRAL" | "TOGETHER",
+      apiKey: apiKey.trim(),
+    });
   };
 
   return (
     <div className="space-y-6">
       <div className="text-center mb-2">
         <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Key className="w-7 h-7 text-primary" />
+          <Cpu className="w-7 h-7 text-primary" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground">{t("apiKeyTitle")}</h2>
-        <p className="text-muted-foreground mt-2 max-w-md mx-auto">{t("apiKeyDescription")}</p>
+        <h2 className="text-2xl font-bold text-foreground">{t("aiProviderTitle")}</h2>
+        <p className="text-muted-foreground mt-2 max-w-md mx-auto">{t("aiProviderDescription")}</p>
       </div>
 
       {/* What does it do? */}
@@ -409,49 +424,103 @@ function ApiKeyStep({ onNext, onBack }: { onNext: () => void; onBack: () => void
         <p className="text-xs text-muted-foreground">{t("apiKeyExplainer")}</p>
       </div>
 
-      {hasKey ? (
+      {isConfigured ? (
         <div className="flex items-center gap-3 p-4 bg-green-500/5 border border-green-500/20 rounded-xl">
           <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" />
           <div>
             <p className="text-sm font-medium text-foreground">{t("apiKeyConfigured")}</p>
             <p className="text-xs text-muted-foreground">
-              {status?.isPrivileged ? t("platformKeyActive") : status?.maskedKey}
+              {status?.isPrivileged ? t("platformKeyActive") : status?.providerLabel}
             </p>
           </div>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1.5">{t("apiKeyLabel")}</label>
-            <input
-              type="password"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder="sk-ant-api03-..."
-              className="w-full px-3 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
-              autoFocus
-            />
-            <p className="text-xs text-muted-foreground mt-1.5">{t("apiKeyEncrypted")}</p>
-          </div>
+        <div className="space-y-4">
+          {/* Community option — primary CTA */}
+          {status?.communityAvailable && (
+            <button
+              type="button"
+              onClick={handleCommunity}
+              disabled={saveProvider.isPending}
+              className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-green-500/40 bg-green-500/5 hover:border-green-500 transition-all text-left"
+            >
+              <div className="w-10 h-10 bg-green-500/10 rounded-full flex items-center justify-center flex-shrink-0">
+                <Zap className="w-5 h-5 text-green-500" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">{t("communityOption")}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{t("communityOptionDescription")}</p>
+              </div>
+              {saveProvider.isPending && <Loader2 className="w-4 h-4 animate-spin text-green-500" />}
+            </button>
+          )}
 
-          <button
-            type="submit"
-            disabled={!apiKey.trim() || saveKey.isPending}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
-          >
-            {saveKey.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t("saveApiKey")}
-          </button>
+          {/* Pro option — expandable */}
+          {!showProForm ? (
+            <button
+              type="button"
+              onClick={() => setShowProForm(true)}
+              className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-border hover:border-primary/40 transition-all text-left"
+            >
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                <Key className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">{t("bringKeyOption")}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{t("apiKeyExplainer").slice(0, 80)}...</p>
+              </div>
+            </button>
+          ) : (
+            <form onSubmit={handleProSubmit} className="space-y-4 p-4 rounded-xl border-2 border-primary/40 bg-primary/5">
+              <div>
+                <label className="block text-sm font-medium mb-1.5">{t("apiKeyLabel")}</label>
+                <select
+                  value={selectedProvider}
+                  onChange={(e) => {
+                    setSelectedProvider(e.target.value);
+                    setApiKey("");
+                  }}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 mb-3"
+                >
+                  {providers
+                    .filter((p) => p.requiresKey)
+                    .map((p) => (
+                      <option key={p.value} value={p.value}>{p.label}</option>
+                    ))}
+                </select>
+                <input
+                  type="password"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder={currentProviderDef?.keyPlaceholder || "..."}
+                  className="w-full px-3 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                  autoFocus
+                />
+                <p className="text-xs text-muted-foreground mt-1.5">{t("apiKeyEncrypted")}</p>
+              </div>
 
-          <a
-            href="https://console.anthropic.com/settings/keys"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-1.5 text-sm text-primary hover:underline"
-          >
-            {t("getApiKey")}
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
-        </form>
+              <button
+                type="submit"
+                disabled={!apiKey.trim() || saveProvider.isPending}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
+              >
+                {saveProvider.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t("saveApiKey")}
+              </button>
+
+              {currentProviderDef?.keyUrl && (
+                <a
+                  href={currentProviderDef.keyUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1.5 text-sm text-primary hover:underline"
+                >
+                  {t("getApiKey")}
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              )}
+            </form>
+          )}
+        </div>
       )}
 
       {/* Navigation */}
@@ -467,7 +536,7 @@ function ApiKeyStep({ onNext, onBack }: { onNext: () => void; onBack: () => void
           onClick={onNext}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          {hasKey ? t("continue") : t("skipStep")}
+          {isConfigured ? t("continue") : t("skipStep")}
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

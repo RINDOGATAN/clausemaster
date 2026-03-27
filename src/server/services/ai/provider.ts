@@ -1,62 +1,47 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
+import { createOpenAI } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import type { LanguageModelV1 } from "ai";
+import type { AIConfig } from "../resolve-ai-config";
+import { AI_PROVIDERS } from "./providers";
 
-export type AIProviderType = "anthropic" | "ollama" | "openai-compatible";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyLanguageModel = LanguageModelV1 | any;
 
-export function getAIModel(options?: { anthropicApiKey?: string }): LanguageModelV1 {
-  const provider = (process.env.AI_PROVIDER || "anthropic") as AIProviderType;
-
-  switch (provider) {
-    case "anthropic": {
-      const anthropic = createAnthropic({
-        apiKey: options?.anthropicApiKey || process.env.ANTHROPIC_API_KEY,
-      });
-      const model = process.env.AI_MODEL || "claude-sonnet-4-20250514";
-      return anthropic(model);
-    }
-
-    case "ollama": {
-      const ollama = createOpenAICompatible({
-        name: "ollama",
-        baseURL: `${process.env.OLLAMA_BASE_URL || "http://localhost:11434"}/v1`,
-      });
-      const model = process.env.OLLAMA_MODEL || "qwen2.5:32b";
-      return ollama(model);
-    }
-
-    case "openai-compatible": {
+export function getAIModel(config: AIConfig): LanguageModelV1 {
+  switch (config.provider) {
+    case "COMMUNITY": {
       const compatible = createOpenAICompatible({
-        name: "openai-compatible",
-        baseURL: process.env.OPENAI_COMPATIBLE_BASE_URL || "http://localhost:8080/v1",
-        apiKey: process.env.OPENAI_COMPATIBLE_API_KEY,
+        name: "community",
+        baseURL: config.baseUrl!,
+        apiKey: config.apiKey,
       });
-      const model = process.env.AI_MODEL || "default";
-      return compatible(model);
+      return compatible(config.model);
     }
-
+    case "ANTHROPIC": {
+      const anthropic = createAnthropic({ apiKey: config.apiKey });
+      return anthropic(config.model);
+    }
+    case "OPENAI": {
+      const openai = createOpenAI({ apiKey: config.apiKey });
+      return openai(config.model) as AnyLanguageModel as LanguageModelV1;
+    }
+    case "GROQ":
+    case "MISTRAL":
+    case "TOGETHER": {
+      const providerDef = AI_PROVIDERS[config.provider];
+      const compatible = createOpenAICompatible({
+        name: config.provider.toLowerCase(),
+        baseURL: config.baseUrl || providerDef.baseUrl,
+        apiKey: config.apiKey,
+      });
+      return compatible(config.model);
+    }
     default:
-      throw new Error(`Unsupported AI provider: ${provider}`);
+      throw new Error(`Unsupported AI provider: ${config.provider}`);
   }
 }
 
-export function getProviderInfo(): { provider: string; model: string } {
-  const provider = process.env.AI_PROVIDER || "anthropic";
-  let model: string;
-
-  switch (provider) {
-    case "anthropic":
-      model = process.env.AI_MODEL || "claude-sonnet-4-20250514";
-      break;
-    case "ollama":
-      model = process.env.OLLAMA_MODEL || "qwen2.5:32b";
-      break;
-    case "openai-compatible":
-      model = process.env.AI_MODEL || "default";
-      break;
-    default:
-      model = "unknown";
-  }
-
-  return { provider, model };
+export function getProviderInfo(config: AIConfig): { provider: string; model: string } {
+  return { provider: config.provider, model: config.model };
 }

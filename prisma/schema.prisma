@@ -21,6 +21,17 @@ enum UserRole {
   @@schema("clausemaster")
 }
 
+enum AIProvider {
+  COMMUNITY
+  ANTHROPIC
+  OPENAI
+  GROQ
+  MISTRAL
+  TOGETHER
+
+  @@schema("clausemaster")
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -31,6 +42,9 @@ model User {
   onboardedAt   DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  aiProvider      AIProvider @default(COMMUNITY)
+  aiModel         String?
 
   encryptedApiKey String? @db.Text
   apiKeyIv        String?

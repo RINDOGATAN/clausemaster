@@ -1,5 +1,6 @@
 import { generateObject } from "ai";
 import { getAIModel, getProviderInfo } from "./provider";
+import type { AIConfig } from "../resolve-ai-config";
 import {
   optionGenerationSchema,
   soloOptionGenerationSchema,
@@ -19,7 +20,7 @@ import prisma from "@/lib/prisma";
 
 export async function generateSkillDraft(
   analysisId: string,
-  options?: { anthropicApiKey?: string }
+  aiConfig: AIConfig
 ): Promise<string> {
   const startTime = Date.now();
 
@@ -56,8 +57,8 @@ export async function generateSkillDraft(
   });
 
   try {
-    const model = getAIModel(options);
-    const providerInfo = getProviderInfo();
+    const model = getAIModel(aiConfig);
+    const providerInfo = getProviderInfo(aiConfig);
 
     // Build classification object from analysis fields
     const classification = {
