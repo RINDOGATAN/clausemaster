@@ -1,0 +1,41 @@
+# Clausemaster — LLM Context
+
+> Clausemaster is an AI-powered contract analysis platform built by TODO.LAW. Upload a contract (PDF, DOCX, or TXT) and get instant clause-by-clause breakdown, issue flagging, and jurisdiction-specific legal insights.
+
+## Public Pages
+
+- [Homepage](https://clausemaster.todo.law): Platform overview, three-step analysis workflow
+- [Documentation Hub](https://clausemaster.todo.law/docs): Full platform documentation
+- [Analysis Pipeline](https://clausemaster.todo.law/docs/analysis): How the AI analysis works
+- [Publisher Program](https://clausemaster.todo.law/docs/publisher): LegalSkills publisher program and revenue share
+- [Internal Skills](https://clausemaster.todo.law/docs/internal): Creating internal analysis skills
+- [Revenue Share](https://clausemaster.todo.law/docs/revenue-share): 70/30 publisher revenue model
+- [Client Guide](https://clausemaster.todo.law/docs/client): End-user guide for contract analysis
+- [Reviews](https://clausemaster.todo.law/docs/reviews): Expert review workflow
+
+## What Clausemaster Does
+
+- **Three-Step AI Pipeline**:
+  1. **Classification**: Identify contract type, jurisdiction, parties, and effective date
+  2. **Clause Extraction**: Summarize each clause with legal significance and bias assessment
+  3. **Issue Flagging**: Flag issues by severity (Info / Warning / Critical)
+- **Multi-Format Support**: Upload PDF, DOCX, or TXT contracts
+- **Jurisdiction-Specific Insights**: Analysis calibrated to applicable legal jurisdictions
+- **LegalSkills Integration**: Extensible analysis through the TODO.LAW Skills marketplace
+- **Skill Draft Generation**: AI-assisted creation of new analysis skills from contract patterns
+- **Publisher Revenue Share**: 70% revenue share for legal professionals who publish analysis skills
+- **Multi-Platform Export**: Export analysis reports in multiple formats
+
+## TODO.LAW Ecosystem
+
+Clausemaster is part of the TODO.LAW platform for AI-native legal services:
+
+- **Dealroom** (dealroom.todo.law) — Contract negotiation
+- **DPO Central** (dpocentral.todo.law) — Privacy compliance management
+- **AI Sentinel** (aisentinel.todo.law) — AI governance and EU AI Act compliance
+- **Seneca** (seneca.todo.law) — Privacy litigation research
+- **Vendor.Watch** (vendor.watch) — SaaS vendor compliance database
+- **Clausemaster** (clausemaster.todo.law) — AI-powered contract analysis
+- **Gavel** (gavel.todo.law) — Digital arbitration protocol
+
+For full ecosystem context, see: https://todo.law/llms-full.txt
