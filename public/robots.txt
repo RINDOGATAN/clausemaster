@@ -1,0 +1,30 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /sign-in
+Disallow: /verify-request
+Disallow: /auth/
+Disallow: /account/
+Disallow: /documents/
+Disallow: /reviews/
+Disallow: /admin/
+Disallow: /settings
+Disallow: /setup
+Disallow: /onboarding
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Bytespider
+Disallow: /
+
+Sitemap: https://clausemaster.todo.law/sitemap.xml
