@@ -22,6 +22,10 @@ export const brand = {
     logo: "/logo-negative.svg",
     symbol: "/simbol-negative.svg",
     favicon: "/favicon.ico",
+    faviconSvg: "/favicon.svg",
+    appleTouchIcon: "/apple-touch-icon.png",
+    icon192: "/icon-192.png",
+    icon512: "/icon-512.png",
   },
 
   links: {

@@ -134,7 +134,9 @@ LegalSkills repo is loaded as read-only reference for Steps 2 and 3.
 
 - **Logo**: `/public/logo-negative.svg` — full wordmark (TODO.LAW) for headers/navbars
 - **Symbol**: `/public/simbol-negative.svg` — isometric icon for favicons/compact use
-- **Favicon**: `/public/favicon.ico` + `/public/favicon.png`
+- **Favicon**: `/public/favicon.ico` (legacy) + `/public/favicon.svg` (modern) + `/public/favicon.png` (fallback)
+- **Apple Touch Icon**: `/public/apple-touch-icon.png` — iOS home screen
+- **PWA Icons**: `/public/icon-192.png` + `/public/icon-512.png` — referenced in `site.webmanifest`
 - Logo is displayed via `<img>` tag alongside a `<span>CLAUSEMASTER</span>` in Jost 600 / text-primary
 - All layouts (auth, dashboard, public, landing) use the same logo pattern
 

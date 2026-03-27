@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Jost, Archivo_Black } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
@@ -20,14 +20,24 @@ const archivoBlack = Archivo_Black({
   weight: "400",
 });
 
+export const viewport: Viewport = {
+  themeColor: "#1a1a1a",
+};
+
 export const metadata: Metadata = {
   title: `CLAUSEMASTER - ${brand.tagline}`,
   description: brand.description,
   icons: {
     icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
       { url: "/favicon.png", type: "image/png" },
     ],
-    apple: "/logo-icon.png",
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/site.webmanifest",
+  other: {
+    "msapplication-TileColor": "#1a1a1a",
   },
 };
 
