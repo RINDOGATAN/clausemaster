@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure, internalProcedure, publisherProcedure } from "../trpc";
-import { resolveApiKeyForUser } from "../services/resolve-api-key";
+import { resolveAIConfigForUser } from "../services/resolve-ai-config";
 
 export const skillDraftRouter = createTRPCRouter({
   generate: protectedProcedure
@@ -29,16 +29,16 @@ export const skillDraftRouter = createTRPCRouter({
         });
       }
 
-      // Resolve the user's API key
-      const anthropicApiKey = await resolveApiKeyForUser(ctx.session.user.id);
+      // Resolve the user's AI config
+      const aiConfig = await resolveAIConfigForUser(ctx.session.user.id);
 
       // Route by document category
       if (analysis.documentCategory === "assessment") {
         const { generateAssessmentSkillDraft } = await import("@/server/services/ai/assessment-generator");
-        generateAssessmentSkillDraft(input.analysisId, { anthropicApiKey }).catch(console.error);
+        generateAssessmentSkillDraft(input.analysisId, aiConfig).catch(console.error);
       } else {
         const { generateSkillDraft } = await import("@/server/services/ai/skill-generator");
-        generateSkillDraft(input.analysisId, { anthropicApiKey }).catch(console.error);
+        generateSkillDraft(input.analysisId, aiConfig).catch(console.error);
       }
 
       return { analysisId: input.analysisId };
@@ -255,16 +255,16 @@ export const skillDraftRouter = createTRPCRouter({
         where: { analysisId: input.analysisId },
       });
 
-      // Resolve the user's API key
-      const anthropicApiKey = await resolveApiKeyForUser(ctx.session.user.id);
+      // Resolve the user's AI config
+      const aiConfig = await resolveAIConfigForUser(ctx.session.user.id);
 
       // Route by document category
       if (analysis.documentCategory === "assessment") {
         const { generateAssessmentSkillDraft } = await import("@/server/services/ai/assessment-generator");
-        generateAssessmentSkillDraft(input.analysisId, { anthropicApiKey }).catch(console.error);
+        generateAssessmentSkillDraft(input.analysisId, aiConfig).catch(console.error);
       } else {
         const { generateSkillDraft } = await import("@/server/services/ai/skill-generator");
-        generateSkillDraft(input.analysisId, { anthropicApiKey }).catch(console.error);
+        generateSkillDraft(input.analysisId, aiConfig).catch(console.error);
       }
 
       return { analysisId: input.analysisId };

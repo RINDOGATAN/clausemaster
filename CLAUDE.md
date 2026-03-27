@@ -9,7 +9,7 @@ AI-powered contract analysis tool by TODO.LAW.
 - **Database**: Prisma 5.22.0 + PostgreSQL (Neon)
 - **Auth**: NextAuth 4.24.13 (magic link + Google OAuth)
 - **Styling**: Tailwind CSS 4, Shadcn/ui (new-york style), dark brutalist theme with amber/gold accent (#f5a623)
-- **AI**: Vercel AI SDK (`ai`, `@ai-sdk/anthropic`, `@ai-sdk/openai-compatible`)
+- **AI**: Vercel AI SDK (`ai`, `@ai-sdk/anthropic`, `@ai-sdk/openai`, `@ai-sdk/openai-compatible`)
 - **i18n**: next-intl (EN/ES)
 - **File parsing**: pdf-parse, mammoth (DOCX), react-dropzone
 
@@ -55,10 +55,11 @@ npx prisma studio    # Open Prisma Studio
 
 - `DATABASE_URL` - PostgreSQL connection string
 - `NEXTAUTH_SECRET` - NextAuth session secret
-- `AI_PROVIDER` - `anthropic` | `ollama` | `openai-compatible`
-- `AI_MODEL` - Model name (e.g., `claude-sonnet-4-20250514`)
-- `ANTHROPIC_API_KEY` - Anthropic API key
-- `OLLAMA_BASE_URL` - Ollama server URL
+- `ANTHROPIC_API_KEY` - Platform Anthropic key (for privileged-domain users)
+- `PLATFORM_AI_PROVIDER` - Community tier provider (e.g., `groq`)
+- `PLATFORM_AI_MODEL` - Community tier model (e.g., `llama-3.3-70b-versatile`)
+- `PLATFORM_AI_API_KEY` - Community tier API key
+- `PLATFORM_AI_BASE_URL` - Community tier base URL
 - `LEGALSKILLS_DIR` - Path to legalskills repo (defaults to `../legalskills`)
 - `INVITE_CODE` - Optional invite code to gate the sign-in page (unset = open access)
 - `E2E_CREDENTIALS_SECRET` - Optional secret enabling e2e-credentials auth provider for Playwright tests
@@ -103,6 +104,19 @@ The AI analysis pipeline (3 sequential calls: classify → extract clauses → f
 3. Verify: document status progresses UPLOADED → EXTRACTING → ANALYZING → COMPLETED
 
 **Alternative if Pro is not an option**: split the 3 AI steps into separate API routes, each called sequentially by the client (each fits within 10s). This would require refactoring the analyzer and the client polling logic.
+
+## AI Provider Architecture
+
+Two-tier system stored per-user in the `User` model (`aiProvider`, `aiModel`, `encryptedApiKey`):
+
+- **Community tier (default)**: Platform-provided open-weights model (e.g., Llama 3.3 70B via Groq). No API key needed from the user. Configured via `PLATFORM_AI_*` env vars.
+- **Pro tier**: User brings their own key for Anthropic, OpenAI, Groq, Mistral, or Together. Key is encrypted with AES-256-GCM.
+
+Provider registry: `src/server/services/ai/providers.ts` — metadata for each provider (labels, key prefixes, default models, base URLs).
+Config resolver: `src/server/services/resolve-ai-config.ts` — resolves per-user `AIConfig` (provider + model + key + baseUrl).
+Model factory: `src/server/services/ai/provider.ts` — `getAIModel(config)` creates the correct Vercel AI SDK model instance.
+
+Privileged-domain users (e.g., `@privacycloud.com`) always use the platform Anthropic key regardless of their settings.
 
 ## AI Analysis Pipeline
 
