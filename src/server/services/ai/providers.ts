@@ -5,7 +5,7 @@ export const AI_PROVIDERS = {
     keyPrefix: "",
     keyPlaceholder: "",
     keyUrl: "",
-    defaultModel: "llama-3.3-70b-versatile",
+    defaultModel: "qwen/qwen3-32b",
     models: [],
     baseUrl: "",
   },
