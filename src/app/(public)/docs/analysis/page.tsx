@@ -5,6 +5,9 @@ import {
   AlertTriangle,
   BookOpen,
   Scale,
+  Cpu,
+  Zap,
+  Key,
 } from "lucide-react";
 
 export default function AnalysisDocsPage() {
@@ -20,8 +23,9 @@ export default function AnalysisDocsPage() {
         </h1>
         <p className="text-base text-muted-foreground leading-relaxed max-w-2xl">
           Clausemaster uses a three-step AI pipeline powered by the Vercel AI
-          SDK to analyze contracts. Each step builds on the previous one to
-          provide comprehensive results.
+          SDK to analyze contracts. Choose between our free community model or
+          bring your own API key for premium providers. Each step builds on the
+          previous one to provide comprehensive results.
         </p>
       </section>
 
@@ -290,6 +294,93 @@ export default function AnalysisDocsPage() {
               {type}
             </span>
           ))}
+        </div>
+      </section>
+
+      {/* AI Providers */}
+      <section id="ai-providers" className="scroll-mt-20">
+        <h2 className="text-xl font-semibold text-foreground mb-4">
+          AI Providers
+        </h2>
+        <p className="text-sm text-muted-foreground mb-6">
+          Clausemaster supports multiple AI providers. Choose the option that
+          best fits your needs and budget.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <div className="card-brutal">
+            <div className="flex items-center gap-2 mb-3">
+              <Zap className="w-5 h-5 text-green-500" />
+              <h3 className="text-sm font-semibold text-foreground">
+                Community (Free)
+              </h3>
+            </div>
+            <p className="text-xs text-muted-foreground mb-3">
+              Start analyzing contracts immediately with no API key required.
+              Powered by an open-weights model hosted by the platform.
+            </p>
+            <ul className="space-y-1.5">
+              {[
+                "No API key or account needed",
+                "Good for getting started and drafting skills",
+                "All pipeline features available",
+              ].map((item) => (
+                <li
+                  key={item}
+                  className="flex items-start gap-2 text-xs text-muted-foreground"
+                >
+                  <span className="w-1 h-1 rounded-full bg-green-500 mt-1.5 shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="card-brutal">
+            <div className="flex items-center gap-2 mb-3">
+              <Key className="w-5 h-5 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">
+                Bring Your Own Key
+              </h3>
+            </div>
+            <p className="text-xs text-muted-foreground mb-3">
+              Use your preferred AI provider for higher quality output or
+              specific model requirements.
+            </p>
+            <ul className="space-y-1.5">
+              {[
+                "Anthropic (Claude)",
+                "OpenAI (GPT)",
+                "Groq (Llama)",
+                "Mistral",
+                "Together AI (Llama)",
+              ].map((item) => (
+                <li
+                  key={item}
+                  className="flex items-start gap-2 text-xs text-muted-foreground"
+                >
+                  <span className="w-1 h-1 rounded-full bg-primary mt-1.5 shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="card-brutal flex items-start gap-3">
+          <Cpu className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-foreground mb-1">
+              How It Works
+            </p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Your AI provider choice is stored per-account. You can switch
+              providers at any time from Settings. All providers use the same
+              analysis pipeline and produce the same structured output format
+              &mdash; only the underlying model differs. API keys are encrypted
+              at rest using AES-256-GCM.
+            </p>
+          </div>
         </div>
       </section>
 
