@@ -19,6 +19,11 @@
   1. **Classification**: Identify contract type, jurisdiction, parties, and effective date
   2. **Clause Extraction**: Summarize each clause with legal significance and bias assessment
   3. **Issue Flagging**: Flag issues by severity (Info / Warning / Critical)
+- **Two-Tier AI Provider System**:
+  - **Community (Free)**: Open-weights model hosted by the platform — no API key needed
+  - **Bring Your Own Key**: Anthropic (Claude), OpenAI (GPT), Groq, Mistral, or Together AI
+  - Per-user provider selection, switchable anytime from Settings
+  - All API keys encrypted at rest (AES-256-GCM)
 - **Multi-Format Support**: Upload PDF, DOCX, or TXT contracts
 - **Jurisdiction-Specific Insights**: Analysis calibrated to applicable legal jurisdictions
 - **LegalSkills Integration**: Extensible analysis through the TODO.LAW Skills marketplace

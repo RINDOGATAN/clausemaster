@@ -67,6 +67,17 @@ export default function PublisherDocsPage() {
               "Areas of specialization (e.g., corporate, IP, employment)",
               "Website URL for your profile listing",
             ]}
+          />
+          <WorkflowStep
+            number={4}
+            title="Choose AI Provider"
+            actor="Lawyer"
+            description="Start with the free community model or bring your own API key from Anthropic, OpenAI, Groq, Mistral, or Together."
+            details={[
+              "Community model (free) — no API key needed, analyze contracts immediately",
+              "Bring your own key — choose your preferred provider for premium models",
+              "Switch providers anytime from Settings",
+            ]}
             isLast
           />
         </div>
