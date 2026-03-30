@@ -57,7 +57,7 @@ npx prisma studio    # Open Prisma Studio
 - `NEXTAUTH_SECRET` - NextAuth session secret
 - `ANTHROPIC_API_KEY` - Platform Anthropic key (for privileged-domain users)
 - `PLATFORM_AI_PROVIDER` - Community tier provider (e.g., `groq`)
-- `PLATFORM_AI_MODEL` - Community tier model (e.g., `llama-3.3-70b-versatile`)
+- `PLATFORM_AI_MODEL` - Community tier model (e.g., `qwen/qwen3-32b`)
 - `PLATFORM_AI_API_KEY` - Community tier API key
 - `PLATFORM_AI_BASE_URL` - Community tier base URL
 - `LEGALSKILLS_DIR` - Path to legalskills repo (defaults to `../legalskills`)
@@ -85,7 +85,7 @@ Clausemaster is a **standalone** project that connects to Dealroom (`deal-room-t
   - `metadata.json` includes `languages`, `jurisdictions`, `soloModeSupported`
   - `boilerplate.json` wraps all text fields in i18n objects
 
-When working in this project, do not touch anything in `/Users/sme/NEL/deal-room-todo`.
+When working in this project, do not touch anything in the deal-room-todo repository.
 
 ## Deployment
 
@@ -109,7 +109,7 @@ The AI analysis pipeline (3 sequential calls: classify → extract clauses → f
 
 Two-tier system stored per-user in the `User` model (`aiProvider`, `aiModel`, `encryptedApiKey`):
 
-- **Community tier (default)**: Platform-provided open-weights model (e.g., Llama 3.3 70B via Groq). No API key needed from the user. Configured via `PLATFORM_AI_*` env vars.
+- **Community tier (default)**: Platform-provided open-weights model (currently Qwen 3 32B via Groq). No API key needed from the user. Configured via `PLATFORM_AI_*` env vars.
 - **Pro tier**: User brings their own key for Anthropic, OpenAI, Groq, Mistral, or Together. Key is encrypted with AES-256-GCM.
 
 Provider registry: `src/server/services/ai/providers.ts` — metadata for each provider (labels, key prefixes, default models, base URLs).
