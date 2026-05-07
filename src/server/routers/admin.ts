@@ -8,13 +8,13 @@ export const adminRouter = createTRPCRouter({
   listSubmissions: internalProcedure
     .input(
       z.object({
-        status: z.enum(["SUBMITTED", "APPROVED", "REJECTED", "ALL"]).default("ALL"),
+        status: z.enum(["SUBMITTED", "APPROVED", "REJECTED", "EXPORTED", "ALL"]).default("ALL"),
       })
     )
     .query(async ({ ctx, input }) => {
       return ctx.prisma.skillDraft.findMany({
         where: input.status === "ALL"
-          ? { status: { in: ["SUBMITTED", "APPROVED", "REJECTED"] } }
+          ? { status: { in: ["SUBMITTED", "APPROVED", "REJECTED", "EXPORTED"] } }
           : { status: input.status },
         include: {
           analysis: {

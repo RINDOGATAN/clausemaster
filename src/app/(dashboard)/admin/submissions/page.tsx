@@ -10,9 +10,10 @@ const STATUS_COLORS: Record<string, string> = {
   SUBMITTED: "bg-blue-500/10 text-blue-500",
   APPROVED: "bg-green-500/10 text-green-500",
   REJECTED: "bg-red-500/10 text-red-500",
+  EXPORTED: "bg-primary/10 text-primary",
 };
 
-type FilterStatus = "SUBMITTED" | "APPROVED" | "REJECTED" | "ALL";
+type FilterStatus = "SUBMITTED" | "APPROVED" | "REJECTED" | "EXPORTED" | "ALL";
 
 export default function AdminSubmissionsPage() {
   const t = useTranslations("admin");
@@ -40,7 +41,7 @@ export default function AdminSubmissionsPage() {
 
       {/* Filter tabs */}
       <div className="flex items-center gap-1 border-b border-border pb-0">
-        {(["SUBMITTED", "APPROVED", "REJECTED", "ALL"] as const).map((status) => (
+        {(["SUBMITTED", "APPROVED", "EXPORTED", "REJECTED", "ALL"] as const).map((status) => (
           <button
             key={status}
             onClick={() => setFilter(status)}
