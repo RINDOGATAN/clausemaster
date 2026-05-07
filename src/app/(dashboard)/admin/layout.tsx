@@ -1,21 +1,15 @@
-"use client";
-
-import { useSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { authOptions } from "@/lib/auth";
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession();
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const session = await getServerSession(authOptions);
 
-  if (status === "loading") {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
+  if (!session?.user) {
+    redirect("/sign-in");
   }
 
-  if (session?.user?.role !== "INTERNAL") {
+  if (session.user.role !== "INTERNAL") {
     redirect("/documents");
   }
 

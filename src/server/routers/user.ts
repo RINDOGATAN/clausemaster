@@ -22,6 +22,7 @@ export const userRouter = createTRPCRouter({
       z.object({
         inviteCode: z.string().optional(),
         useExpertDirectory: z.boolean().optional(),
+        asClient: z.boolean().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -47,6 +48,16 @@ export const userRouter = createTRPCRouter({
         const updated = await ctx.prisma.user.update({
           where: { id: userId },
           data: { role: "INTERNAL", onboardedAt: new Date() },
+          select: { role: true },
+        });
+        return { role: updated.role };
+      }
+
+      // Default path: continue as client (analyze own contracts)
+      if (input.asClient) {
+        const updated = await ctx.prisma.user.update({
+          where: { id: userId },
+          data: { role: "CLIENT", onboardedAt: new Date() },
           select: { role: true },
         });
         return { role: updated.role };
@@ -141,7 +152,7 @@ export const userRouter = createTRPCRouter({
       // No valid onboarding path
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "Please provide an invite code or verify via the Expert Directory.",
+        message: "Pick a path: continue as client, enter a publisher invite code, or verify via the Expert Directory.",
       });
     }),
 
