@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { ArrowLeft, Loader2, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, Loader2, CheckCircle, XCircle, Upload, Check, ExternalLink } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
@@ -12,6 +12,7 @@ const STATUS_COLORS: Record<string, string> = {
   SUBMITTED: "bg-blue-500/10 text-blue-500",
   APPROVED: "bg-green-500/10 text-green-500",
   REJECTED: "bg-red-500/10 text-red-500",
+  EXPORTED: "bg-primary/10 text-primary",
 };
 
 export default function SubmissionReviewPage() {
@@ -25,6 +26,8 @@ export default function SubmissionReviewPage() {
 
   const { data: submission, isLoading } = trpc.admin.getSubmission.useQuery({ id: submissionId });
 
+  const utils = trpc.useUtils();
+
   const reviewMutation = trpc.admin.reviewSubmission.useMutation({
     onSuccess: (data) => {
       toast.success(
@@ -34,6 +37,16 @@ export default function SubmissionReviewPage() {
     },
     onError: (error) => {
       toast.error(error.message);
+    },
+  });
+
+  const publishMutation = trpc.skillDraft.export.useMutation({
+    onSuccess: () => {
+      toast.success(t("submissionPublished"));
+      utils.admin.getSubmission.invalidate({ id: submissionId });
+    },
+    onError: (error) => {
+      toast.error(t("publishFailed", { error: error.message }));
     },
   });
 
@@ -161,6 +174,58 @@ export default function SubmissionReviewPage() {
         <div className="card-brutal p-5">
           <h3 className="section-label mb-2">{t("previousReviewNotes")}</h3>
           <p className="text-sm text-muted-foreground">{submission.reviewNotes}</p>
+        </div>
+      )}
+
+      {/* Publish area — for APPROVED (publish button) and EXPORTED (link to repo) */}
+      {(submission.status === "APPROVED" || submission.status === "EXPORTED") && (
+        <div className="card-brutal p-5 space-y-4">
+          <h3 className="section-label">{t("publishSection")}</h3>
+          <p className="text-sm text-muted-foreground">
+            {submission.status === "APPROVED"
+              ? t("publishDescription")
+              : t("publishedDescription")}
+          </p>
+
+          {submission.status === "APPROVED" && (
+            <button
+              onClick={() => publishMutation.mutate({ skillDraftId: submission.id })}
+              disabled={publishMutation.isPending}
+              className="btn-brutal inline-flex items-center gap-2"
+            >
+              {publishMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Upload className="w-4 h-4" />
+              )}
+              {publishMutation.isPending ? t("publishing") : t("publishToMarketplace")}
+            </button>
+          )}
+
+          {submission.status === "EXPORTED" && (
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="inline-flex items-center gap-2 text-sm text-green-500">
+                <Check className="w-4 h-4" />
+                {t("published")}
+              </span>
+              {submission.exportPath && (
+                <a
+                  href={submission.exportPath}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+                >
+                  {t("viewInMarketplace")}
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+              {submission.exportedAt && (
+                <span className="text-xs text-muted-foreground">
+                  {new Date(submission.exportedAt).toLocaleString()}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       )}
 

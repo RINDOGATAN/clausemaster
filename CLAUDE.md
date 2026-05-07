@@ -61,6 +61,8 @@ npx prisma studio    # Open Prisma Studio
 - `PLATFORM_AI_API_KEY` - Community tier API key
 - `PLATFORM_AI_BASE_URL` - Community tier base URL
 - `LEGALSKILLS_DIR` - Path to legalskills repo (defaults to `../legalskills`)
+- `LEGALSKILLS_GITHUB_TOKEN` - PAT (Contents:write) used to commit published skills to `RINDOGATAN/legalskills`. Required in production. When unset, publish falls back to writing files into `LEGALSKILLS_DIR` (local dev only).
+- `LEGALSKILLS_GITHUB_OWNER` / `LEGALSKILLS_GITHUB_REPO` / `LEGALSKILLS_GITHUB_BRANCH` - Optional overrides; default `RINDOGATAN`/`legalskills`/`main`.
 - `INVITE_CODE` - Optional invite code to gate the sign-in page (unset = open access)
 - `E2E_CREDENTIALS_SECRET` - Optional secret enabling e2e-credentials auth provider for Playwright tests
 
@@ -92,7 +94,7 @@ When working in this project, do not touch anything in the deal-room-todo reposi
 - **Host**: Vercel (serverless) — currently on **Hobby plan**
 - **Domain**: clausemaster.todo.law
 - **Important**: Vercel has a **read-only filesystem** — never write files to disk in API routes. File uploads are stored as `Bytes` in the database (Document.fileData column).
-- Skill draft export (`skill-exporter.ts`) writes to `legalskills/` directory — this only works locally, not on Vercel.
+- Skill draft publish (`skill-exporter.ts`) commits the skill files to the `RINDOGATAN/legalskills` GitHub repo via the Git Data API when `LEGALSKILLS_GITHUB_TOKEN` is set. Without the token (local dev), it falls back to writing files to `LEGALSKILLS_DIR`.
 
 ## Known Blocker: Analysis timeout on Vercel Hobby (Feb 2026)
 

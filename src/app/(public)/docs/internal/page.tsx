@@ -186,30 +186,42 @@ export default function InternalDocsPage() {
         </div>
       </section>
 
-      {/* Direct Export */}
+      {/* Publish */}
       <section id="export" className="scroll-mt-20">
         <h2 className="text-xl font-semibold text-foreground mb-4">
-          Skill Export
+          Publishing Approved Skills
         </h2>
         <p className="text-sm text-muted-foreground mb-6">
-          Export approved skills to the LegalSkills repository for use by other
-          systems.
+          After approving a submission, an admin must explicitly publish it.
+          Publishing commits the skill&apos;s JSON files to the{" "}
+          <code className="px-1.5 py-0.5 rounded bg-card border border-border text-xs">
+            RINDOGATAN/legalskills
+          </code>{" "}
+          GitHub repository so Dealroom and other consumers can pick it up.
         </p>
 
         <div className="card-brutal flex items-start gap-3">
           <Download className="w-5 h-5 text-primary shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-semibold text-foreground mb-1">
-              Local Export Only
+              How it works
             </p>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              The export feature writes approved skills to the{" "}
-              <code className="px-1.5 py-0.5 rounded bg-card border border-border text-xs">
+              On approval, the draft enters{" "}
+              <code className="px-1 py-0.5 rounded bg-card border border-border text-xs">
+                APPROVED
+              </code>{" "}
+              status. Clicking Publish commits one atomic commit per skill via
+              the GitHub Git Data API and moves the draft to{" "}
+              <code className="px-1 py-0.5 rounded bg-card border border-border text-xs">
+                EXPORTED
+              </code>
+              . In local dev (no GitHub token), it falls back to writing files
+              into the{" "}
+              <code className="px-1 py-0.5 rounded bg-card border border-border text-xs">
                 legalskills/
               </code>{" "}
-              directory. This only works in local development environments
-              &mdash; Vercel&apos;s read-only filesystem prevents writing in
-              production.
+              directory.
             </p>
           </div>
         </div>
