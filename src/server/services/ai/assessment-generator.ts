@@ -14,6 +14,7 @@ import {
   buildGuidanceGenerationPrompt,
 } from "./prompts";
 import prisma from "@/lib/prisma";
+import { skillPublishingConfig } from "@/config/skill-publishing";
 
 export async function generateAssessmentSkillDraft(
   analysisId: string,
@@ -108,7 +109,7 @@ export async function generateAssessmentSkillDraft(
     const contractTypeSlug = (analysis.contractType || "assessment")
       .toLowerCase()
       .replace(/[_\s]+/g, "-");
-    const skillId = `com.nel.skills.${contractTypeSlug}`;
+    const skillId = `${skillPublishingConfig.idNamespace}.${contractTypeSlug}`;
     const displayName = analysis.contractTypeLabel || analysis.contractType || "Assessment";
     const language = analysis.jurisdiction === "SPAIN" ? "es" : "en";
 
@@ -143,8 +144,8 @@ export async function generateAssessmentSkillDraft(
       version: "1.0.0",
       jurisdictions,
       languages: [language],
-      author: "Clausemaster AI",
-      license: "proprietary",
+      author: skillPublishingConfig.author,
+      license: skillPublishingConfig.defaultLicense,
       templateFamily: (analysis.contractType || "ASSESSMENT").toUpperCase(),
       nativeJurisdiction: jurisdictions[0],
       skillType: "assessment",
