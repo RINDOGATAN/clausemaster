@@ -18,7 +18,7 @@ export const skillPublishingConfig = {
   defaultLicense: process.env.SKILL_DEFAULT_LICENSE || "Apache-2.0",
 
   /** Author recorded in the manifest and SKILL.md frontmatter. */
-  author: process.env.SKILL_AUTHOR || "Clausemaster AI",
+  author: process.env.SKILL_AUTHOR || "Sergio Maldonado",
 
   /** Reverse-DNS namespace for the generated skillId. */
   idNamespace: process.env.SKILL_ID_NAMESPACE || "com.nel.skills",
