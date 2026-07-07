@@ -17,6 +17,7 @@ import {
   buildBoilerplateGenerationPrompt,
 } from "./prompts";
 import prisma from "@/lib/prisma";
+import { skillPublishingConfig } from "@/config/skill-publishing";
 
 export async function generateSkillDraft(
   analysisId: string,
@@ -145,7 +146,7 @@ export async function generateSkillDraft(
     const contractTypeSlug = (analysis.contractType || "contract")
       .toLowerCase()
       .replace(/[_\s]+/g, "-");
-    const skillId = `com.nel.skills.${contractTypeSlug}`;
+    const skillId = `${skillPublishingConfig.idNamespace}.${contractTypeSlug}`;
     const displayName = analysis.contractTypeLabel || analysis.contractType || "Contract";
 
     // Detect language from jurisdiction
@@ -184,8 +185,8 @@ export async function generateSkillDraft(
       version: "1.0.0",
       jurisdictions,
       languages: [language],
-      author: "Clausemaster AI",
-      license: "proprietary",
+      author: skillPublishingConfig.author,
+      license: skillPublishingConfig.defaultLicense,
       templateFamily: (analysis.contractType || "CONTRACT").toUpperCase(),
       nativeJurisdiction: jurisdictions[0],
     };
