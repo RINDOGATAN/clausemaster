@@ -171,3 +171,35 @@ LegalSkills repo is loaded as read-only reference for Steps 2 and 3.
 - Card style: `.card-brutal` / `.paper-card` with rounded-2xl, shadow-card
 - `.container` must be defined in globals.css (`mx-auto w-full max-width: 1400px`) — Tailwind v4 does not provide this by default
 - Port: 3002
+
+## Skill extensibility & positioning (product doctrine)
+
+**What Clausemaster is:** a hosted **cloud** authoring tool (NOT part of the
+self-hosted bundle, which is `dpocentral / deal-room / aisentinel`). General users
+**bring their own AI key**; privileged/first-party get a platform key. It generates
+**dual-format** skills — the todo.law engine artifacts (`clauses.json`,
+`boilerplate.json`, `metadata.json`, `manifest.json`) **and** the LQ.AI artifacts
+(`SKILL.md` with `lq_ai` frontmatter, `parameters.json`, `evals/`) — so a skill runs
+in both todo.law and LegalQuants. Approved skills publish to the `legalskills` repo.
+
+**Framing:** *Clausemaster is the cloud factory; the todo.law bundle is the
+sovereign workshop.* You author in the cloud (BYO-key → your clauses go to your own
+LLM, not ours; the output lands in your own deployment); you run the skill locally.
+Sovereignty lives in the daily runtime (the bundle), so a hosted occasional-use
+authoring tool is the right, low-complexity default. (A self-host option could
+follow for air-gapped firms; not the default.)
+
+**Which apps can be extended with your own skills — and how open:**
+- **Dealroom → OPEN extension.** Its value *is* the clause libraries; a skill is
+  bespoke drafting DNA. Open-ended, many authors, low stakes (a draft a human vets
+  before use). This is where "create your own skill / for LegalQuants / extend your
+  Dealroom" is the headline, community-friendly win.
+- **DPO Central & AI Sentinel → CURATED extension only.** Their value is the program
+  structure; a "skill" is a standardized, compliance-critical assessment/framework
+  pack (a wrong DPIA rule or AI-Act mapping is regulatory exposure). Right model: a
+  vetted, attested first-party/partner line, NOT an open marketplace.
+- **The load-bearing why:** Dealroom produces *drafts a human vets*; DPO/AIS produce
+  *compliance artifacts people rely on*. Open community authorship fits the former;
+  the latter wants a named author's attestation. Explain it to users exactly this way.
+
+Full doctrine: legalai/synthesis/skill-extensibility-and-clausemaster-positioning.md
