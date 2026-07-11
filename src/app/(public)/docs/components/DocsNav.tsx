@@ -7,13 +7,11 @@ import {
   Scale,
   Shield,
   Brain,
-  CreditCard,
 } from "lucide-react";
 
 const sections = [
   { title: "Getting Started", href: "/docs", icon: BookOpen },
   { title: "For Lawyers", href: "/docs/publisher", icon: Scale },
-  { title: "Revenue Share", href: "/docs/revenue-share", icon: CreditCard },
   { title: "For Admins", href: "/docs/internal", icon: Shield },
   { title: "AI Analysis", href: "/docs/analysis", icon: Brain },
 ];

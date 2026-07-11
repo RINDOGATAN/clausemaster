@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   Briefcase,
-  CreditCard,
   Cpu,
   Rocket,
   Check,
@@ -21,30 +20,13 @@ import {
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 
-const STEPS = ["profile", "stripe", "aiProvider", "ready"] as const;
+const STEPS = ["profile", "aiProvider", "ready"] as const;
 type Step = (typeof STEPS)[number];
 
 export default function PublisherSetupPage() {
   const t = useTranslations("publisherSetup");
-  const searchParams = useSearchParams();
-  const stripeParam = searchParams.get("stripe");
-
-  // Start on the Stripe step if returning from Stripe onboarding
-  const [currentStep, setCurrentStep] = useState<Step>(
-    stripeParam ? "stripe" : "profile"
-  );
+  const [currentStep, setCurrentStep] = useState<Step>("profile");
   const currentIndex = STEPS.indexOf(currentStep);
-
-  // Show toast on return from Stripe (once only)
-  useEffect(() => {
-    if (stripeParam === "connected") {
-      toast.success(t("stripeConnected"));
-      window.history.replaceState({}, "", "/publisher-setup");
-    } else if (stripeParam === "refresh") {
-      toast.info(t("stripeIncomplete"));
-      window.history.replaceState({}, "", "/publisher-setup");
-    }
-  }, [stripeParam, t]);
 
   const goNext = () => {
     if (currentIndex < STEPS.length - 1) {
@@ -66,7 +48,7 @@ export default function PublisherSetupPage() {
           {STEPS.map((step, i) => {
             const isCompleted = i < currentIndex;
             const isCurrent = i === currentIndex;
-            const icons = [Briefcase, CreditCard, Cpu, Rocket];
+            const icons = [Briefcase, Cpu, Rocket];
             const Icon = icons[i];
 
             return (
@@ -102,7 +84,6 @@ export default function PublisherSetupPage() {
       {/* Step content */}
       <div className="card-brutal bg-card border border-border rounded-2xl p-8 shadow-card">
         {currentStep === "profile" && <ProfileStep onNext={goNext} />}
-        {currentStep === "stripe" && <StripeStep onNext={goNext} onBack={goBack} />}
         {currentStep === "aiProvider" && <AIProviderStep onNext={goNext} onBack={goBack} />}
         {currentStep === "ready" && <ReadyStep />}
       </div>
@@ -241,134 +222,7 @@ function ProfileStep({ onNext }: { onNext: () => void }) {
   );
 }
 
-// ── Step 2: Stripe Connect ───────────────────────────────────────
-
-function StripeStep({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
-  const t = useTranslations("publisherSetup");
-  const tCommon = useTranslations("common");
-
-  const { data: connectStatus, isLoading } = trpc.user.getStripeConnectStatus.useQuery(
-    undefined,
-    { refetchInterval: 5000 }
-  );
-
-  const createLink = trpc.user.createConnectOnboardingLink.useMutation({
-    onSuccess: (data) => {
-      window.location.href = data.url;
-    },
-    onError: (error) => toast.error(error.message),
-  });
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-6 h-6 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  const isConnected = connectStatus?.connected && connectStatus?.complete;
-  const isIncomplete = connectStatus?.connected && !connectStatus?.complete;
-
-  return (
-    <div className="space-y-6">
-      <div className="text-center mb-2">
-        <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CreditCard className="w-7 h-7 text-primary" />
-        </div>
-        <h2 className="text-2xl font-bold text-foreground">{t("stripeTitle")}</h2>
-        <p className="text-muted-foreground mt-2 max-w-md mx-auto">{t("stripeDescription")}</p>
-      </div>
-
-      {/* Revenue visual */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="p-4 rounded-xl bg-primary/10 border border-primary/30 text-center">
-          <p className="text-3xl font-bold text-primary">70%</p>
-          <p className="text-xs text-muted-foreground mt-1">{t("youKeep")}</p>
-        </div>
-        <div className="p-4 rounded-xl bg-background border border-border text-center">
-          <p className="text-3xl font-bold text-foreground">30%</p>
-          <p className="text-xs text-muted-foreground mt-1">{t("platformKeeps")}</p>
-        </div>
-      </div>
-
-      {/* Why this matters callout */}
-      <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
-        <p className="text-sm font-medium text-foreground mb-1">{t("whyStripeMatters")}</p>
-        <p className="text-xs text-muted-foreground">{t("whyStripeExplainer")}</p>
-      </div>
-
-      {isConnected ? (
-        <div className="flex items-center gap-3 p-4 bg-green-500/5 border border-green-500/20 rounded-xl">
-          <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" />
-          <div>
-            <p className="text-sm font-medium text-foreground">{t("stripeConnected")}</p>
-            <p className="text-xs text-muted-foreground">{t("stripeConnectedHint")}</p>
-          </div>
-        </div>
-      ) : isIncomplete ? (
-        <div className="space-y-3">
-          <div className="flex items-center gap-3 p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl">
-            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0" />
-            <div>
-              <p className="text-sm font-medium text-foreground">{t("stripeIncomplete")}</p>
-              <p className="text-xs text-muted-foreground">{t("stripeIncompleteHint")}</p>
-            </div>
-          </div>
-          <button
-            onClick={() => createLink.mutate()}
-            disabled={createLink.isPending}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
-          >
-            {createLink.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t("completeStripeSetup")}
-          </button>
-        </div>
-      ) : connectStatus?.available ? (
-        <button
-          onClick={() => createLink.mutate()}
-          disabled={createLink.isPending}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
-        >
-          {createLink.isPending ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              {t("connecting")}
-            </>
-          ) : (
-            <>
-              <CreditCard className="w-4 h-4" />
-              {t("connectStripe")}
-            </>
-          )}
-        </button>
-      ) : (
-        <div className="p-4 rounded-xl bg-muted/50 border border-border text-center">
-          <p className="text-sm text-muted-foreground">{t("stripeUnavailable")}</p>
-        </div>
-      )}
-
-      {/* Navigation */}
-      <div className="flex items-center justify-between pt-2">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          {tCommon("back")}
-        </button>
-        <button
-          onClick={onNext}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          {isConnected ? t("continue") : t("skipStep")}
-          <ArrowRight className="w-4 h-4" />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ── Step 3: AI Provider ──────────────────────────────────────────
+// ── Step 2: AI Provider ──────────────────────────────────────────
 
 function AIProviderStep({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
   const t = useTranslations("publisherSetup");
@@ -544,23 +398,20 @@ function AIProviderStep({ onNext, onBack }: { onNext: () => void; onBack: () => 
   );
 }
 
-// ── Step 4: Ready ────────────────────────────────────────────────
+// ── Step 3: Ready ────────────────────────────────────────────────
 
 function ReadyStep() {
   const t = useTranslations("publisherSetup");
   const router = useRouter();
 
   const { data: profile } = trpc.user.getPublisherProfile.useQuery();
-  const { data: stripeStatus } = trpc.user.getStripeConnectStatus.useQuery();
   const { data: apiKeyStatus } = trpc.settings.getApiKeyStatus.useQuery();
 
   const hasProfile = !!(profile?.firmName || profile?.specialties?.length);
-  const hasStripe = stripeStatus?.connected && stripeStatus?.complete;
   const hasApiKey = apiKeyStatus?.hasApiKey || apiKeyStatus?.isPrivileged;
 
   const items = [
     { label: t("checkProfile"), done: hasProfile },
-    { label: t("checkStripe"), done: hasStripe },
     { label: t("checkApiKey"), done: hasApiKey },
   ];
 

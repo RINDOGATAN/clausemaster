@@ -18,8 +18,8 @@ export default function DocsOverviewPage() {
           {brand.name} Documentation
         </h1>
         <p className="text-base text-muted-foreground leading-relaxed max-w-2xl">
-          Everything you need to publish legal skills, earn revenue on the
-          marketplace, and manage your practice on {brand.name}.
+          Everything you need to build legal skills, extend your own todo.law
+          stack, and contribute to the LegalQuants community on {brand.name}.
         </p>
       </section>
 
@@ -42,13 +42,13 @@ export default function DocsOverviewPage() {
             },
             {
               step: 3,
-              title: "Publish to the Marketplace",
-              desc: "Submit your skill for review and list it on the AAS marketplace.",
+              title: "Install to Your Stack",
+              desc: "Add the skill to your own self-hosted todo.law deployments so it drafts the way you do.",
             },
             {
               step: 4,
-              title: "Earn Revenue",
-              desc: "Receive 70% of subscription revenue every time a client uses your skill.",
+              title: "Contribute to LegalQuants",
+              desc: "Publish open skills to the LegalQuants community. Every skill is dual-format for todo.law and LQ.",
             },
           ].map((item) => (
             <div key={item.step} className="flex items-start gap-4">
@@ -83,8 +83,8 @@ export default function DocsOverviewPage() {
                 Publisher
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Create and publish legal skills, earn 70% revenue on the AAS
-                marketplace, and manage your published catalog.
+                Create legal skills, extend your own todo.law stack, and
+                contribute open skills to the LegalQuants community.
               </p>
             </div>
           </Link>
