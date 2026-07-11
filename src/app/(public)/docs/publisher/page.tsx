@@ -1,6 +1,5 @@
 import { FlowDiagram } from "../components/FlowDiagram";
 import { WorkflowStep } from "../components/WorkflowStep";
-import { Price } from "../components/Price";
 import {
   KeyRound,
   FileText,
@@ -9,7 +8,6 @@ import {
   CheckCircle,
   XCircle,
   User,
-  DollarSign,
   ExternalLink,
   Cloud,
   Server,
@@ -29,8 +27,8 @@ export default function PublisherDocsPage() {
           For Lawyers
         </h1>
         <p className="text-base text-muted-foreground leading-relaxed max-w-2xl">
-          Analyze contracts, generate legal skills for the marketplace, and
-          provide expert reviews to startups.
+          Analyze contracts, generate legal skills for your own todo.law stack
+          and the LegalQuants community, and provide expert reviews to startups.
         </p>
       </section>
 
@@ -214,58 +212,57 @@ export default function PublisherDocsPage() {
         </div>
       </section>
 
-      {/* Earn from the AAS Marketplace */}
+      {/* Dual-Format: Your Stack and LegalQuants */}
       <section id="aas-marketplace" className="scroll-mt-20">
         <h2 className="text-xl font-semibold text-foreground mb-4">
-          Earn from the AAS Marketplace
+          Your Stack and the LegalQuants Community
         </h2>
         <p className="text-sm text-muted-foreground mb-6">
           Skills you create in Clausemaster become{" "}
           <strong className="text-foreground">Agentic Attorney Skills (AAS)</strong>{" "}
-          &mdash; AI-powered legal modules listed on the{" "}
+          &mdash; dual-format modules that work in both your own todo.law
+          deployments and the{" "}
           <a
             href="https://todo.law/skills"
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary hover:underline inline-flex items-center gap-1"
           >
-            TODO.LAW marketplace
+            LegalQuants community
             <ExternalLink className="w-3 h-3" />
           </a>
-          . When lawyers or firms purchase your skills, you earn revenue.
+          . Clausemaster is a free tool, not a marketplace. There is no revenue
+          share and nothing to sell. You use it to get more from your own stack
+          and to contribute to LegalQuants.
         </p>
 
-        {/* Revenue card */}
+        {/* Two reasons card */}
         <div className="card-brutal mb-6">
           <div className="flex items-center gap-2 mb-4">
-            <DollarSign className="w-5 h-5 text-primary" />
+            <Cloud className="w-5 h-5 text-primary" />
             <h3 className="text-sm font-semibold text-foreground">
-              Revenue Split
+              Two Reasons to Build
             </h3>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-            <div className="p-4 rounded-lg bg-primary/10 border border-primary/30 text-center">
-              <p className="text-2xl font-bold text-primary">70%</p>
-              <p className="text-xs text-muted-foreground mt-1">You earn</p>
-            </div>
-            <div className="p-4 rounded-lg bg-background border border-border text-center">
-              <p className="text-2xl font-bold text-foreground">30%</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Platform (hosting, distribution &amp; support)
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="p-4 rounded-lg bg-primary/10 border border-primary/30">
+              <p className="text-sm font-semibold text-primary mb-1">
+                Get more from your stack
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Extend your self-hosted todo.law deployments with your own
+                clause libraries and templates. Add your standards to Dealroom
+                so it drafts the way you do. Your skills, your stack.
               </p>
             </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="p-3 rounded-lg bg-background border border-border">
-              <p className="text-xs text-muted-foreground">Self-hosted / downloadable</p>
-              <p className="text-sm font-semibold text-foreground">
-                <Price amount={60} period="/year" />
+            <div className="p-4 rounded-lg bg-background border border-border">
+              <p className="text-sm font-semibold text-foreground mb-1">
+                Contribute to LegalQuants
               </p>
-            </div>
-            <div className="p-3 rounded-lg bg-background border border-border">
-              <p className="text-xs text-muted-foreground">Cloud add-on</p>
-              <p className="text-sm font-semibold text-foreground">
-                <Price amount={9} period="/month" />
+              <p className="text-xs text-muted-foreground">
+                Publish open skills to the LegalQuants (LQ.AI) community so your
+                work runs across the ecosystem. Every skill is dual-format for
+                both todo.law and LQ.
               </p>
             </div>
           </div>
@@ -274,15 +271,15 @@ export default function PublisherDocsPage() {
         {/* Pipeline flow */}
         <div className="card-brutal mb-6">
           <h3 className="text-sm font-semibold text-foreground mb-4">
-            From Clausemaster to Revenue
+            From Clausemaster to Running Skill
           </h3>
           <FlowDiagram
             steps={[
               { label: "Clausemaster", description: "Analyze & generate" },
-              { label: "Submit", description: "Send for review" },
-              { label: "Approved", description: "Admin approves" },
-              { label: "Listed", description: "Live on todo.law" },
-              { label: "Earn", description: "70% revenue" },
+              { label: "Review", description: "Edit & refine" },
+              { label: "Publish", description: "Install or contribute" },
+              { label: "todo.law", description: "Your own stack" },
+              { label: "LegalQuants", description: "The community" },
             ]}
           />
         </div>
@@ -292,7 +289,7 @@ export default function PublisherDocsPage() {
           Deployment Targets
         </h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Your published skills can be consumed in three ways by buyers.
+          Your published skills can run in three ways.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="card-brutal">
@@ -310,7 +307,7 @@ export default function PublisherDocsPage() {
               Self-Hosted Cloud
             </h4>
             <p className="text-xs text-muted-foreground">
-              Downloadable packages deployed to the buyer&apos;s own infrastructure.
+              Downloadable packages deployed to your own infrastructure.
             </p>
           </div>
           <div className="card-brutal">
@@ -332,7 +329,7 @@ export default function PublisherDocsPage() {
         </h2>
         <p className="text-sm text-muted-foreground mb-6">
           AAS power multiple TODO.LAW products. Law firms, startups, and developers
-          purchase skills to enhance their legal workflows.
+          install skills to enhance their legal workflows.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -360,7 +357,7 @@ export default function PublisherDocsPage() {
 
         <div className="mt-4 p-3 rounded-lg bg-primary/5 border border-primary/20">
           <p className="text-xs text-muted-foreground">
-            <strong className="text-foreground">Who buys?</strong>{" "}
+            <strong className="text-foreground">Who uses them?</strong>{" "}
             Law firms seeking automation, startups needing legal tooling, and
             developers building legal-tech integrations.
           </p>
