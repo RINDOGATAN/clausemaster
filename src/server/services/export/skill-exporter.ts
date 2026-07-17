@@ -3,6 +3,7 @@ import { dirname, join } from "path";
 import { Octokit } from "@octokit/rest";
 import prisma from "@/lib/prisma";
 import { isOpenLicense, skillPublishingConfig } from "@/config/skill-publishing";
+import { APACHE_2_0_LICENSE } from "./licenses";
 
 const GITHUB_OWNER = process.env.LEGALSKILLS_GITHUB_OWNER || "RINDOGATAN";
 const GITHUB_REPO = process.env.LEGALSKILLS_GITHUB_REPO || "legalskills";
@@ -27,8 +28,6 @@ export async function exportSkillDraft(
                   publisherProfile: {
                     select: {
                       firmName: true,
-                      stripeConnectAccountId: true,
-                      stripeConnectComplete: true,
                     },
                   },
                 },
@@ -65,13 +64,9 @@ export async function exportSkillDraft(
   const profile = publisher?.publisherProfile;
   const manifestData = draft.manifestJson as Record<string, unknown> | null;
 
-  // The license drives whether payout identity is attached. Community skills
-  // (open / Apache-2.0) must NOT carry a stripeConnectAccountId; only
-  // proprietary skills get the payout identity for monetization.
   const license =
     (manifestData?.license as string | undefined) ||
     skillPublishingConfig.defaultLicense;
-  const skillIsOpen = isOpenLicense(license);
 
   // Author string for the LQ-facing SKILL.md frontmatter, captured before the
   // manifest author is rewritten into an object below.
@@ -82,13 +77,12 @@ export async function exportSkillDraft(
       ? (manifestData.author as string)
       : skillPublishingConfig.author);
 
+  // No payout identity in manifests: the rev-share model is scrapped —
+  // premium licensing is first-party only, orthogonal to authoring.
   if (manifestData && publisher) {
     manifestData.author = {
       name: profile?.firmName || publisher.name || "Unknown",
       email: publisher.email,
-      ...(!skillIsOpen && profile?.stripeConnectAccountId && profile.stripeConnectComplete
-        ? { stripeConnectAccountId: profile.stripeConnectAccountId }
-        : {}),
     };
   }
 
@@ -172,6 +166,13 @@ export async function exportSkillDraft(
     name: "evals/evals.json",
     content: JSON.stringify(buildEvalsSkeleton(dirName, metadata), null, 2),
   });
+
+  // Open skills ship with their license text; the packager includes LICENSE
+  // in the signed archive when present. Proprietary (first-party premium)
+  // skills get their EULA from the todolaw packaging pipeline instead.
+  if (isOpenLicense(license) && license === "Apache-2.0") {
+    files.push({ name: "LICENSE", content: APACHE_2_0_LICENSE });
+  }
 
   const githubToken = process.env.LEGALSKILLS_GITHUB_TOKEN;
   let exportPath: string;
