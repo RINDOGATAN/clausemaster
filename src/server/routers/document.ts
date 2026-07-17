@@ -6,7 +6,18 @@ export const documentRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
     return ctx.prisma.document.findMany({
       where: { userId: ctx.session.user.id },
-      include: {
+      // Explicit select: fileData (Bytes) must never reach the client — the
+      // payload is huge and superjson can't revive Buffer in the browser,
+      // which kills the whole query
+      select: {
+        id: true,
+        fileName: true,
+        fileType: true,
+        fileSize: true,
+        status: true,
+        errorMessage: true,
+        createdAt: true,
+        updatedAt: true,
         analysis: {
           include: {
             _count: {
@@ -35,7 +46,16 @@ export const documentRouter = createTRPCRouter({
           id: input.id,
           userId: ctx.session.user.id,
         },
-        include: {
+        // Explicit select: fileData (Bytes) must never reach the client (see list)
+        select: {
+          id: true,
+          fileName: true,
+          fileType: true,
+          fileSize: true,
+          status: true,
+          errorMessage: true,
+          createdAt: true,
+          updatedAt: true,
           analysis: {
             include: {
               clauses: {
@@ -90,7 +110,7 @@ export const documentRouter = createTRPCRouter({
         where: { documentId: document.id },
       });
 
-      // Reset status to trigger re-analysis
+      // Reset status; the client drives the pipeline via runAnalysisStep
       await ctx.prisma.document.update({
         where: { id: document.id },
         data: {
@@ -99,13 +119,28 @@ export const documentRouter = createTRPCRouter({
         },
       });
 
-      // Resolve the user's AI config
-      const aiConfig = await resolveAIConfigForUser(ctx.session.user.id);
-
-      // Trigger analysis in background
-      const { analyzeDocument } = await import("@/server/services/ai/analyzer");
-      analyzeDocument(document.id, aiConfig).catch(console.error);
-
       return { success: true };
+    }),
+
+  // Runs one step of the analysis pipeline (client-driven so each AI call
+  // gets its own serverless invocation — Vercel Hobby caps functions at 10s)
+  runAnalysisStep: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const document = await ctx.prisma.document.findFirst({
+        where: {
+          id: input.id,
+          userId: ctx.session.user.id,
+        },
+        select: { id: true },
+      });
+
+      if (!document) {
+        throw new Error("Document not found");
+      }
+
+      const aiConfig = await resolveAIConfigForUser(ctx.session.user.id);
+      const { runAnalysisStep } = await import("@/server/services/ai/analyzer");
+      return runAnalysisStep(document.id, aiConfig);
     }),
 });

@@ -19,45 +19,53 @@ import {
 import prisma from "@/lib/prisma";
 import { skillPublishingConfig } from "@/config/skill-publishing";
 
-export async function generateSkillDraft(
-  analysisId: string,
+export interface SkillDraftStepResult {
+  done: boolean;
+  status: string;
+  step: "options" | "boilerplate" | null;
+  error?: string;
+}
+
+/**
+ * Run exactly ONE step of contract skill generation and persist it. The
+ * client calls this repeatedly until `done` — each call fits inside Vercel
+ * Hobby's 10s function cap. The draft row is created by the router with
+ * status GENERATING; progress is marked by which JSON fields are filled:
+ *   no clausesJson     -> option generation
+ *   no boilerplateJson -> boilerplate generation, then REVIEW
+ */
+export async function runContractDraftStep(
+  draftId: string,
   aiConfig: AIConfig
-): Promise<string> {
-  const startTime = Date.now();
-
-  // Load analysis with clauses and issues
-  const analysis = await prisma.analysis.findUnique({
-    where: { id: analysisId },
+): Promise<SkillDraftStepResult> {
+  const draft = await prisma.skillDraft.findUnique({
+    where: { id: draftId },
     include: {
-      document: true,
-      clauses: {
-        orderBy: { order: "asc" },
+      analysis: {
+        include: {
+          document: { select: { status: true } },
+          clauses: { orderBy: { order: "asc" } },
+        },
       },
-      issues: true,
     },
   });
 
-  if (!analysis) {
-    throw new Error("Analysis not found");
+  if (!draft) {
+    throw new Error("Skill draft not found");
   }
 
-  if (!analysis.document || analysis.document.status !== "COMPLETED") {
-    throw new Error("Analysis must be completed before generating a skill");
+  if (draft.status !== "GENERATING") {
+    return { done: true, status: draft.status, step: null };
   }
 
-  if (analysis.clauses.length === 0) {
-    throw new Error("Analysis has no extracted clauses");
-  }
-
-  // Create SkillDraft record
-  const draft = await prisma.skillDraft.create({
-    data: {
-      analysisId,
-      status: "GENERATING",
-    },
-  });
+  const analysis = draft.analysis;
+  let step: SkillDraftStepResult["step"] = null;
 
   try {
+    if (!analysis.document || analysis.document.status !== "COMPLETED") {
+      throw new Error("Analysis must be completed before generating a skill");
+    }
+
     const model = getAIModel(aiConfig);
     const providerInfo = getProviderInfo(aiConfig);
 
@@ -75,66 +83,84 @@ export async function generateSkillDraft(
       suggestedDestination: (analysis.suggestedDestination || "deal-room") as "deal-room" | "dpo-central" | "ai-sentinel",
     };
 
-    // Build clauses in the format expected by prompts
-    const extractedClauses = analysis.clauses.map((c) => ({
-      title: c.title,
-      category: c.category || undefined,
-      originalText: c.originalText,
-      summary: c.summary || "",
-      legalSignificance: c.legalSignificance || undefined,
-      skillClauseMatch: c.skillClauseMatch || undefined,
-      biasAssessment: c.biasAssessment === "FAVORS_PARTY_A"
-        ? "favors-party-a" as const
-        : c.biasAssessment === "FAVORS_PARTY_B"
-        ? "favors-party-b" as const
-        : "neutral" as const,
-    }));
-
     const isSoloParty = analysis.partyMode === "solo";
+    const language = analysis.jurisdiction === "SPAIN" ? "es" : "en";
+    const displayName = analysis.contractTypeLabel || analysis.contractType || "Contract";
 
-    // Step 4: Option Generation (branching on party mode)
-    let clausesJson: ReturnType<typeof buildClausesJson> | ReturnType<typeof buildSoloClausesJson>;
-    let clauseTitles: string[];
+    if (!draft.clausesJson) {
+      step = "options";
 
-    if (isSoloParty) {
-      const soloResult = await runSoloOptionGeneration(
-        model,
-        analysis.rawExtractedText || "",
-        classification,
-        extractedClauses
-      );
-      clauseTitles = soloResult.clauses.map((c) => c.title);
+      if (analysis.clauses.length === 0) {
+        throw new Error("Analysis has no extracted clauses");
+      }
 
-      // Detect language from jurisdiction
-      const language = analysis.jurisdiction === "SPAIN" ? "es" : "en";
-      const displayName = analysis.contractTypeLabel || analysis.contractType || "Document";
-      clausesJson = buildSoloClausesJson(
-        analysis.contractType || "CONTRACT",
-        displayName,
-        soloResult,
-        language
-      );
-    } else {
-      const optionResult = await runOptionGeneration(
-        model,
-        analysis.rawExtractedText || "",
-        classification,
-        extractedClauses
-      );
-      clauseTitles = optionResult.clauses.map((c) => c.title);
+      // Build clauses in the format expected by prompts
+      const extractedClauses = analysis.clauses.map((c) => ({
+        title: c.title,
+        category: c.category || undefined,
+        originalText: c.originalText,
+        summary: c.summary || "",
+        legalSignificance: c.legalSignificance || undefined,
+        skillClauseMatch: c.skillClauseMatch || undefined,
+        biasAssessment: c.biasAssessment === "FAVORS_PARTY_A"
+          ? "favors-party-a" as const
+          : c.biasAssessment === "FAVORS_PARTY_B"
+          ? "favors-party-b" as const
+          : "neutral" as const,
+      }));
 
-      // Detect language from jurisdiction
-      const language = analysis.jurisdiction === "SPAIN" ? "es" : "en";
-      const displayName = analysis.contractTypeLabel || analysis.contractType || "Contract";
-      clausesJson = buildClausesJson(
-        analysis.contractType || "CONTRACT",
-        displayName,
-        optionResult,
-        language
-      );
+      let clausesJson: ReturnType<typeof buildClausesJson> | ReturnType<typeof buildSoloClausesJson>;
+      if (isSoloParty) {
+        const soloResult = await runSoloOptionGeneration(
+          model,
+          analysis.rawExtractedText || "",
+          classification,
+          extractedClauses
+        );
+        clausesJson = buildSoloClausesJson(
+          analysis.contractType || "CONTRACT",
+          displayName,
+          soloResult,
+          language
+        );
+      } else {
+        const optionResult = await runOptionGeneration(
+          model,
+          analysis.rawExtractedText || "",
+          classification,
+          extractedClauses
+        );
+        clausesJson = buildClausesJson(
+          analysis.contractType || "CONTRACT",
+          displayName,
+          optionResult,
+          language
+        );
+      }
+
+      await prisma.skillDraft.update({
+        where: { id: draftId },
+        data: {
+          skillType: "CONTRACT",
+          partyMode: isSoloParty ? "SOLO" : "TWO_PARTY",
+          clausesJson,
+          aiProvider: providerInfo.provider,
+          aiModel: providerInfo.model,
+        },
+      });
+
+      return { done: false, status: "GENERATING", step };
     }
 
-    // Step 5: Boilerplate Generation
+    step = "boilerplate";
+
+    // Recover clause titles from the stored clausesJson (titles are i18n objects)
+    const storedClauses = (draft.clausesJson as { clauses?: Array<{ title?: Record<string, string> }> })
+      .clauses || [];
+    const clauseTitles = storedClauses
+      .map((c) => c.title?.[language] || Object.values(c.title || {})[0] || "")
+      .filter(Boolean);
+
     const boilerplateResult = await runBoilerplateGeneration(
       model,
       classification,
@@ -147,16 +173,11 @@ export async function generateSkillDraft(
       .toLowerCase()
       .replace(/[_\s]+/g, "-");
     const skillId = `${skillPublishingConfig.idNamespace}.${contractTypeSlug}`;
-    const displayName = analysis.contractTypeLabel || analysis.contractType || "Contract";
-
-    // Detect language from jurisdiction
-    const language = analysis.jurisdiction === "SPAIN" ? "es" : "en";
 
     const jurisdictions = analysis.jurisdiction !== "UNKNOWN"
       ? [analysis.jurisdiction]
       : ["CALIFORNIA"];
 
-    // Build metadata
     const metadataJson = {
       contractType: (analysis.contractType || "CONTRACT").toUpperCase(),
       displayName: { [language]: displayName },
@@ -171,7 +192,6 @@ export async function generateSkillDraft(
       soloModeOnly: isSoloParty,
     };
 
-    // Map destination string to enum value
     const destinationMap: Record<string, "DEAL_ROOM" | "DPO_CENTRAL" | "AI_SENTINEL"> = {
       "deal-room": "DEAL_ROOM",
       "dpo-central": "DPO_CENTRAL",
@@ -191,42 +211,32 @@ export async function generateSkillDraft(
       nativeJurisdiction: jurisdictions[0],
     };
 
-    const processingTimeMs = Date.now() - startTime;
-
-    // Update the draft with all generated data
     await prisma.skillDraft.update({
-      where: { id: draft.id },
+      where: { id: draftId },
       data: {
         status: "REVIEW",
-        skillType: "CONTRACT",
-        partyMode: isSoloParty ? "SOLO" : "TWO_PARTY",
         destination: analysis.suggestedDestination
           ? destinationMap[analysis.suggestedDestination] || null
           : null,
         skillId,
         contractType: (analysis.contractType || "CONTRACT").toUpperCase(),
         displayName,
-        clausesJson,
         boilerplateJson: buildBoilerplateJson(boilerplateResult, language),
         metadataJson,
         manifestJson,
-        aiProvider: providerInfo.provider,
-        aiModel: providerInfo.model,
-        processingTimeMs,
+        processingTimeMs: Date.now() - draft.createdAt.getTime(),
       },
     });
 
-    return draft.id;
+    return { done: true, status: "REVIEW", step };
   } catch (error) {
-    console.error(`Skill generation failed for analysis ${analysisId}:`, error);
+    console.error(`Skill generation step "${step}" failed for draft ${draftId}:`, error);
+    const message = error instanceof Error ? error.message : "Skill generation failed";
     await prisma.skillDraft.update({
-      where: { id: draft.id },
-      data: {
-        status: "FAILED",
-        errorMessage: error instanceof Error ? error.message : "Skill generation failed",
-      },
+      where: { id: draftId },
+      data: { status: "FAILED", errorMessage: message },
     });
-    throw error;
+    return { done: true, status: "FAILED", step, error: message };
   }
 }
 

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { trpc } from "@/lib/trpc";
+import { useSkillDraftDriver } from "@/lib/use-pipeline-driver";
 import { toast } from "sonner";
 
 type Tab = "clauses" | "boilerplate" | "metadata" | "criteria" | "guidance";
@@ -195,6 +196,9 @@ export default function SkillDraftPage() {
       },
     }
   );
+
+  // Drive skill generation step by step (see use-pipeline-driver.ts)
+  useSkillDraftDriver(analysisId, draft?.status, refetch);
 
   const exportMutation = trpc.skillDraft.export.useMutation({
     onSuccess: (data) => {

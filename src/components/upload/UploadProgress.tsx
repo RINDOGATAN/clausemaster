@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { CheckCircle2, Loader2, Circle, AlertTriangle } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { useAnalysisDriver } from "@/lib/use-pipeline-driver";
 import { Progress } from "@/components/ui/progress";
 
 const POLL_INTERVAL = 2000;
@@ -21,7 +22,7 @@ export function UploadProgress({ documentId }: UploadProgressProps) {
   const lastStatusRef = useRef<string | undefined>(undefined);
   const lastChangeRef = useRef(Date.now());
 
-  const { data: document } = trpc.document.getById.useQuery(
+  const { data: document, refetch } = trpc.document.getById.useQuery(
     { id: documentId },
     {
       refetchInterval: (query) => {
@@ -33,6 +34,9 @@ export function UploadProgress({ documentId }: UploadProgressProps) {
   );
 
   const status = document?.status;
+
+  // Drive the analysis pipeline step by step (see use-pipeline-driver.ts)
+  useAnalysisDriver(documentId, status, refetch);
 
   // Track stalled analysis
   useEffect(() => {

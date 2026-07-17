@@ -15,42 +15,45 @@ import {
 } from "./prompts";
 import prisma from "@/lib/prisma";
 import { skillPublishingConfig } from "@/config/skill-publishing";
+import type { SkillDraftStepResult } from "./skill-generator";
 
-export async function generateAssessmentSkillDraft(
-  analysisId: string,
+/**
+ * Run exactly ONE step of assessment skill generation and persist it. The
+ * client calls this repeatedly until `done` — each call fits inside Vercel
+ * Hobby's 10s function cap. The draft row is created by the router with
+ * status GENERATING; progress is marked by which JSON fields are filled:
+ *   no assessmentJson -> criteria extraction (stored without guidance)
+ *   no guidanceJson   -> guidance generation, merge, then REVIEW
+ */
+export async function runAssessmentDraftStep(
+  draftId: string,
   aiConfig: AIConfig
-): Promise<string> {
-  const startTime = Date.now();
-
-  // Load analysis with clauses
-  const analysis = await prisma.analysis.findUnique({
-    where: { id: analysisId },
+): Promise<SkillDraftStepResult> {
+  const draft = await prisma.skillDraft.findUnique({
+    where: { id: draftId },
     include: {
-      document: true,
-      clauses: {
-        orderBy: { order: "asc" },
+      analysis: {
+        include: { document: { select: { status: true } } },
       },
     },
   });
 
-  if (!analysis) {
-    throw new Error("Analysis not found");
+  if (!draft) {
+    throw new Error("Skill draft not found");
   }
 
-  if (!analysis.document || analysis.document.status !== "COMPLETED") {
-    throw new Error("Analysis must be completed before generating an assessment skill");
+  if (draft.status !== "GENERATING") {
+    return { done: true, status: draft.status, step: null };
   }
 
-  // Create SkillDraft record
-  const draft = await prisma.skillDraft.create({
-    data: {
-      analysisId,
-      status: "GENERATING",
-      skillType: "ASSESSMENT",
-    },
-  });
+  const analysis = draft.analysis;
+  let step: SkillDraftStepResult["step"] = null;
 
   try {
+    if (!analysis.document || analysis.document.status !== "COMPLETED") {
+      throw new Error("Analysis must be completed before generating an assessment skill");
+    }
+
     const model = getAIModel(aiConfig);
     const providerInfo = getProviderInfo(aiConfig);
 
@@ -68,12 +71,33 @@ export async function generateAssessmentSkillDraft(
       suggestedDestination: (analysis.suggestedDestination || "dpo-central") as "deal-room" | "dpo-central" | "ai-sentinel",
     };
 
-    // Step 1: Criteria Extraction
-    const criteriaResult = await runCriteriaExtraction(
-      model,
-      analysis.rawExtractedText || "",
-      classification
-    );
+    if (!draft.assessmentJson) {
+      step = "options";
+
+      // Step 1: Criteria Extraction — stored as-is (criteria carry no
+      // guidance fields yet); the next step reads it back and merges.
+      const criteriaResult = await runCriteriaExtraction(
+        model,
+        analysis.rawExtractedText || "",
+        classification
+      );
+
+      await prisma.skillDraft.update({
+        where: { id: draftId },
+        data: {
+          skillType: "ASSESSMENT",
+          assessmentJson: criteriaResult,
+          aiProvider: providerInfo.provider,
+          aiModel: providerInfo.model,
+        },
+      });
+
+      return { done: false, status: "GENERATING", step };
+    }
+
+    step = "boilerplate";
+
+    const criteriaResult = draft.assessmentJson as unknown as CriteriaExtractionResult;
 
     // Step 2: Guidance Generation
     const guidanceResult = await runGuidanceGeneration(
@@ -151,11 +175,8 @@ export async function generateAssessmentSkillDraft(
       skillType: "assessment",
     };
 
-    const processingTimeMs = Date.now() - startTime;
-
-    // Update the draft with all generated data
     await prisma.skillDraft.update({
-      where: { id: draft.id },
+      where: { id: draftId },
       data: {
         status: "REVIEW",
         skillType: "ASSESSMENT",
@@ -169,23 +190,19 @@ export async function generateAssessmentSkillDraft(
         guidanceJson,
         metadataJson,
         manifestJson,
-        aiProvider: providerInfo.provider,
-        aiModel: providerInfo.model,
-        processingTimeMs,
+        processingTimeMs: Date.now() - draft.createdAt.getTime(),
       },
     });
 
-    return draft.id;
+    return { done: true, status: "REVIEW", step };
   } catch (error) {
-    console.error(`Assessment skill generation failed for analysis ${analysisId}:`, error);
+    console.error(`Assessment generation step "${step}" failed for draft ${draftId}:`, error);
+    const message = error instanceof Error ? error.message : "Assessment skill generation failed";
     await prisma.skillDraft.update({
-      where: { id: draft.id },
-      data: {
-        status: "FAILED",
-        errorMessage: error instanceof Error ? error.message : "Assessment skill generation failed",
-      },
+      where: { id: draftId },
+      data: { status: "FAILED", errorMessage: message },
     });
-    throw error;
+    return { done: true, status: "FAILED", step, error: message };
   }
 }
 

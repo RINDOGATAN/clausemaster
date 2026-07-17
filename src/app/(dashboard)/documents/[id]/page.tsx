@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ArrowLeft, Loader2, Sparkles, ExternalLink, RefreshCw, Gavel, Clock, CheckCircle, MessageSquare } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { trpc } from "@/lib/trpc";
+import { useAnalysisDriver, useSkillDraftDriver } from "@/lib/use-pipeline-driver";
 import { toast } from "sonner";
 import { ExecutiveSummary } from "@/components/analysis/ExecutiveSummary";
 import { generateTextSummary } from "@/lib/report-text";
@@ -69,6 +70,11 @@ export default function DocumentDetailPage() {
       },
     }
   );
+
+  // Drive in-progress pipelines step by step (see use-pipeline-driver.ts) —
+  // also resumes analyses interrupted by a closed tab or failed step
+  useAnalysisDriver(documentId, document?.status, refetch);
+  useSkillDraftDriver(analysisId, skillDraft?.status, refetchDraft);
 
   const generateSkillMutation = trpc.skillDraft.generate.useMutation({
     onSuccess: () => {

@@ -29,19 +29,43 @@ export const skillDraftRouter = createTRPCRouter({
         });
       }
 
-      // Resolve the user's AI config
-      const aiConfig = await resolveAIConfigForUser(ctx.session.user.id);
-
-      // Route by document category
-      if (analysis.documentCategory === "assessment") {
-        const { generateAssessmentSkillDraft } = await import("@/server/services/ai/assessment-generator");
-        generateAssessmentSkillDraft(input.analysisId, aiConfig).catch(console.error);
-      } else {
-        const { generateSkillDraft } = await import("@/server/services/ai/skill-generator");
-        generateSkillDraft(input.analysisId, aiConfig).catch(console.error);
-      }
+      // Create the draft row; the client drives generation via runStep
+      await createDraftForAnalysis(ctx.prisma, input.analysisId, analysis.documentCategory);
 
       return { analysisId: input.analysisId };
+    }),
+
+  // Runs one step of skill generation (client-driven so each AI call gets
+  // its own serverless invocation — Vercel Hobby caps functions at 10s)
+  runStep: protectedProcedure
+    .input(z.object({ analysisId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const analysis = await ctx.prisma.analysis.findUnique({
+        where: { id: input.analysisId },
+        include: { document: true },
+      });
+
+      if (!analysis || analysis.document.userId !== ctx.session.user.id) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Analysis not found" });
+      }
+
+      const draft = await ctx.prisma.skillDraft.findUnique({
+        where: { analysisId: input.analysisId },
+        select: { id: true, skillType: true },
+      });
+
+      if (!draft) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Skill draft not found" });
+      }
+
+      const aiConfig = await resolveAIConfigForUser(ctx.session.user.id);
+
+      if (draft.skillType === "ASSESSMENT") {
+        const { runAssessmentDraftStep } = await import("@/server/services/ai/assessment-generator");
+        return runAssessmentDraftStep(draft.id, aiConfig);
+      }
+      const { runContractDraftStep } = await import("@/server/services/ai/skill-generator");
+      return runContractDraftStep(draft.id, aiConfig);
     }),
 
   listMine: publisherProcedure.query(async ({ ctx }) => {
@@ -255,21 +279,27 @@ export const skillDraftRouter = createTRPCRouter({
         where: { analysisId: input.analysisId },
       });
 
-      // Resolve the user's AI config
-      const aiConfig = await resolveAIConfigForUser(ctx.session.user.id);
-
-      // Route by document category
-      if (analysis.documentCategory === "assessment") {
-        const { generateAssessmentSkillDraft } = await import("@/server/services/ai/assessment-generator");
-        generateAssessmentSkillDraft(input.analysisId, aiConfig).catch(console.error);
-      } else {
-        const { generateSkillDraft } = await import("@/server/services/ai/skill-generator");
-        generateSkillDraft(input.analysisId, aiConfig).catch(console.error);
-      }
+      // Create a fresh draft row; the client drives generation via runStep
+      await createDraftForAnalysis(ctx.prisma, input.analysisId, analysis.documentCategory);
 
       return { analysisId: input.analysisId };
     }),
 });
+
+// Creates the GENERATING draft row that runStep operates on
+async function createDraftForAnalysis(
+  prisma: typeof import("@/lib/prisma").default,
+  analysisId: string,
+  documentCategory: string | null
+) {
+  return prisma.skillDraft.create({
+    data: {
+      analysisId,
+      status: "GENERATING",
+      skillType: documentCategory === "assessment" ? "ASSESSMENT" : "CONTRACT",
+    },
+  });
+}
 
 // Helper to verify the user owns the draft's document
 async function verifyDraftOwnership(

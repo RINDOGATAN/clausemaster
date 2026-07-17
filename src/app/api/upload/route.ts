@@ -1,12 +1,8 @@
 import { NextResponse } from "next/server";
-import { after } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { analyzeDocument } from "@/server/services/ai/analyzer";
 import { resolveAIConfigForUser } from "@/server/services/resolve-ai-config";
-
-export const maxDuration = 120;
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain"];
@@ -23,10 +19,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Resolve the user's AI provider config before proceeding
-    let aiConfig: Awaited<ReturnType<typeof resolveAIConfigForUser>>;
+    // Verify the user has an AI provider configured before accepting the file
     try {
-      aiConfig = await resolveAIConfigForUser(session.user.id);
+      await resolveAIConfigForUser(session.user.id);
     } catch {
       return NextResponse.json(
         { error: "No AI provider configured. Please set up your AI provider in Settings." },
@@ -68,14 +63,8 @@ export async function POST(request: Request) {
       },
     });
 
-    // Run analysis after response is sent (keeps function alive on Vercel)
-    after(async () => {
-      try {
-        await analyzeDocument(document.id, aiConfig);
-      } catch (error) {
-        console.error("Background analysis failed:", error);
-      }
-    });
+    // Analysis is driven by the client via document.runAnalysisStep — one
+    // serverless invocation per AI step, so it fits Vercel Hobby's 10s cap
 
     return NextResponse.json({
       id: document.id,
