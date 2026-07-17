@@ -109,6 +109,32 @@ export async function exportSkillDraft(
   // Build the file set we want to publish
   const files: Array<{ name: string; content: string }> = [];
   if (isAssessment) {
+    // The suite packager (todolaw/scripts/build-skills.mjs) requires
+    // template.json for assessment skills, and the DPO Central installer
+    // enforces template.type === manifest.assessmentType against its enum —
+    // normalize the AI's free-form type and rewrite the manifest to match.
+    const normalizedType = normalizeAssessmentType(
+      (manifestData?.assessmentType as string) || "",
+      draft.destination
+    );
+    if (manifestData) manifestData.assessmentType = normalizedType;
+    files.push({
+      name: "template.json",
+      content: JSON.stringify(
+        buildTemplateJson({
+          assessmentJson: draft.assessmentJson,
+          type: normalizedType,
+          name: draft.displayName || dirName,
+          metadata,
+          manifestData,
+          lang,
+        }),
+        null,
+        2
+      ),
+    });
+    // Full-fidelity Clausemaster source (guidance, remediation, scoring detail)
+    // kept alongside the installer-facing template.
     files.push({ name: "assessment.json", content: JSON.stringify(draft.assessmentJson, null, 2) });
     if (draft.guidanceJson) {
       files.push({ name: "guidance.json", content: JSON.stringify(draft.guidanceJson, null, 2) });
@@ -561,6 +587,137 @@ function collectClauseTitles(clausesJson: unknown, lang: string): string[] {
     }
   }
   return titles;
+}
+
+// ---------------------------------------------------------------------------
+// Assessment template builder (installer-facing template.json)
+// ---------------------------------------------------------------------------
+
+/**
+ * Map the AI's free-form assessment type onto the destination installer's
+ * enum. DPO Central validates against {DPIA, PIA, TIA, LIA, VENDOR, CUSTOM};
+ * AI Sentinel skills use the AIS framework types (CONFORMITY, BIAS_FAIRNESS).
+ * Anything unrecognized becomes CUSTOM so the install never fails validation.
+ */
+export function normalizeAssessmentType(
+  raw: string,
+  destination: string | null
+): string {
+  const upper = raw.toUpperCase();
+  if (destination === "AI_SENTINEL") {
+    if (/CONFORMITY/.test(upper)) return "CONFORMITY";
+    if (/BIAS|FAIRNESS/.test(upper)) return "BIAS_FAIRNESS";
+    return "CUSTOM";
+  }
+  if (/DPIA|DATA PROTECTION IMPACT/.test(upper)) return "DPIA";
+  if (/TIA|TRANSFER IMPACT/.test(upper)) return "TIA";
+  if (/LIA|LEGITIMATE INTEREST/.test(upper)) return "LIA";
+  if (/VENDOR/.test(upper)) return "VENDOR";
+  if (/PIA|PRIVACY IMPACT/.test(upper)) return "PIA";
+  return "CUSTOM";
+}
+
+interface AssessmentCriterion {
+  id: string;
+  title: string;
+  description?: string;
+  order?: number;
+  riskLevel?: "low" | "medium" | "high" | "critical";
+  regulatoryReference?: string;
+  guidance?: string;
+  remediation?: string;
+  evidenceRequired?: string;
+  scoringOptions?: Array<{ id: string; label: string; score: number; description?: string }>;
+}
+
+interface AssessmentCategory {
+  id: string;
+  title: string;
+  description?: string;
+  order?: number;
+  criteria?: AssessmentCriterion[];
+}
+
+const RISK_WEIGHTS: Record<string, number> = {
+  low: 1,
+  medium: 1.5,
+  high: 2,
+  critical: 3,
+};
+
+/**
+ * Transform Clausemaster's assessmentJson (categories/criteria with guidance
+ * and 0-100 compliance scoringOptions) into the DPO Central installer's
+ * template shape (sections/questions with 0-100 riskScore options, where
+ * higher = riskier — the inverse of the compliance score).
+ */
+export function buildTemplateJson(input: {
+  assessmentJson: unknown;
+  type: string;
+  name: string;
+  metadata: Record<string, unknown>;
+  manifestData: Record<string, unknown> | null;
+  lang: string;
+}): unknown {
+  const { assessmentJson, type, name, metadata, manifestData, lang } = input;
+  const source = (assessmentJson as { categories?: AssessmentCategory[] } | null) || {};
+  const scoringMethod = (assessmentJson as { scoringMethod?: string } | null)?.scoringMethod;
+
+  const categories = [...(source.categories || [])].sort(
+    (a, b) => (a.order ?? 0) - (b.order ?? 0)
+  );
+
+  const frameworkRefs = new Set<string>();
+  const sections = categories.map((cat) => ({
+    id: cat.id,
+    title: cat.title,
+    ...(cat.description ? { description: cat.description } : {}),
+    questions: [...(cat.criteria || [])]
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+      .map((criterion) => {
+        if (criterion.regulatoryReference) frameworkRefs.add(criterion.regulatoryReference);
+        const helpText = [
+          criterion.guidance,
+          criterion.remediation ? `Remediation: ${criterion.remediation}` : undefined,
+          criterion.evidenceRequired ? `Evidence: ${criterion.evidenceRequired}` : undefined,
+        ]
+          .filter(Boolean)
+          .join(" ");
+        const options = criterion.scoringOptions?.map((opt) => ({
+          value: opt.id,
+          label: opt.label,
+          riskScore: Math.max(0, Math.min(100, 100 - opt.score)),
+        }));
+        return {
+          id: criterion.id,
+          text: criterion.description || criterion.title,
+          type: options?.length ? ("select" as const) : ("textarea" as const),
+          ...(options?.length ? { options } : {}),
+          required: true,
+          riskWeight: RISK_WEIGHTS[criterion.riskLevel || "medium"],
+          ...(helpText ? { helpText } : {}),
+        };
+      }),
+  }));
+
+  const description =
+    (metadata.description as Record<string, string> | undefined)?.[lang] ||
+    (typeof metadata.description === "string" ? metadata.description : undefined);
+
+  return {
+    type,
+    name,
+    ...(description ? { description } : {}),
+    version: (manifestData?.version as string) || (metadata.version as string) || "1.0",
+    ...(frameworkRefs.size
+      ? { frameworkRef: [...frameworkRefs].slice(0, 8).join("; ") }
+      : {}),
+    sections,
+    scoringLogic: {
+      method: scoringMethod === "checklist" ? "sum" : "weighted_average",
+      thresholds: { low: 25, medium: 50, high: 75, critical: 90 },
+    },
+  };
 }
 
 function collectAssessmentCategories(assessmentJson: unknown): string[] {
