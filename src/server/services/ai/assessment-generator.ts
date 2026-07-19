@@ -81,6 +81,13 @@ export async function runAssessmentDraftStep(
         analysis.rawExtractedText || "",
         classification
       );
+      // Open models may null out per-criterion riskLevel; the draft UI and
+      // template builder expect a concrete value, so default to "medium".
+      for (const category of criteriaResult.categories) {
+        for (const criterion of category.criteria) {
+          criterion.riskLevel = criterion.riskLevel ?? "medium";
+        }
+      }
 
       await prisma.skillDraft.update({
         where: { id: draftId },
@@ -216,6 +223,7 @@ async function runCriteriaExtraction(
     model,
     schema: criteriaExtractionSchema,
     prompt,
+    maxTokens: 16384,
   });
   return result.object;
 }
@@ -230,6 +238,7 @@ async function runGuidanceGeneration(
     model,
     schema: guidanceGenerationSchema,
     prompt,
+    maxTokens: 16384,
   });
   return result.object;
 }

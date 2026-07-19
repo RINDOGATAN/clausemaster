@@ -5,12 +5,12 @@ export const classificationSchema = z.object({
   contractType: z.string().describe("Contract type code (e.g., NDA, FOUNDERS, SAFE, EMPLOYMENT, LEASE, SPA, MSA, SAAS, DPA, CONSULTING, GDPR_ASSESSMENT, AI_GOVERNANCE, DPIA_TEMPLATE, VENDOR_AUDIT, PRIVACY_IMPACT, COMPLIANCE_CHECKLIST, RISK_ASSESSMENT)"),
   contractTypeLabel: z.string().describe("Human-readable contract type name"),
   jurisdiction: z.enum(["CALIFORNIA", "ENGLAND_WALES", "SPAIN", "UNKNOWN"]).describe("Detected jurisdiction based on legal references, governing law clauses, or party locations"),
-  jurisdictionNotes: z.string().optional().describe("Notes about jurisdiction detection reasoning"),
-  partyNames: z.array(z.string()).describe("Names of the parties to the contract"),
-  effectiveDate: z.string().optional().describe("Effective date of the contract if found"),
+  jurisdictionNotes: z.string().nullish().describe("Notes about jurisdiction detection reasoning"),
+  partyNames: z.array(z.string()).nullish().describe("Names of the parties to the contract"),
+  effectiveDate: z.string().nullish().describe("Effective date of the contract if found"),
   summary: z.string().describe("2-3 sentence summary of the contract's purpose and key terms"),
   documentCategory: z.enum(["contract", "assessment"]).describe("Whether this is a contract template (two-party or solo-party agreement) or an assessment template (compliance checklist, DPIA, audit framework)"),
-  partyMode: z.enum(["two-party", "solo"]).optional().describe("For contracts: 'two-party' if negotiated between two parties (NDA, SPA, employment), 'solo' if unilateral (privacy policy, ToS, acceptable use policy, code of conduct). Omit for assessments."),
+  partyMode: z.enum(["two-party", "solo"]).nullish().describe("For contracts: 'two-party' if negotiated between two parties (NDA, SPA, employment), 'solo' if unilateral (privacy policy, ToS, acceptable use policy, code of conduct). Omit for assessments."),
   suggestedDestination: z.enum(["deal-room", "dpo-central", "ai-sentinel"]).describe("Target product: contracts → deal-room, privacy/data protection assessments → dpo-central, AI governance/risk assessments → ai-sentinel"),
 });
 
@@ -20,12 +20,12 @@ export type ClassificationResult = z.infer<typeof classificationSchema>;
 export const clauseExtractionSchema = z.object({
   clauses: z.array(z.object({
     title: z.string().describe("Title or heading of the clause"),
-    category: z.string().optional().describe("Category (e.g., Equity, Term, Liability, IP, Confidentiality, Termination)"),
+    category: z.string().nullish().describe("Category (e.g., Equity, Term, Liability, IP, Confidentiality, Termination)"),
     originalText: z.string().describe("The original text of the clause from the contract"),
     summary: z.string().describe("Plain language summary of what this clause does"),
-    legalSignificance: z.string().optional().describe("Why this clause matters legally"),
-    skillClauseMatch: z.string().optional().describe("Matching clause ID from legalskills if applicable"),
-    biasAssessment: z.enum(["neutral", "favors-party-a", "favors-party-b"]).describe("Whether the clause favors one party over the other"),
+    legalSignificance: z.string().nullish().describe("Why this clause matters legally"),
+    skillClauseMatch: z.string().nullish().describe("Matching clause ID from legalskills if applicable"),
+    biasAssessment: z.string().nullish().describe("One of: 'neutral', 'favors-party-a', 'favors-party-b'. Use null when not applicable. Values outside this list are treated as neutral."),
   })),
 });
 
@@ -38,9 +38,9 @@ export const issueFlaggingSchema = z.object({
     severity: z.enum(["INFO", "WARNING", "CRITICAL"]),
     title: z.string().describe("Short title for the issue"),
     description: z.string().describe("Detailed description of the issue"),
-    recommendation: z.string().optional().describe("Recommended action to address the issue"),
-    relatedClauseTitle: z.string().optional().describe("Title of the related clause, if any"),
-    jurisdictionNote: z.string().optional().describe("Jurisdiction-specific note about this issue"),
+    recommendation: z.string().nullish().describe("Recommended action to address the issue"),
+    relatedClauseTitle: z.string().nullish().describe("Title of the related clause, if any"),
+    jurisdictionNote: z.string().nullish().describe("Jurisdiction-specific note about this issue"),
   })),
 });
 
@@ -54,7 +54,7 @@ export const optionGenerationSchema = z.object({
     category: z.string().describe("Category grouping, e.g. Equity, Term, Liability, IP, Confidentiality"),
     order: z.number().describe("Display order (1-based)"),
     plainDescription: z.string().describe("Plain language description of what this clause covers and why it matters"),
-    legalContext: z.string().optional().describe("Legal/regulatory context for this clause"),
+    legalContext: z.string().nullish().describe("Legal/regulatory context for this clause"),
     isRequired: z.boolean().describe("Whether this clause is mandatory for a valid contract"),
     options: z.array(z.object({
       id: z.string().describe("Option slug, e.g. 'narrow', 'standard', 'broad'"),
@@ -83,7 +83,7 @@ export const soloOptionGenerationSchema = z.object({
     category: z.string().describe("Category grouping, e.g. Data Collection, User Rights, Liability, Intellectual Property"),
     order: z.number().describe("Display order (1-based)"),
     plainDescription: z.string().describe("Plain language description of what this clause covers and why it matters"),
-    legalContext: z.string().optional().describe("Legal/regulatory context for this clause"),
+    legalContext: z.string().nullish().describe("Legal/regulatory context for this clause"),
     isRequired: z.boolean().describe("Whether this clause is mandatory for a valid document"),
     options: z.array(z.object({
       id: z.string().describe("Option slug, e.g. 'minimal', 'standard', 'comprehensive'"),
@@ -120,7 +120,7 @@ export const boilerplateGenerationSchema = z.object({
   jurisdictionProvisions: z.record(z.object({
     title: z.string().describe("Jurisdiction-specific provision title"),
     text: z.string().describe("Jurisdiction-specific provision text"),
-  })).optional().describe("Jurisdiction-specific provisions keyed by jurisdiction code (e.g. CALIFORNIA, ENGLAND_WALES, SPAIN)"),
+  })).nullish().describe("Jurisdiction-specific provisions keyed by jurisdiction code (e.g. CALIFORNIA, ENGLAND_WALES, SPAIN)"),
   signatureBlock: z.string().describe("Signature block template with {partyASignatureBlock} and {partyBSignatureBlock} placeholders"),
   partyLabels: z.object({
     partyA: z.string().describe("Label for Party A, e.g. 'Company', 'Employer', 'Founder A'"),
@@ -145,8 +145,8 @@ export const criteriaExtractionSchema = z.object({
       title: z.string().describe("Criterion title"),
       description: z.string().describe("What this criterion evaluates"),
       order: z.number().describe("Display order within category (1-based)"),
-      riskLevel: z.enum(["low", "medium", "high", "critical"]).describe("Risk level if this criterion is not met"),
-      regulatoryReference: z.string().optional().describe("Regulatory reference, e.g. 'GDPR Art. 6', 'AI Act Art. 9'"),
+      riskLevel: z.enum(["low", "medium", "high", "critical"]).nullish().describe("Risk level if this criterion is not met; null when unclear"),
+      regulatoryReference: z.string().nullish().describe("Regulatory reference, e.g. 'GDPR Art. 6', 'AI Act Art. 9'"),
     })),
   })),
 });
@@ -159,7 +159,7 @@ export const guidanceGenerationSchema = z.object({
     criterionId: z.string().describe("Matching criterion ID from the criteria extraction"),
     guidance: z.string().describe("What to look for when assessing this criterion"),
     remediation: z.string().describe("How to fix non-compliance or improve"),
-    evidenceRequired: z.string().optional().describe("What documentation proves compliance"),
+    evidenceRequired: z.string().nullish().describe("What documentation proves compliance"),
     scoringOptions: z.array(z.object({
       id: z.string().describe("Scoring option slug, e.g. 'not-implemented', 'partial', 'fully-implemented'"),
       label: z.string().describe("Scoring option label"),

@@ -399,20 +399,43 @@ function buildBoilerplateJson(result: BoilerplateGenerationResult, language: str
   };
 }
 
+// Options generation emits the full legal text for 3-5 options per clause —
+// far past any model's output budget when a document has dozens of clauses
+// (a 43-clause term sheet truncates mid-JSON even at 32k output tokens).
+// Generate in clause batches and merge; order is preserved by input order.
+const OPTION_GENERATION_BATCH_SIZE = 8;
+
+function batchClauses<T>(clauses: T[]): T[][] {
+  const batches: T[][] = [];
+  for (let i = 0; i < clauses.length; i += OPTION_GENERATION_BATCH_SIZE) {
+    batches.push(clauses.slice(i, i + OPTION_GENERATION_BATCH_SIZE));
+  }
+  return batches;
+}
+
 async function runSoloOptionGeneration(
   model: Parameters<typeof generateObject>[0]["model"],
   contractText: string,
   classification: Parameters<typeof buildSoloOptionGenerationPrompt>[1],
   clauses: Parameters<typeof buildSoloOptionGenerationPrompt>[2]
 ): Promise<SoloOptionGenerationResult> {
-  const prompt = buildSoloOptionGenerationPrompt(contractText, classification, clauses);
-  const result = await generateObject({
-    model,
-    schema: soloOptionGenerationSchema,
-    prompt,
-    maxTokens: 16384,
+  const merged: SoloOptionGenerationResult = { clauses: [] };
+  for (const batch of batchClauses(clauses)) {
+    const prompt = buildSoloOptionGenerationPrompt(contractText, classification, batch);
+    const result = await generateObject({
+      model,
+      schema: soloOptionGenerationSchema,
+      prompt,
+      maxTokens: 32768,
+    });
+    merged.clauses.push(...result.object.clauses);
+  }
+  // Per-batch prompts number options 1-based within the batch — renumber
+  // globally so display order survives the merge.
+  merged.clauses.forEach((c, i) => {
+    c.order = i + 1;
   });
-  return result.object;
+  return merged;
 }
 
 async function runOptionGeneration(
@@ -421,14 +444,23 @@ async function runOptionGeneration(
   classification: Parameters<typeof buildOptionGenerationPrompt>[1],
   clauses: Parameters<typeof buildOptionGenerationPrompt>[2]
 ): Promise<OptionGenerationResult> {
-  const prompt = buildOptionGenerationPrompt(contractText, classification, clauses);
-  const result = await generateObject({
-    model,
-    schema: optionGenerationSchema,
-    prompt,
-    maxTokens: 16384,
+  const merged: OptionGenerationResult = { clauses: [] };
+  for (const batch of batchClauses(clauses)) {
+    const prompt = buildOptionGenerationPrompt(contractText, classification, batch);
+    const result = await generateObject({
+      model,
+      schema: optionGenerationSchema,
+      prompt,
+      maxTokens: 32768,
+    });
+    merged.clauses.push(...result.object.clauses);
+  }
+  // Per-batch prompts number options 1-based within the batch — renumber
+  // globally so display order survives the merge.
+  merged.clauses.forEach((c, i) => {
+    c.order = i + 1;
   });
-  return result.object;
+  return merged;
 }
 
 async function runBoilerplateGeneration(
@@ -442,7 +474,7 @@ async function runBoilerplateGeneration(
     model,
     schema: boilerplateGenerationSchema,
     prompt,
-    maxTokens: 16384,
+    maxTokens: 32768,
   });
   return result.object;
 }

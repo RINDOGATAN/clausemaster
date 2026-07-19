@@ -79,7 +79,7 @@ Use this reference knowledge to:
 CONTRACT CLASSIFICATION:
 - Type: ${classification.contractTypeLabel} (${classification.contractType})
 - Jurisdiction: ${classification.jurisdiction}
-- Parties: ${classification.partyNames.join(", ")}
+- Parties: ${(classification.partyNames ?? []).join(", ")}
 ${skillSection}
 
 For each clause, provide:
@@ -117,7 +117,7 @@ Check if any of these expected clauses are MISSING from the contract.`
 CONTRACT:
 - Type: ${classification.contractTypeLabel} (${classification.contractType})
 - Jurisdiction: ${classification.jurisdiction}
-- Parties: ${classification.partyNames.join(", ")}
+- Parties: ${(classification.partyNames ?? []).join(", ")}
 - Summary: ${classification.summary}
 
 EXTRACTED CLAUSES:
@@ -147,7 +147,7 @@ export function buildOptionGenerationPrompt(
   clauses: ClauseExtractionResult["clauses"]
 ): string {
   const clauseSummary = clauses.map((c, i) =>
-    `${i + 1}. "${c.title}" (${c.category || "General"}) — ${c.summary}\n   Bias: ${c.biasAssessment}\n   Original: ${c.originalText.slice(0, 300)}...`
+    `${i + 1}. "${c.title}" (${c.category || "General"}) — ${c.summary}\n   Bias: ${c.biasAssessment ?? "neutral"}\n   Original: ${c.originalText.slice(0, 300)}...`
   ).join("\n\n");
 
   return `You are a legal negotiation expert specializing in two-party deal room software. Your task is to transform an analyzed contract into negotiation clauses with multiple options for a Dealroom platform.
@@ -155,7 +155,7 @@ export function buildOptionGenerationPrompt(
 CONTEXT:
 - Contract Type: ${classification.contractTypeLabel} (${classification.contractType})
 - Jurisdiction: ${classification.jurisdiction}
-- Parties: ${classification.partyNames.join(" and ")}
+- Parties: ${(classification.partyNames ?? []).join(" and ")}
 - Summary: ${classification.summary}
 
 EXTRACTED CLAUSES FROM THE CONTRACT:
@@ -175,9 +175,9 @@ For each option within a clause:
 1. Create a descriptive id (e.g. "narrow", "standard", "broad", "aggressive", "balanced")
 2. Provide a short code (e.g. "NARROW", "STANDARD", "BROAD")
 3. Write a clear label (e.g. "Narrow Scope", "Standard Terms", "Broad Protection")
-4. Write prosPartyA (2-4 advantages for Party A — "${classification.partyNames[0] || "Party A"}")
+4. Write prosPartyA (2-4 advantages for Party A — "${(classification.partyNames ?? [])[0] || "Party A"}")
 5. Write consPartyA (2-4 disadvantages for Party A)
-6. Write prosPartyB (2-4 advantages for Party B — "${classification.partyNames[1] || "Party B"}")
+6. Write prosPartyB (2-4 advantages for Party B — "${(classification.partyNames ?? [])[1] || "Party B"}")
 7. Write consPartyB (2-4 disadvantages for Party B)
 8. Write the FULL legal text as it would appear in the contract
 9. Set biasPartyA: 1.0 = strongly favors Party A, 0.0 = neutral, -1.0 = strongly against Party A
@@ -280,7 +280,7 @@ export function buildBoilerplateGenerationPrompt(
 ${isSolo ? "DOCUMENT" : "CONTRACT"} DETAILS:
 - Type: ${classification.contractTypeLabel} (${classification.contractType})
 - Jurisdiction: ${classification.jurisdiction}
-${isSolo ? `- Party: ${classification.partyNames[0] || "the publishing party"}` : `- Parties: ${classification.partyNames.join(" and ")}`}
+${isSolo ? `- Party: ${(classification.partyNames ?? [])[0] || "the publishing party"}` : `- Parties: ${(classification.partyNames ?? []).join(" and ")}`}
 
 ${isSolo ? "CONFIGURABLE" : "NEGOTIABLE"} CLAUSES (these will be inserted separately — do NOT include them in the boilerplate):
 ${clauseTitles.map((t, i) => `${i + 1}. ${t}`).join("\n")}
@@ -339,10 +339,10 @@ Provide your analysis as structured output.`;
 
 export function buildGuidanceGenerationPrompt(
   classification: ClassificationResult,
-  criteria: { assessmentType: string; categories: Array<{ title: string; criteria: Array<{ id: string; title: string; description: string; riskLevel: string }> }> }
+  criteria: { assessmentType: string; categories: Array<{ title: string; criteria: Array<{ id: string; title: string; description: string; riskLevel?: string | null }> }> }
 ): string {
   const criteriaList = criteria.categories.flatMap((cat) =>
-    cat.criteria.map((c) => `- [${cat.title}] ${c.id}: ${c.title} — ${c.description} (risk: ${c.riskLevel})`)
+    cat.criteria.map((c) => `- [${cat.title}] ${c.id}: ${c.title} — ${c.description} (risk: ${c.riskLevel ?? "medium"})`)
   ).join("\n");
 
   return `You are a compliance advisor. Generate practical assessment guidance for each criterion in the following framework.

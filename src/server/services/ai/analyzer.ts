@@ -135,10 +135,10 @@ async function runClassifyStep(
       contractType: classification.contractType,
       contractTypeLabel: classification.contractTypeLabel,
       jurisdiction: classification.jurisdiction,
-      jurisdictionNotes: classification.jurisdictionNotes,
+      jurisdictionNotes: classification.jurisdictionNotes ?? null,
       summary: classification.summary,
-      partyNames: classification.partyNames,
-      effectiveDate: classification.effectiveDate,
+      partyNames: classification.partyNames ?? [],
+      effectiveDate: classification.effectiveDate ?? null,
       documentCategory: classification.documentCategory,
       partyMode: classification.partyMode,
       suggestedDestination: classification.suggestedDestination,
@@ -184,7 +184,7 @@ async function runClausesStep(
       summary: clause.summary,
       legalSignificance: clause.legalSignificance,
       skillClauseMatch: clause.skillClauseMatch,
-      biasAssessment: biasMap[clause.biasAssessment] || "NEUTRAL",
+      biasAssessment: biasMap[clause.biasAssessment ?? "neutral"] || "NEUTRAL",
     })),
   });
 }
