@@ -167,12 +167,37 @@ export async function exportSkillDraft(
     content: JSON.stringify(buildEvalsSkeleton(dirName, metadata), null, 2),
   });
 
+  files.push({
+    name: "README.md",
+    content: buildReadme({
+      displayName: draft.displayName || dirName,
+      description:
+        resolveLocalized(metadata.description, lang) ||
+        `A ${draft.displayName || dirName} skill authored with Clausemaster.`,
+      isAssessment,
+      manifestData,
+      author: authorName,
+      license,
+      lang,
+    }),
+  });
+
   // Open skills ship with their license text; the packager includes LICENSE
   // in the signed archive when present. Proprietary (first-party premium)
   // skills get their EULA from the todolaw packaging pipeline instead.
-  if (isOpenLicense(license) && license === "Apache-2.0") {
-    files.push({ name: "LICENSE", content: APACHE_2_0_LICENSE });
+  // The lq-skills community gate requires a LICENSE file for every skill, so
+  // open licenses without bundled text still get a pointer file.
+  if (isOpenLicense(license)) {
+    files.push({
+      name: "LICENSE",
+      content:
+        license === "Apache-2.0"
+          ? APACHE_2_0_LICENSE
+          : `This skill is licensed under the ${license} license.\nSee https://spdx.org/licenses/${license}.html for the full text.\n`,
+    });
   }
+
+  validateExportedFiles(files, { isAssessment, manifestData });
 
   const githubToken = process.env.LEGALSKILLS_GITHUB_TOKEN;
   let exportPath: string;
@@ -457,21 +482,25 @@ function buildSkillMd(args: {
   );
   lines.push("  trigger_examples:");
   for (const t of triggers) lines.push(`    - ${yamlScalar(t)}`);
+  lines.push("  output_format: markdown");
 
+  // `inputs:` lives at the TOP level (the authoring guide's formal shape):
+  // the LQ.AI api reads top-level first and the gateway's required-input
+  // enforcement reads ONLY the top level — nesting under lq_ai would render
+  // in the form UI but silently escape gateway enforcement.
   if (required.length === 0 && optional.length === 0) {
-    lines.push("  inputs: {}");
+    lines.push("inputs: {}");
   } else {
-    lines.push("  inputs:");
+    lines.push("inputs:");
     if (required.length > 0) {
-      lines.push("    required:");
+      lines.push("  required:");
       for (const p of required) appendInput(lines, p, lang);
     }
     if (optional.length > 0) {
-      lines.push("    optional:");
+      lines.push("  optional:");
       for (const p of optional) appendInput(lines, p, lang);
     }
   }
-  lines.push("  output_format: markdown");
   lines.push("---");
   lines.push("");
 
@@ -530,10 +559,10 @@ function appendInput(
   p: DerivedParameter,
   lang: string
 ): void {
-  lines.push(`      - name: ${p.id}`);
-  lines.push(`        type: ${p.type}`);
+  lines.push(`    - name: ${p.id}`);
+  lines.push(`      type: ${p.type}`);
   lines.push(
-    `        description: ${yamlScalar(p.hint[lang] || p.label[lang] || p.token)}`
+    `      description: ${yamlScalar(p.hint[lang] || p.label[lang] || p.token)}`
   );
 }
 
@@ -736,6 +765,114 @@ function collectAssessmentCategories(assessmentJson: unknown): string[] {
     }
   }
   return names;
+}
+
+function buildReadme(args: {
+  displayName: string;
+  description: string;
+  isAssessment: boolean;
+  manifestData: Record<string, unknown> | null;
+  author: string;
+  license: string;
+  lang: string;
+}): string {
+  const jurisdictions =
+    ((args.manifestData?.jurisdictions as string[] | undefined) || []).filter(
+      (j) => j && j !== "UNKNOWN"
+    );
+  const languages = (args.manifestData?.languages as string[] | undefined) || [args.lang];
+
+  const lines: string[] = [];
+  lines.push(`# ${args.displayName}`);
+  lines.push("");
+  lines.push(args.description);
+  lines.push("");
+  lines.push("## What's inside");
+  lines.push("");
+  lines.push("- `SKILL.md` — agent-facing instructions (agentskills format, runs in any LQ.AI / LegalQuants-community runtime)");
+  if (args.isAssessment) {
+    lines.push("- `template.json` — structured assessment template for the todo.law suite (DPO Central installer input)");
+    lines.push("- `assessment.json` / `guidance.json` — full-fidelity criteria and per-criterion guidance");
+  } else {
+    lines.push("- `clauses.json` / `boilerplate.json` — clause engine data for the todo.law suite (Dealroom)");
+    lines.push("- `parameters.json` — fill-in parameters derived from the clause text");
+  }
+  lines.push("- `manifest.json` / `metadata.json` — machine-readable metadata");
+  lines.push("- `evals/evals.json` — evaluation cases (review and complete before relying on them)");
+  lines.push("");
+  lines.push("## Compatibility");
+  lines.push("");
+  lines.push("Dual-format: installable in the todo.law self-hosted suite (as a signed `.skill` package) and loadable by any LQ.AI / LegalQuants-community runtime as a skill folder.");
+  if (jurisdictions.length > 0) {
+    lines.push("");
+    lines.push(`Jurisdictions: ${jurisdictions.join(", ")} · Languages: ${languages.join(", ")}`);
+  }
+  lines.push("");
+  lines.push("## Provenance");
+  lines.push("");
+  lines.push(`Authored with [Clausemaster](https://clausemaster.todo.law) by ${args.author}. AI-assisted output — have a qualified lawyer review before production use.`);
+  lines.push("");
+  lines.push(`Licensed under the ${args.license} license.`);
+  lines.push("");
+  return lines.join("\n");
+}
+
+const DEALROOM_SKILL_ID_RE = /^com\.(nel|todolaw)\.skills\.[a-z0-9.-]+$/;
+const DPOCENTRAL_SKILL_ID_RE = /^com\.(nel|todolaw)\.(dpocentral|skills)\.[a-z0-9.-]+$/;
+
+/**
+ * Pre-publish conformance gate. Mirrors the static rules the downstream
+ * installers and the lq-skills community gate enforce, so a malformed skill
+ * fails HERE (with a useful message) instead of publishing silently and
+ * failing at install/review time. Throws on the first rule set violated.
+ */
+function validateExportedFiles(
+  files: Array<{ name: string; content: string }>,
+  opts: { isAssessment: boolean; manifestData: Record<string, unknown> | null }
+): void {
+  const names = new Set(files.map((f) => f.name));
+  const problems: string[] = [];
+
+  const required = opts.isAssessment
+    ? ["template.json", "assessment.json", "metadata.json", "manifest.json", "SKILL.md", "README.md", "evals/evals.json"]
+    : ["clauses.json", "boilerplate.json", "metadata.json", "manifest.json", "SKILL.md", "README.md", "parameters.json", "evals/evals.json"];
+  for (const name of required) {
+    if (!names.has(name)) problems.push(`missing required file: ${name}`);
+  }
+
+  const man = opts.manifestData || {};
+  const skillId = String(man.skillId ?? "");
+  const idRe = opts.isAssessment ? DPOCENTRAL_SKILL_ID_RE : DEALROOM_SKILL_ID_RE;
+  if (!idRe.test(skillId)) {
+    problems.push(
+      `skillId "${skillId}" does not match the ${opts.isAssessment ? "DPO Central" : "Dealroom"} installer pattern ${idRe}`
+    );
+  }
+  if (!/^\d+\.\d+\.\d+$/.test(String(man.version ?? ""))) {
+    problems.push(`manifest.version "${man.version}" is not x.y.z semver`);
+  }
+  if (!Array.isArray(man.jurisdictions) || man.jurisdictions.length === 0) {
+    problems.push("manifest.jurisdictions must be a non-empty array");
+  }
+  if (!Array.isArray(man.languages) || man.languages.length === 0) {
+    problems.push("manifest.languages must be a non-empty array");
+  }
+  if (opts.isAssessment && man.assessmentType == null) {
+    problems.push("assessment skill manifest is missing assessmentType (packager would route it as a contract skill)");
+  }
+  if (!opts.isAssessment && man.assessmentType != null) {
+    problems.push("contract skill manifest carries assessmentType (packager would route it as an assessment)");
+  }
+
+  const skillMd = files.find((f) => f.name === "SKILL.md")?.content || "";
+  if (!/^---\r?\n/.test(skillMd)) problems.push("SKILL.md has no YAML frontmatter block");
+  if (!/^name: /m.test(skillMd) || !/^description: /m.test(skillMd)) {
+    problems.push("SKILL.md frontmatter is missing top-level name/description (the LQ.AI loader would skip the skill)");
+  }
+
+  if (problems.length > 0) {
+    throw new Error(`Skill failed pre-publish conformance:\n- ${problems.join("\n- ")}`);
+  }
 }
 
 function buildEvalsSkeleton(
