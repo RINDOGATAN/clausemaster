@@ -1,9 +1,9 @@
 {
   "hero.badge": "Ensamblador de Skills legales",
-  "hero.title.prefix": "Convierte tu redacción en ",
-  "hero.title.accent": "skills instalables",
-  "hero.title.suffix": ".",
-  "hero.subtitle": "Convierte tus bibliotecas de cláusulas, plantillas y tu estilo en Agentic Attorney Skills. Amplía tu propio stack de todo.law o contribuye con skills abiertos a la comunidad LegalQuants. Cada skill funciona en ambos.",
+  "hero.title.prefix": "Crea y publica ",
+  "hero.title.accent": "Skills legales",
+  "hero.title.suffix": " sin esfuerzo.",
+  "hero.subtitle": "Transforma tu experiencia y conocimiento específico en módulos reutilizables, compártelos con tus clientes o publícalos en abierto. Cada skill es tuyo para siempre: funciona en tu propio stack de todo.law y en cualquier runtime de LegalQuants.",
   "hero.cta": "Empieza hoy",
   "hero.login": "¿Ya tienes cuenta? Inicia sesión",
   "hero.platform_url": "https://clausemaster.todo.law",
