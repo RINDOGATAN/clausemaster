@@ -10,8 +10,6 @@ import {
   User,
   ExternalLink,
   Cloud,
-  Server,
-  Cpu,
   ShoppingBag,
 } from "lucide-react";
 
@@ -72,8 +70,8 @@ export default function PublisherDocsPage() {
             actor="Lawyer"
             description="Start with the free community model or bring your own API key from Anthropic, OpenAI, Groq, Mistral, or Together."
             details={[
-              "Community model (free) — no API key needed, analyze contracts immediately",
-              "Bring your own key — choose your preferred provider for premium models",
+              "Community model (free): no API key needed, analyze contracts immediately",
+              "Bring your own key: choose your preferred provider for premium models",
               "Switch providers anytime from Settings",
             ]}
             isLast
@@ -110,9 +108,11 @@ export default function PublisherDocsPage() {
           Skill Generation
         </h2>
         <p className="text-sm text-muted-foreground mb-6">
-          After analyzing a contract, you can generate a &quot;legal skill&quot;
-          &mdash; a structured knowledge artifact that captures clause patterns,
-          boilerplate language, and metadata from the analysis.
+          After analyzing a document, you can generate a &quot;legal
+          skill&quot;: a structured artifact that captures what the analysis
+          found. Contracts become contract skills with clause options and
+          boilerplate. Compliance documents (DPIA questionnaires, vendor
+          audits) become assessment skills with scored criteria and guidance.
         </p>
 
         <div className="card-brutal mb-6">
@@ -122,7 +122,7 @@ export default function PublisherDocsPage() {
               { label: "Generate", description: "Create skill draft" },
               { label: "Review", description: "Edit & refine" },
               { label: "Submit", description: "Send for approval" },
-              { label: "Published", description: "Live in marketplace" },
+              { label: "Publish", description: "Export to destinations" },
             ]}
           />
         </div>
@@ -131,28 +131,30 @@ export default function PublisherDocsPage() {
           Skill Draft Editor
         </h3>
         <p className="text-sm text-muted-foreground mb-4">
-          The skill draft editor organizes generated content into tabs for easy
-          review and editing.
+          Drafts stop in review so you can edit them before submitting.
+          Contract drafts have Clauses, Boilerplate, and Metadata tabs.
+          Assessment drafts have Criteria, Guidance, and Metadata tabs.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="card-brutal">
             <FileText className="w-5 h-5 text-primary mb-2" />
             <h4 className="text-sm font-semibold text-foreground mb-1">
-              Clauses
+              Clauses / Criteria
             </h4>
             <p className="text-xs text-muted-foreground">
-              Extracted clause patterns with types, summaries, and bias
-              indicators.
+              Clause patterns with types, summaries, and bias indicators for
+              contracts; scored criteria for assessments.
             </p>
           </div>
           <div className="card-brutal">
             <Sparkles className="w-5 h-5 text-primary mb-2" />
             <h4 className="text-sm font-semibold text-foreground mb-1">
-              Boilerplate
+              Boilerplate / Guidance
             </h4>
             <p className="text-xs text-muted-foreground">
-              Standard language templates and recommended clause wording.
+              Recommended clause wording for contracts; reviewer guidance for
+              assessments.
             </p>
           </div>
           <div className="card-brutal">
@@ -166,16 +168,26 @@ export default function PublisherDocsPage() {
             </p>
           </div>
         </div>
+
+        <div className="mt-4 p-3 rounded-lg bg-primary/5 border border-primary/20">
+          <p className="text-xs text-muted-foreground">
+            <strong className="text-foreground">Evaluation cases:</strong>{" "}
+            generated automatically as the final step and included in the
+            export. There is no separate tab for them. They are AI-drafted, so
+            have a lawyer review them before relying on them.
+          </p>
+        </div>
       </section>
 
-      {/* Marketplace Submission */}
+      {/* Review Queue */}
       <section id="submission" className="scroll-mt-20">
         <h2 className="text-xl font-semibold text-foreground mb-4">
-          Marketplace Submission
+          Submitting for Review
         </h2>
         <p className="text-sm text-muted-foreground mb-6">
-          Once you&apos;re satisfied with a skill draft, submit it to the
-          marketplace for admin review.
+          Once you&apos;re satisfied with a skill draft, submit it from review
+          status. It enters a queue where an internal reviewer approves or
+          rejects it.
         </p>
 
         <div className="card-brutal space-y-4">
@@ -184,8 +196,8 @@ export default function PublisherDocsPage() {
             <div>
               <p className="text-sm font-semibold text-foreground">Submit</p>
               <p className="text-xs text-muted-foreground">
-                Click &quot;Submit to Marketplace&quot; on your skill draft. The
-                status changes to pending.
+                Click Submit on your skill draft. The status changes to
+                pending.
               </p>
             </div>
           </div>
@@ -194,8 +206,9 @@ export default function PublisherDocsPage() {
             <div>
               <p className="text-sm font-semibold text-foreground">Approved</p>
               <p className="text-xs text-muted-foreground">
-                An admin reviews and approves your skill. It becomes available in
-                the knowledge base for AI analysis.
+                An internal reviewer approves your skill and it is published.
+                It also becomes available in the knowledge base for AI
+                analysis.
               </p>
             </div>
           </div>
@@ -213,14 +226,14 @@ export default function PublisherDocsPage() {
       </section>
 
       {/* Dual-Format: Your Stack and LegalQuants */}
-      <section id="aas-marketplace" className="scroll-mt-20">
+      <section id="aas-dual-format" className="scroll-mt-20">
         <h2 className="text-xl font-semibold text-foreground mb-4">
           Your Stack and the LegalQuants Community
         </h2>
         <p className="text-sm text-muted-foreground mb-6">
           Skills you create in Clausemaster become{" "}
-          <strong className="text-foreground">Agentic Attorney Skills (AAS)</strong>{" "}
-          &mdash; dual-format modules that work in both your own todo.law
+          <strong className="text-foreground">Agentic Attorney Skills (AAS)</strong>:
+          dual-format modules that work in both your own todo.law
           deployments and the{" "}
           <a
             href="https://todo.law/skills"
@@ -284,42 +297,18 @@ export default function PublisherDocsPage() {
           />
         </div>
 
-        {/* Three deployment targets */}
+        {/* Where skills install */}
         <h3 className="text-base font-semibold text-foreground mb-3">
-          Deployment Targets
+          Where Skills Install
         </h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Your published skills can run in three ways.
+        <p className="text-sm text-muted-foreground">
+          Contract skills install into Dealroom as signed packages. Assessment
+          skills install into DPO Central. AI Sentinel skills can be authored,
+          but the AI Sentinel installer is still in development, so they cannot
+          be installed yet. The same skill folder also loads in
+          LegalQuants-community runtimes such as LQ.AI and in other agent-skill
+          hosts.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="card-brutal">
-            <Cloud className="w-5 h-5 text-primary mb-2" />
-            <h4 className="text-sm font-semibold text-foreground mb-1">
-              TODO.LAW Hosted
-            </h4>
-            <p className="text-xs text-muted-foreground">
-              Instant activation on the TODO.LAW cloud. Zero setup for buyers.
-            </p>
-          </div>
-          <div className="card-brutal">
-            <Server className="w-5 h-5 text-primary mb-2" />
-            <h4 className="text-sm font-semibold text-foreground mb-1">
-              Self-Hosted Cloud
-            </h4>
-            <p className="text-xs text-muted-foreground">
-              Downloadable packages deployed to your own infrastructure.
-            </p>
-          </div>
-          <div className="card-brutal">
-            <Cpu className="w-5 h-5 text-primary mb-2" />
-            <h4 className="text-sm font-semibold text-foreground mb-1">
-              Portable Hardware
-            </h4>
-            <p className="text-xs text-muted-foreground">
-              Air-gapped devices running open-weight models for maximum confidentiality.
-            </p>
-          </div>
-        </div>
       </section>
 
       {/* Where Your Skills Are Used */}

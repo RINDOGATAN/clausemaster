@@ -21,8 +21,8 @@ export default function ClientDocsPage() {
           For Startups
         </h1>
         <p className="text-base text-muted-foreground leading-relaxed max-w-2xl">
-          Upload contracts, get instant AI analysis, and request expert lawyer
-          reviews &mdash; all from a single dashboard.
+          Upload contracts, get AI analysis, and request expert lawyer
+          reviews, all from a single dashboard.
         </p>
       </section>
 
@@ -176,7 +176,7 @@ export default function ClientDocsPage() {
                 Download PDF Report
               </h3>
               <p className="text-xs text-muted-foreground">
-                Generate a comprehensive PDF report with all clauses, issues,
+                Generate a PDF report with all clauses, issues,
                 and the executive summary.
               </p>
             </div>

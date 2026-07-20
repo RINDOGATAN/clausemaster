@@ -4,6 +4,8 @@ Clausemaster turns legal documents into installable AI skills. Upload a contract
 
 Built by TODO.LAW. Skills you author are yours: open format, no lock-in, no revenue cut.
 
+Full documentation lives at [clausemaster.todo.law/docs](https://clausemaster.todo.law/docs); the [End-to-End Guide](https://clausemaster.todo.law/docs/guide) walks the whole journey from upload to running your skill in todo.law apps and LegalQuants runtimes.
+
 ## What it does
 
 1. **Analyzes your document.** A three-step AI pipeline classifies the document (type, jurisdiction, parties), extracts every clause with a plain-language summary and bias assessment, and flags issues: missing clauses, unusual terms, jurisdiction concerns, compliance risks.

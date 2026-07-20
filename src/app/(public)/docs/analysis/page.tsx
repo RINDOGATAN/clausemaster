@@ -24,8 +24,7 @@ export default function AnalysisDocsPage() {
         <p className="text-base text-muted-foreground leading-relaxed max-w-2xl">
           Clausemaster uses a three-step AI pipeline powered by the Vercel AI
           SDK to analyze contracts. Choose between our free community model or
-          bring your own API key for premium providers. Each step builds on the
-          previous one to provide comprehensive results.
+          bring your own API key for premium providers.
         </p>
       </section>
 
@@ -245,21 +244,21 @@ export default function AnalysisDocsPage() {
             <div className="w-2 h-2 rounded-full bg-red-400" />
             <span className="text-xs font-medium text-red-400">High</span>
             <span className="text-[11px] text-muted-foreground">
-              &mdash; Requires immediate attention
+              Requires immediate attention
             </span>
           </div>
           <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
             <div className="w-2 h-2 rounded-full bg-yellow-400" />
             <span className="text-xs font-medium text-yellow-400">Medium</span>
             <span className="text-[11px] text-muted-foreground">
-              &mdash; Should be reviewed
+              Should be reviewed
             </span>
           </div>
           <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500/10 border border-green-500/20">
             <div className="w-2 h-2 rounded-full bg-green-400" />
             <span className="text-xs font-medium text-green-400">Low</span>
             <span className="text-[11px] text-muted-foreground">
-              &mdash; Informational concern
+              Informational concern
             </span>
           </div>
         </div>
@@ -303,8 +302,8 @@ export default function AnalysisDocsPage() {
           AI Providers
         </h2>
         <p className="text-sm text-muted-foreground mb-6">
-          Clausemaster supports multiple AI providers. Choose the option that
-          best fits your needs and budget.
+          Clausemaster supports multiple AI providers. Internal team accounts
+          on designated domains use a platform-provided key.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
@@ -376,8 +375,8 @@ export default function AnalysisDocsPage() {
             <p className="text-xs text-muted-foreground leading-relaxed">
               Your AI provider choice is stored per-account. You can switch
               providers at any time from Settings. All providers use the same
-              analysis pipeline and produce the same structured output format
-              &mdash; only the underlying model differs. API keys are encrypted
+              analysis pipeline and produce the same structured output format;
+              only the underlying model differs. API keys are encrypted
               at rest using AES-256-GCM.
             </p>
           </div>

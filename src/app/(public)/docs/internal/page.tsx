@@ -20,8 +20,8 @@ export default function InternalDocsPage() {
           For Admins
         </h1>
         <p className="text-base text-muted-foreground leading-relaxed max-w-2xl">
-          Manage marketplace submissions, administer invite codes, export
-          approved skills, and oversee all platform activity.
+          Review submitted skills, administer invite codes, publish approved
+          skills, and oversee platform activity.
         </p>
       </section>
 
@@ -99,16 +99,16 @@ export default function InternalDocsPage() {
               <li className="flex items-start gap-2">
                 <span className="text-green-400">&#10003;</span>
                 <span>
-                  <strong className="text-foreground">Approve</strong> &mdash;
-                  Skill is published to the knowledge base and becomes available
+                  <strong className="text-foreground">Approve</strong>: the
+                  skill is published to the knowledge base and becomes available
                   for AI analysis matching.
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-red-400">&#10007;</span>
                 <span>
-                  <strong className="text-foreground">Reject</strong> &mdash;
-                  Skill is returned to the publisher with notes explaining what
+                  <strong className="text-foreground">Reject</strong>: the
+                  skill is returned to the publisher with notes explaining what
                   needs to be improved.
                 </span>
               </li>
@@ -192,12 +192,8 @@ export default function InternalDocsPage() {
           Publishing Approved Skills
         </h2>
         <p className="text-sm text-muted-foreground mb-6">
-          After approving a submission, an admin must explicitly publish it.
-          Publishing commits the skill&apos;s JSON files to the{" "}
-          <code className="px-1.5 py-0.5 rounded bg-card border border-border text-xs">
-            RINDOGATAN/legalskills
-          </code>{" "}
-          GitHub repository so Dealroom and other consumers can pick it up.
+          After approving a submission, it must be explicitly published. Both
+          approving and publishing require the INTERNAL role.
         </p>
 
         <div className="card-brutal flex items-start gap-3">
@@ -211,17 +207,19 @@ export default function InternalDocsPage() {
               <code className="px-1 py-0.5 rounded bg-card border border-border text-xs">
                 APPROVED
               </code>{" "}
-              status. Clicking Publish commits one atomic commit per skill via
-              the GitHub Git Data API and moves the draft to{" "}
+              status. Clicking Publish first runs a conformance check; if the
+              skill is malformed, the export fails with a clear message. If the
+              check passes, the dual-format file set is exported to the skills
+              library: clauses.json and boilerplate.json for contract skills,
+              or template.json, assessment.json, and guidance.json for
+              assessments, plus manifest.json, metadata.json, SKILL.md,
+              README.md, parameters.json, evaluation cases, and a LICENSE.
+              Dealroom and DPO Central install from the skills library. The
+              draft then moves to{" "}
               <code className="px-1 py-0.5 rounded bg-card border border-border text-xs">
                 EXPORTED
               </code>
-              . In local dev (no GitHub token), it falls back to writing files
-              into the{" "}
-              <code className="px-1 py-0.5 rounded bg-card border border-border text-xs">
-                legalskills/
-              </code>{" "}
-              directory.
+              .
             </p>
           </div>
         </div>
@@ -253,7 +251,7 @@ export default function InternalDocsPage() {
             },
             {
               title: "Admin Tools",
-              desc: "Submission queue, invite codes, exports — exclusive to internal users.",
+              desc: "Submission queue, invite codes, and publishing, restricted to internal users.",
             },
           ].map((item) => (
             <div

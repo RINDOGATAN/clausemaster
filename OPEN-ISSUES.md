@@ -59,6 +59,13 @@ card sits on step 2 for most of the run. The step API returns the actual step na
 so nothing breaks, but if assessments should be parameterizable (vendor name, processing
 context), derive inputs from template questions. Low priority.
 
+## 9. Docs pages are English-only
+
+The landing page ships EN/ES, but everything under `/docs` is hardcoded English with no
+i18n plumbing. Translate the docs section (starting with the end-to-end guide) once its
+content settles. Consider the landing page's lightweight local-JSON approach rather than
+wiring next-intl into the public pages.
+
 ## Resolved
 
 - Skill-specific eval generation shipped as a third draft step (`evals-generator.ts`);

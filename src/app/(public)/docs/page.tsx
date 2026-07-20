@@ -38,15 +38,20 @@ export default function DocsOverviewPage() {
             {
               step: 2,
               title: "Create a Skill",
-              desc: "Define clauses, set flexibility ranges, and configure jurisdiction-specific defaults.",
+              desc: "Upload a document and generate a draft with clause options or assessment criteria.",
             },
             {
               step: 3,
-              title: "Install to Your Stack",
-              desc: "Add the skill to your own self-hosted todo.law deployments so it drafts the way you do.",
+              title: "Review the Draft",
+              desc: "Edit the draft before publishing. Every published skill includes evaluation cases that need lawyer review.",
             },
             {
               step: 4,
+              title: "Install to Your Stack",
+              desc: "Install the skill into Dealroom (contract skills) or DPO Central (assessments) on your own deployment.",
+            },
+            {
+              step: 5,
               title: "Contribute to LegalQuants",
               desc: "Publish open skills to the LegalQuants community. Every skill is dual-format for todo.law and LQ.",
             },
@@ -64,6 +69,13 @@ export default function DocsOverviewPage() {
             </div>
           ))}
         </div>
+        <p className="text-sm text-muted-foreground mt-4">
+          For a full walkthrough of the workflow, see the{" "}
+          <Link href="/docs/guide" className="text-primary hover:underline">
+            End-to-End Guide
+          </Link>
+          .
+        </p>
       </section>
 
       {/* Two Paths */}
@@ -96,8 +108,8 @@ export default function DocsOverviewPage() {
                 Admin / Internal
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Manage marketplace submissions, administer invite codes, and
-                export approved skills.
+                Review and publish submitted skills, and administer invite
+                codes.
               </p>
             </div>
           </Link>
@@ -110,7 +122,7 @@ export default function DocsOverviewPage() {
           Platform Features
         </h2>
         <p className="text-sm text-muted-foreground mb-6">
-          Explore the core modules that power Clausemaster.
+          The main areas of the product.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
