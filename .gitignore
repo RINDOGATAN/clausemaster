@@ -45,3 +45,4 @@ next-env.d.ts
 
 # uploads
 /uploads
+.env.local.bak*

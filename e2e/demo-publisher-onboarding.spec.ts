@@ -15,11 +15,11 @@
  * Usage:
  *   # Against production
  *   BASE_URL=https://clausemaster.todo.law \
- *   TEST_EMAIL=sergio.dejuandreix@croma.legal \
+ *   TEST_EMAIL=expert@example-firm.test \
  *     npx playwright test e2e/demo-publisher-onboarding.spec.ts
  *
  *   # Against local dev
- *   TEST_EMAIL=sergio.dejuandreix@croma.legal \
+ *   TEST_EMAIL=expert@example-firm.test \
  *     npx playwright test e2e/demo-publisher-onboarding.spec.ts
  *
  * Video + screenshots saved to e2e/results/
@@ -30,14 +30,14 @@ import { loginAs } from "./helpers/auth";
 
 // ── Config ─────────────────────────────────────────────────────────
 
-const TEST_EMAIL = process.env.TEST_EMAIL || "sergio.dejuandreix@croma.legal";
+const TEST_EMAIL = process.env.TEST_EMAIL || "expert@example-firm.test";
 
 // Demo profile data
 const DEMO_PROFILE = {
-  firmName: "Croma Legal",
+  firmName: "Example Firm",
   specialties: "Privacy, Data Protection, GDPR",
   bio: "Boutique law firm specializing in technology law, data protection, and digital compliance across EU jurisdictions.",
-  website: "https://croma.legal",
+  website: "https://example-firm.test",
 };
 
 // ── Helpers ─────────────────────────────────────────────────────────

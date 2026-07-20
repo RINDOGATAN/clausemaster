@@ -796,28 +796,28 @@ function buildReadme(args: {
   lines.push("");
   lines.push("## What's inside");
   lines.push("");
-  lines.push("- `SKILL.md` — agent-facing instructions (agentskills format, runs in any LQ.AI / LegalQuants-community runtime)");
+  lines.push("- `SKILL.md`: agent-facing instructions in the agentskills format, loadable by any LegalQuants-community runtime");
   if (args.isAssessment) {
-    lines.push("- `template.json` — structured assessment template for the todo.law suite (DPO Central installer input)");
-    lines.push("- `assessment.json` / `guidance.json` — full-fidelity criteria and per-criterion guidance");
+    lines.push("- `template.json`: structured assessment template for the todo.law suite");
+    lines.push("- `assessment.json` and `guidance.json`: full criteria and per-criterion guidance");
   } else {
-    lines.push("- `clauses.json` / `boilerplate.json` — clause engine data for the todo.law suite (Dealroom)");
-    lines.push("- `parameters.json` — fill-in parameters derived from the clause text");
+    lines.push("- `clauses.json` and `boilerplate.json`: clause engine data for the todo.law suite");
+    lines.push("- `parameters.json`: fill-in parameters derived from the clause text");
   }
-  lines.push("- `manifest.json` / `metadata.json` — machine-readable metadata");
-  lines.push("- `evals/evals.json` — evaluation cases (review and complete before relying on them)");
+  lines.push("- `manifest.json` and `metadata.json`: machine-readable metadata");
+  lines.push("- `evals/evals.json`: evaluation cases. Review them before relying on them.");
   lines.push("");
   lines.push("## Compatibility");
   lines.push("");
-  lines.push("Dual-format: installable in the todo.law self-hosted suite (as a signed `.skill` package) and loadable by any LQ.AI / LegalQuants-community runtime as a skill folder.");
+  lines.push("Dual format. Installable in the todo.law self-hosted suite as a signed `.skill` package, and loadable by LQ.AI and other LegalQuants-community runtimes as a skill folder.");
   if (jurisdictions.length > 0) {
     lines.push("");
-    lines.push(`Jurisdictions: ${jurisdictions.join(", ")} · Languages: ${languages.join(", ")}`);
+    lines.push(`Jurisdictions: ${jurisdictions.join(", ")}. Languages: ${languages.join(", ")}.`);
   }
   lines.push("");
   lines.push("## Provenance");
   lines.push("");
-  lines.push(`Authored with [Clausemaster](https://clausemaster.todo.law) by ${args.author}. AI-assisted output — have a qualified lawyer review before production use.`);
+  lines.push(`Authored with [Clausemaster](https://clausemaster.todo.law) by ${args.author}. This is AI-assisted output. Have a qualified lawyer review it before production use.`);
   lines.push("");
   lines.push(`Licensed under the ${args.license} license.`);
   lines.push("");
