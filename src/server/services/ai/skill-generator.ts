@@ -16,13 +16,14 @@ import {
   buildSoloOptionGenerationPrompt,
   buildBoilerplateGenerationPrompt,
 } from "./prompts";
+import { runEvalsGeneration } from "./evals-generator";
 import prisma from "@/lib/prisma";
 import { skillPublishingConfig } from "@/config/skill-publishing";
 
 export interface SkillDraftStepResult {
   done: boolean;
   status: string;
-  step: "options" | "boilerplate" | null;
+  step: "options" | "boilerplate" | "evals" | null;
   error?: string;
 }
 
@@ -32,7 +33,8 @@ export interface SkillDraftStepResult {
  * Hobby's 10s function cap. The draft row is created by the router with
  * status GENERATING; progress is marked by which JSON fields are filled:
  *   no clausesJson     -> option generation
- *   no boilerplateJson -> boilerplate generation, then REVIEW
+ *   no boilerplateJson -> boilerplate generation
+ *   else               -> skill-specific evals, then REVIEW
  */
 export async function runContractDraftStep(
   draftId: string,
@@ -152,6 +154,31 @@ export async function runContractDraftStep(
       return { done: false, status: "GENERATING", step };
     }
 
+    if (draft.boilerplateJson) {
+      // Final step: skill-specific evals. Additive quality — a failure here
+      // falls back to the exporter's skeleton rather than failing the draft.
+      step = "evals";
+      let evalsJson: unknown = null;
+      try {
+        const manifest = draft.manifestJson as Record<string, unknown> | null;
+        evalsJson = await runEvalsGeneration(model, {
+          displayName: draft.displayName || displayName,
+          isAssessment: false,
+          jurisdictions: (manifest?.jurisdictions as string[]) || [],
+          language,
+          clausesJson: draft.clausesJson,
+          assessmentJson: null,
+        });
+      } catch (evalError) {
+        console.warn(`Eval generation failed for draft ${draftId}; exporter will use the skeleton:`, evalError);
+      }
+      await prisma.skillDraft.update({
+        where: { id: draftId },
+        data: { status: "REVIEW", evalsJson: evalsJson ?? undefined },
+      });
+      return { done: true, status: "REVIEW", step };
+    }
+
     step = "boilerplate";
 
     // Recover clause titles from the stored clausesJson (titles are i18n objects)
@@ -214,7 +241,6 @@ export async function runContractDraftStep(
     await prisma.skillDraft.update({
       where: { id: draftId },
       data: {
-        status: "REVIEW",
         destination: analysis.suggestedDestination
           ? destinationMap[analysis.suggestedDestination] || null
           : null,
@@ -228,7 +254,7 @@ export async function runContractDraftStep(
       },
     });
 
-    return { done: true, status: "REVIEW", step };
+    return { done: false, status: "GENERATING", step };
   } catch (error) {
     console.error(`Skill generation step "${step}" failed for draft ${draftId}:`, error);
     const message = error instanceof Error ? error.message : "Skill generation failed";

@@ -13,6 +13,7 @@ import {
   buildCriteriaExtractionPrompt,
   buildGuidanceGenerationPrompt,
 } from "./prompts";
+import { runEvalsGeneration } from "./evals-generator";
 import prisma from "@/lib/prisma";
 import { skillPublishingConfig } from "@/config/skill-publishing";
 import type { SkillDraftStepResult } from "./skill-generator";
@@ -23,7 +24,8 @@ import type { SkillDraftStepResult } from "./skill-generator";
  * Hobby's 10s function cap. The draft row is created by the router with
  * status GENERATING; progress is marked by which JSON fields are filled:
  *   no assessmentJson -> criteria extraction (stored without guidance)
- *   no guidanceJson   -> guidance generation, merge, then REVIEW
+ *   no metadataJson   -> guidance generation + merge
+ *   else              -> skill-specific evals, then REVIEW
  */
 export async function runAssessmentDraftStep(
   draftId: string,
@@ -100,6 +102,31 @@ export async function runAssessmentDraftStep(
       });
 
       return { done: false, status: "GENERATING", step };
+    }
+
+    if (draft.metadataJson) {
+      // Final step: skill-specific evals. Additive quality — a failure here
+      // falls back to the exporter's skeleton rather than failing the draft.
+      step = "evals";
+      let evalsJson: unknown = null;
+      try {
+        const manifest = draft.manifestJson as Record<string, unknown> | null;
+        evalsJson = await runEvalsGeneration(model, {
+          displayName: draft.displayName || "Assessment",
+          isAssessment: true,
+          jurisdictions: (manifest?.jurisdictions as string[]) || [],
+          language: analysis.jurisdiction === "SPAIN" ? "es" : "en",
+          clausesJson: null,
+          assessmentJson: draft.assessmentJson,
+        });
+      } catch (evalError) {
+        console.warn(`Eval generation failed for draft ${draftId}; exporter will use the skeleton:`, evalError);
+      }
+      await prisma.skillDraft.update({
+        where: { id: draftId },
+        data: { status: "REVIEW", evalsJson: evalsJson ?? undefined },
+      });
+      return { done: true, status: "REVIEW", step };
     }
 
     step = "boilerplate";
@@ -185,7 +212,6 @@ export async function runAssessmentDraftStep(
     await prisma.skillDraft.update({
       where: { id: draftId },
       data: {
-        status: "REVIEW",
         skillType: "ASSESSMENT",
         destination: analysis.suggestedDestination
           ? destinationMap[analysis.suggestedDestination] || null
@@ -201,7 +227,7 @@ export async function runAssessmentDraftStep(
       },
     });
 
-    return { done: true, status: "REVIEW", step };
+    return { done: false, status: "GENERATING", step };
   } catch (error) {
     console.error(`Assessment generation step "${step}" failed for draft ${draftId}:`, error);
     const message = error instanceof Error ? error.message : "Assessment skill generation failed";
@@ -223,7 +249,7 @@ async function runCriteriaExtraction(
     model,
     schema: criteriaExtractionSchema,
     prompt,
-    maxTokens: 16384,
+    maxTokens: 32768,
   });
   return result.object;
 }
@@ -238,7 +264,7 @@ async function runGuidanceGeneration(
     model,
     schema: guidanceGenerationSchema,
     prompt,
-    maxTokens: 16384,
+    maxTokens: 32768,
   });
   return result.object;
 }

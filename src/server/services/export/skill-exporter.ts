@@ -162,9 +162,16 @@ export async function exportSkillDraft(
     name: "parameters.json",
     content: JSON.stringify({ version: "1.0", parameters }, null, 2),
   });
+  // Skill-specific evals generated during drafting (evalsJson); the static
+  // skeleton remains the fallback for drafts predating the evals step or
+  // where generation failed.
   files.push({
     name: "evals/evals.json",
-    content: JSON.stringify(buildEvalsSkeleton(dirName, metadata), null, 2),
+    content: JSON.stringify(
+      buildEvalsContent(dirName, metadata, draft.evalsJson),
+      null,
+      2
+    ),
   });
 
   files.push({
@@ -873,6 +880,33 @@ function validateExportedFiles(
   if (problems.length > 0) {
     throw new Error(`Skill failed pre-publish conformance:\n- ${problems.join("\n- ")}`);
   }
+}
+
+function buildEvalsContent(
+  dirName: string,
+  metadata: Record<string, unknown>,
+  evalsJson: unknown
+): unknown {
+  const generated = evalsJson as {
+    evals?: Array<Record<string, unknown>>;
+  } | null;
+  if (!generated || !Array.isArray(generated.evals) || generated.evals.length === 0) {
+    return buildEvalsSkeleton(dirName, metadata);
+  }
+  return {
+    skill_name: dirName,
+    // Generation date, not an attorney-review date — the README instructs
+    // reviewing evals before reliance.
+    law_reviewed_as_of: new Date().toISOString().slice(0, 10),
+    evals: generated.evals.map((e, i) => ({
+      id: typeof e.id === "number" ? e.id : i + 1,
+      ...(typeof e.kind === "string" ? { kind: e.kind } : {}),
+      prompt: e.prompt,
+      expected_output: e.expected_output,
+      assertions: e.assertions,
+      files: [],
+    })),
+  };
 }
 
 function buildEvalsSkeleton(

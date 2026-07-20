@@ -347,6 +347,7 @@ model SkillDraft {
   manifestJson    Json?
   assessmentJson  Json?
   guidanceJson    Json?
+  evalsJson       Json?
 
   // AI tracking
   aiProvider       String?
