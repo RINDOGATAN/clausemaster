@@ -209,7 +209,7 @@
     "continueAsClient": "Continuar como Cliente",
     "clientDescription": "Analiza tus propios contratos. Gratis con el nivel comunitario de IA; puedes traer tu propia clave API en cualquier momento desde Configuración.",
     "publisherToggle": "Soy abogado/a o despacho",
-    "publisherDescription": "Los publicadores pueden enviar skills reutilizables al marketplace. Requiere un código de invitación o un perfil verificado en el Directorio de Expertos de TodoLaw.",
+    "publisherDescription": "Los publicadores pueden enviar skills reutilizables para revisión y publicación. Requiere un código de invitación o un perfil verificado en el Directorio de Expertos de TodoLaw.",
     "enterCode": "Código de Invitación de Publicador",
     "codePlaceholder": "Introduce tu código...",
     "verifyCode": "Verificar Código",
@@ -226,7 +226,7 @@
   },
   "skillDraft": {
     "generateSkill": "Generar Skill para Dealroom",
-    "generateForMarketplace": "Generar Skill para Marketplace",
+    "generateForMarketplace": "Generar Skill",
     "viewSkillDraft": "Ver Borrador de Skill",
     "generatingSkill": "Generando skill...",
     "retryGeneration": "Reintentar",
@@ -243,11 +243,11 @@
       "FAILED": "Fallido"
     },
     "submit": {
-      "submitToMarketplace": "Enviar al Marketplace",
+      "submitToMarketplace": "Enviar a revisión",
       "submitting": "Enviando...",
       "submitted": "Enviado para revisión",
       "pendingReview": "Este skill ha sido enviado y está en espera de revisión.",
-      "approved": "Este skill ha sido aprobado para el marketplace.",
+      "approved": "Este skill ha sido aprobado para su publicación.",
       "rejected": "Este envío no ha sido aprobado. Revisa las notas y vuelve a enviar."
     },
     "tabs": {
@@ -403,12 +403,12 @@
     "reject": "Rechazar",
     "submissionApproved": "Envío aprobado",
     "submissionRejected": "Envío rechazado",
-    "submissionPublished": "Skill publicado en el marketplace",
+    "submissionPublished": "Skill publicado",
     "publishFailed": "Publicación fallida: {error}",
-    "publishSection": "Publicar en el Marketplace",
+    "publishSection": "Publicar Skill",
     "publishDescription": "La aprobación está completa. Haz clic en Publicar para subir este skill al repositorio legalskills y dejarlo disponible para Dealroom y otros consumidores.",
     "publishedDescription": "Este skill ha sido subido al repositorio legalskills y está disponible para las plataformas que lo consumen.",
-    "publishToMarketplace": "Publicar en el Marketplace",
+    "publishToMarketplace": "Publicar Skill",
     "publishing": "Publicando…",
     "published": "Publicado",
     "viewInMarketplace": "Ver commit",

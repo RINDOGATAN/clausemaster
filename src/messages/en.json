@@ -209,7 +209,7 @@
     "continueAsClient": "Continue as Client",
     "clientDescription": "Analyze your own contracts. Free with the community AI tier — bring your own API key any time from Settings.",
     "publisherToggle": "I'm a lawyer or law firm",
-    "publisherDescription": "Publishers can submit reusable skills to the marketplace. This requires an invite code or a verified entry in the TodoLaw Expert Directory.",
+    "publisherDescription": "Publishers can submit reusable skills for review and publication. This requires an invite code or a verified entry in the TodoLaw Expert Directory.",
     "enterCode": "Publisher Invite Code",
     "codePlaceholder": "Enter your code...",
     "verifyCode": "Verify Code",
@@ -226,7 +226,7 @@
   },
   "skillDraft": {
     "generateSkill": "Generate Dealroom Skill",
-    "generateForMarketplace": "Generate Skill for Marketplace",
+    "generateForMarketplace": "Generate Skill",
     "viewSkillDraft": "View Skill Draft",
     "generatingSkill": "Generating skill...",
     "retryGeneration": "Retry",
@@ -243,11 +243,11 @@
       "FAILED": "Failed"
     },
     "submit": {
-      "submitToMarketplace": "Submit to Marketplace",
+      "submitToMarketplace": "Submit for Review",
       "submitting": "Submitting...",
       "submitted": "Submitted for review",
       "pendingReview": "This skill has been submitted and is awaiting admin review.",
-      "approved": "This skill has been approved for the marketplace.",
+      "approved": "This skill has been approved for publication.",
       "rejected": "This submission was not approved. Please review the notes and resubmit."
     },
     "tabs": {
@@ -403,12 +403,12 @@
     "reject": "Reject",
     "submissionApproved": "Submission approved",
     "submissionRejected": "Submission rejected",
-    "submissionPublished": "Skill published to marketplace",
+    "submissionPublished": "Skill published",
     "publishFailed": "Publish failed: {error}",
-    "publishSection": "Publish to Marketplace",
+    "publishSection": "Publish Skill",
     "publishDescription": "Approval is complete. Click Publish to commit this skill to the legalskills repository so it becomes available to Dealroom and other consumers.",
     "publishedDescription": "This skill has been committed to the legalskills repository and is live for downstream platforms.",
-    "publishToMarketplace": "Publish to Marketplace",
+    "publishToMarketplace": "Publish Skill",
     "publishing": "Publishing…",
     "published": "Published",
     "viewInMarketplace": "View commit",
