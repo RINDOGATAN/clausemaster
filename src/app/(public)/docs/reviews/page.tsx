@@ -26,15 +26,15 @@ export default function ReviewsDocsPage() {
           Review Lifecycle
         </h2>
         <p className="text-sm text-muted-foreground mb-6">
-          Every review request follows a four-stage lifecycle.
+          A review request moves through three stages. A request can also be
+          cancelled before completion.
         </p>
 
         <div className="card-brutal">
           <FlowDiagram
             steps={[
-              { label: "Requested", description: "Startup submits" },
-              { label: "Pending", description: "Awaiting claim" },
-              { label: "In Review", description: "Lawyer working" },
+              { label: "Pending", description: "In the queue" },
+              { label: "Claimed", description: "Lawyer working" },
               { label: "Completed", description: "Notes delivered" },
             ]}
           />
@@ -47,12 +47,6 @@ export default function ReviewsDocsPage() {
           Status Reference
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-center">
-            <p className="text-xs font-semibold text-blue-400">REQUESTED</p>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              Just submitted
-            </p>
-          </div>
           <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-center">
             <p className="text-xs font-semibold text-yellow-400">PENDING</p>
             <p className="text-[11px] text-muted-foreground mt-1">
@@ -60,15 +54,21 @@ export default function ReviewsDocsPage() {
             </p>
           </div>
           <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20 text-center">
-            <p className="text-xs font-semibold text-purple-400">IN REVIEW</p>
+            <p className="text-xs font-semibold text-purple-400">CLAIMED</p>
             <p className="text-[11px] text-muted-foreground mt-1">
-              Lawyer claimed
+              Lawyer working
             </p>
           </div>
           <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-center">
             <p className="text-xs font-semibold text-green-400">COMPLETED</p>
             <p className="text-[11px] text-muted-foreground mt-1">
               Notes delivered
+            </p>
+          </div>
+          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-center">
+            <p className="text-xs font-semibold text-red-400">CANCELLED</p>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              Withdrawn before completion
             </p>
           </div>
         </div>

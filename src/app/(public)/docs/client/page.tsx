@@ -81,8 +81,8 @@ export default function ClientDocsPage() {
               Clause List
             </h3>
             <p className="text-xs text-muted-foreground">
-              Every extracted clause with its type, category, and a one-line
-              summary. Click any clause to see full details.
+              Every extracted clause with its title and category. Click any
+              clause to see full details.
             </p>
           </div>
 
@@ -92,8 +92,9 @@ export default function ClientDocsPage() {
               Clause Detail
             </h3>
             <p className="text-xs text-muted-foreground">
-              Full text, bias assessment (neutral / favors party A or B), skill
-              match confidence, and related boilerplate.
+              Plain-language summary, full clause text, legal significance,
+              bias assessment (neutral or favoring one party), and the matched
+              reference clause when one is found.
             </p>
           </div>
 
@@ -103,8 +104,8 @@ export default function ClientDocsPage() {
               Issue Panel
             </h3>
             <p className="text-xs text-muted-foreground">
-              Flagged issues with severity (high, medium, low), description, and
-              recommended action for each concern.
+              Flagged issues with severity (Critical, Warning, Info),
+              description, and recommended action for each concern.
             </p>
           </div>
         </div>
@@ -127,13 +128,16 @@ export default function ClientDocsPage() {
             </p>
             <div className="flex flex-wrap gap-2">
               <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">
-                High Risk
+                Critical
+              </span>
+              <span className="px-3 py-1 rounded-full text-xs font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                High
               </span>
               <span className="px-3 py-1 rounded-full text-xs font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
-                Medium Risk
+                Moderate
               </span>
               <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
-                Low Risk
+                Low
               </span>
             </div>
           </div>
@@ -173,11 +177,12 @@ export default function ClientDocsPage() {
             <Download className="w-5 h-5 text-primary shrink-0 mt-0.5" />
             <div>
               <h3 className="text-sm font-semibold text-foreground mb-1">
-                Download PDF Report
+                Print Report
               </h3>
               <p className="text-xs text-muted-foreground">
-                Generate a PDF report with all clauses, issues,
-                and the executive summary.
+                Open a print-ready report with all clauses, issues, and the
+                executive summary. Print it or save it as a PDF from your
+                browser.
               </p>
             </div>
           </div>
@@ -189,8 +194,8 @@ export default function ClientDocsPage() {
                 Copy to Clipboard
               </h3>
               <p className="text-xs text-muted-foreground">
-                Copy the executive summary or full analysis to your clipboard
-                for sharing via email or chat.
+                Copy a text summary of the analysis to your clipboard for
+                sharing via email or chat.
               </p>
             </div>
           </div>
@@ -221,7 +226,7 @@ export default function ClientDocsPage() {
           />
           <WorkflowStep
             number={3}
-            title="In Review"
+            title="Claimed"
             actor="Lawyer"
             description="A qualified lawyer claims your review and examines the AI analysis alongside the original contract."
           />
