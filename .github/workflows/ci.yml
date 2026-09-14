@@ -24,7 +24,11 @@ jobs:
       # If it fails on advisories that cannot be fixed yet, do not remove the
       # step: record them and add `continue-on-error: true` with the date.
       - name: Audit dependencies
+        # Soft gate since 2026-09-14: after in-range fixes, 3 critical (@auth/core, @auth/prisma-adapter, next)
+        # and 5 high (next-auth, sharp, postcss, nodemailer, jsondiffpatch) need major upgrades. Remove
+        # continue-on-error once those upgrades land.
         run: npm audit --audit-level=high
+        continue-on-error: true
 
       - name: Generate Prisma client
         run: npx prisma generate
