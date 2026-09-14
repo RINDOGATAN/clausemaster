@@ -123,7 +123,7 @@ export default function LandingPageV2() {
       "footer.tagline": locale === "es" ? "Constructor de skills legales" : "Legal skill builder",
       "footer.privacy": locale === "es" ? "Privacidad" : "Privacy",
       "footer.terms": locale === "es" ? "T\u00e9rminos" : "Terms",
-      "footer.marketplace": locale === "es" ? "Marketplace TODO.LAW" : "TODO.LAW Marketplace",
+      "footer.marketplace": locale === "es" ? "Skills TODO.LAW" : "TODO.LAW Skills",
     };
     return map[key] ?? key;
   };
