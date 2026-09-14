@@ -46,3 +46,6 @@ next-env.d.ts
 # uploads
 /uploads
 .env.local.bak*
+
+# local working notes (never committed; the repository is public)
+STATUS.md
