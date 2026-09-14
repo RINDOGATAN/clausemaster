@@ -47,5 +47,6 @@ next-env.d.ts
 /uploads
 .env.local.bak*
 
+# local working notes (never committed; the repository is public)
 # local session status (never committed)
 STATUS.md

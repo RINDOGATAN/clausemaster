@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { resolveAIConfigForUser } from "@/server/services/resolve-ai-config";
+import { rateLimitResponse, uploadRateLimiter } from "@/lib/rate-limit";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain"];
@@ -17,6 +18,12 @@ export async function POST(request: Request) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Uploads are rate limited per user before the body is read
+    const limit = uploadRateLimiter.check(session.user.id);
+    if (!limit.allowed) {
+      return rateLimitResponse(limit);
     }
 
     // Verify the user has an AI provider configured before accepting the file

@@ -5,7 +5,9 @@ const DEFAULT_BASE_URL = process.env.BASE_URL || "http://localhost:3002";
 
 /**
  * Sign in as a specific email via the E2E credentials provider.
- * Requires E2E_CREDENTIALS_SECRET to be set on the target environment.
+ * Requires E2E_CREDENTIALS_SECRET on the target server, and the target must
+ * be a non-production build (`next dev`): the provider is compiled out of
+ * production builds (src/lib/auth-guards.ts).
  */
 export async function loginAs(page: Page, email: string, baseURL?: string) {
   const base = baseURL || DEFAULT_BASE_URL;
@@ -31,7 +33,7 @@ export async function loginAs(page: Page, email: string, baseURL?: string) {
   if (loginRes.status() >= 400) {
     throw new Error(
       `E2E login failed (${loginRes.status()}). ` +
-      `Is E2E_CREDENTIALS_SECRET set on the server?`
+      `Is E2E_CREDENTIALS_SECRET set on the server, and is it a non-production build?`
     );
   }
 

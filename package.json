@@ -8,6 +8,7 @@
     "build": "prisma generate && next build",
     "start": "next start -p 3002",
     "lint": "eslint",
+    "test": "node --import tsx -C import --test tests/*.test.ts",
     "db:push": "prisma db push",
     "db:studio": "prisma studio"
   },

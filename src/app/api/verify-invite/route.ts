@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { getClientIp, inviteRateLimiter, rateLimitResponse } from "@/lib/rate-limit";
 
 export async function GET() {
   const required = !!process.env.INVITE_CODE;
@@ -7,6 +8,12 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  // Every check counts against the client IP, whether or not a code is configured.
+  const limit = inviteRateLimiter.check(getClientIp(request));
+  if (!limit.allowed) {
+    return rateLimitResponse(limit);
+  }
+
   const inviteCode = process.env.INVITE_CODE;
 
   // If no invite code is configured, access is open
