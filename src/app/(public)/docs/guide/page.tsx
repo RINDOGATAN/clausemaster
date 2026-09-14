@@ -159,7 +159,7 @@ export default function GuidePage() {
               <p className="text-sm font-semibold text-foreground">Dealroom</p>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Contract skills install as signed packages. Your clause options
+              Contract skills install as skill packages. Your clause options
               become the negotiation surface: each party picks positions, the
               engine assembles the contract from your legal text.
             </p>
@@ -192,9 +192,10 @@ export default function GuidePage() {
           </div>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed mt-4">
-          Installation is verified: packages are signed, integrity-checked, and
-          validated against the installer&apos;s schema before anything is
-          activated.
+          Every publish is validated before it is committed: required files,
+          skill identifiers, versions and frontmatter are checked against the
+          shape each installer expects. Any further checks at install time
+          belong to the installing app.
         </p>
       </section>
 

@@ -11,6 +11,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://clausemaster.todo.law/docs/guide</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://clausemaster.todo.law/docs/analysis</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -22,11 +27,6 @@
   </url>
   <url>
     <loc>https://clausemaster.todo.law/docs/internal</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://clausemaster.todo.law/docs/revenue-share</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
