@@ -249,7 +249,7 @@ async function runCriteriaExtraction(
     model,
     schema: criteriaExtractionSchema,
     prompt,
-    maxTokens: 32768,
+    maxOutputTokens:32768,
   });
   return result.object;
 }
@@ -264,7 +264,7 @@ async function runGuidanceGeneration(
     model,
     schema: guidanceGenerationSchema,
     prompt,
-    maxTokens: 32768,
+    maxOutputTokens:32768,
   });
   return result.object;
 }

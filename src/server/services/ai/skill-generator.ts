@@ -452,7 +452,7 @@ async function runSoloOptionGeneration(
       model,
       schema: soloOptionGenerationSchema,
       prompt,
-      maxTokens: 32768,
+      maxOutputTokens: 32768,
     });
     merged.clauses.push(...result.object.clauses);
   }
@@ -477,7 +477,7 @@ async function runOptionGeneration(
       model,
       schema: optionGenerationSchema,
       prompt,
-      maxTokens: 32768,
+      maxOutputTokens: 32768,
     });
     merged.clauses.push(...result.object.clauses);
   }
@@ -500,7 +500,7 @@ async function runBoilerplateGeneration(
     model,
     schema: boilerplateGenerationSchema,
     prompt,
-    maxTokens: 32768,
+    maxOutputTokens: 32768,
   });
   return result.object;
 }

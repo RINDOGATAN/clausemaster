@@ -144,7 +144,7 @@ export async function runEvalsGeneration(
     model,
     schema: evalsGenerationSchema,
     prompt: buildEvalsGenerationPrompt(args),
-    maxTokens: 8192,
+    maxOutputTokens:8192,
   });
   return result.object;
 }
