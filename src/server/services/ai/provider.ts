@@ -1,14 +1,11 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import type { LanguageModelV1 } from "ai";
+import type { LanguageModel } from "ai";
 import type { AIConfig } from "../resolve-ai-config";
 import { AI_PROVIDERS } from "./providers";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyLanguageModel = LanguageModelV1 | any;
-
-export function getAIModel(config: AIConfig): LanguageModelV1 {
+export function getAIModel(config: AIConfig): LanguageModel {
   switch (config.provider) {
     case "COMMUNITY": {
       const compatible = createOpenAICompatible({
@@ -24,7 +21,7 @@ export function getAIModel(config: AIConfig): LanguageModelV1 {
     }
     case "OPENAI": {
       const openai = createOpenAI({ apiKey: config.apiKey });
-      return openai(config.model) as AnyLanguageModel as LanguageModelV1;
+      return openai(config.model);
     }
     case "GROQ":
     case "MISTRAL":
