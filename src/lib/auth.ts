@@ -5,9 +5,9 @@ import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { Resend } from "resend";
 import prisma from "@/lib/prisma";
+import { isDevCredentialsEnabled, isE2ECredentialsEnabled } from "@/lib/auth-guards";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-const isDev = process.env.NODE_ENV === "development";
 
 // Build providers list dynamically
 const providers: NextAuthOptions["providers"] = [];
@@ -22,8 +22,9 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   );
 }
 
-// Dev-only credentials provider (instant sign-in, no email needed)
-if (isDev) {
+// Dev-only credentials provider (instant sign-in, no email needed).
+// Guarded by src/lib/auth-guards.ts: never present in a production build.
+if (isDevCredentialsEnabled(process.env)) {
   providers.push(
     CredentialsProvider({
       id: "dev-credentials",
@@ -57,8 +58,9 @@ if (isDev) {
   );
 }
 
-// E2E test credentials provider — only active when E2E_CREDENTIALS_SECRET is set
-if (process.env.E2E_CREDENTIALS_SECRET) {
+// E2E test credentials provider: needs E2E_CREDENTIALS_SECRET and is never
+// present in a production build (src/lib/auth-guards.ts).
+if (isE2ECredentialsEnabled(process.env)) {
   providers.push(
     CredentialsProvider({
       id: "e2e-credentials",

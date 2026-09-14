@@ -54,6 +54,7 @@ scripts/
 npm run dev          # Start dev server on port 3002
 npm run build        # Build for production
 npx tsc --noEmit     # Typecheck
+npm test             # Unit tests (node:test via tsx, tests/*.test.ts; -C import lets CJS tests load ESM-only deps)
 npx prisma db push   # Push schema to database
 npx prisma studio    # Open Prisma Studio
 node scripts/check-skill-conformance.mjs <skill-dir>   # Validate an exported skill
@@ -69,7 +70,7 @@ node scripts/check-skill-conformance.mjs <skill-dir>   # Validate an exported sk
 - `LEGALSKILLS_GITHUB_TOKEN` - PAT (Contents:write) used to commit published skills. Required in production; when unset, publish writes files into `LEGALSKILLS_DIR` (local dev only).
 - `LEGALSKILLS_GITHUB_OWNER` / `LEGALSKILLS_GITHUB_REPO` / `LEGALSKILLS_GITHUB_BRANCH` - Optional overrides for the publish target.
 - `INVITE_CODE` - Optional invite code gating the sign-in page (unset = open access)
-- `E2E_CREDENTIALS_SECRET` - Optional secret enabling the e2e-credentials auth provider for Playwright tests
+- `E2E_CREDENTIALS_SECRET` - Optional secret enabling the e2e-credentials auth provider for Playwright tests (non-production builds only; see `src/lib/auth-guards.ts`)
 
 ## Skills Integration
 
