@@ -24,9 +24,12 @@ jobs:
       # If it fails on advisories that cannot be fixed yet, do not remove the
       # step: record them and add `continue-on-error: true` with the date.
       - name: Audit dependencies
-        # Soft gate since 2026-09-14: after in-range fixes, 3 critical (@auth/core, @auth/prisma-adapter, next)
-        # and 5 high (next-auth, sharp, postcss, nodemailer, jsondiffpatch) need major upgrades. Remove
-        # continue-on-error once those upgrades land.
+        # Soft gate since 2026-09-14. Still open after the 2026-09-14 upgrades (next 16.3.5,
+        # @auth/prisma-adapter 2.11.3, AI SDK 6): 4 high, all one advisory chain. nodemailer
+        # (GHSA-2x7j-588g-ccc2, fixed in 9.1.0) is pinned to ^7 by next-auth 4's optional peer
+        # range and to ^7 || ^8 by @auth/core 0.41.3; with nodemailer 9 installed, `npm ci`
+        # fails on ERESOLVE. The chain reports nodemailer, @auth/core, @auth/prisma-adapter and
+        # next-auth. Remove continue-on-error once next-auth or @auth/core accept nodemailer 9.
         run: npm audit --audit-level=high
         continue-on-error: true
 
