@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # Dependency audit gate: fails the build on high or critical advisories.
+      # If it fails on advisories that cannot be fixed yet, do not remove the
+      # step: record them and add `continue-on-error: true` with the date.
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Unit tests
+        run: npm test
+
+      # Non-blocking since 2026-09-14: six pre-existing react-hooks errors
+      # (OPEN-ISSUES.md item 6). Remove `continue-on-error` once they are fixed.
+      - name: Lint
+        run: npm run lint
+        continue-on-error: true
