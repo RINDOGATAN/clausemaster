@@ -46,3 +46,6 @@ next-env.d.ts
 # uploads
 /uploads
 .env.local.bak*
+
+# local session status (never committed)
+STATUS.md

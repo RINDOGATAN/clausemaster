@@ -302,8 +302,8 @@ export default function PublisherDocsPage() {
           Where Skills Install
         </h3>
         <p className="text-sm text-muted-foreground">
-          Contract skills install into Dealroom as signed packages. Assessment
-          skills install into DPO Central. AI Sentinel skills can be authored,
+          Contract skills install into Dealroom. Assessment skills install into
+          DPO Central. AI Sentinel skills can be authored,
           but the AI Sentinel installer is still in development, so they cannot
           be installed yet. The same skill folder also loads in
           LegalQuants-community runtimes such as LQ.AI and in other agent-skill
