@@ -11,7 +11,7 @@ Full documentation lives at [clausemaster.todo.law/docs](https://clausemaster.to
 1. **Analyzes your document.** A three-step AI pipeline classifies the document (type, jurisdiction, parties), extracts every clause with a plain-language summary and bias assessment, and flags issues: missing clauses, unusual terms, jurisdiction concerns, compliance risks.
 2. **Generates a skill draft.** For contracts, it builds a clause library where each clause carries 3 to 5 negotiation options with pros, cons, and full legal text. For compliance documents (DPIAs, vendor audits, checklists), it builds a structured assessment template with scoring guidance. Every draft also gets evaluation cases grounded in its own content, so quality can be checked before anyone relies on it.
 3. **Publishes a dual-format skill.** One export produces both formats:
-   - the todo.law engine files (`clauses.json`, `boilerplate.json` or `template.json`, `manifest.json`), installable as a signed package in Dealroom, DPO Central, or AI Sentinel
+   - the todo.law engine files (`clauses.json`, `boilerplate.json` or `template.json`, `manifest.json`), installable as a signed package in Dealroom or DPO Central (the AI Sentinel installer is planned)
    - an agent skill (`SKILL.md` with YAML frontmatter, `README.md`, `parameters.json`, `evals/`), loadable by LQ.AI and other LegalQuants-community runtimes
 
 A conformance check runs before every publish, so a malformed skill fails at export time with a clear message instead of failing at install time.

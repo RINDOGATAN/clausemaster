@@ -64,8 +64,8 @@
   "revenue.stat1.label": "Runtimes per skill",
   "revenue.stat2.value": "100%",
   "revenue.stat2.label": "Your clauses & style",
-  "revenue.stat3.value": "3",
-  "revenue.stat3.label": "TODO.LAW products reached",
+  "revenue.stat3.value": "2",
+  "revenue.stat3.label": "TODO.LAW products installable today",
   "revenue.stat4.value": "$0",
   "revenue.stat4.label": "Cost to publish",
 
@@ -82,11 +82,11 @@
   "feat.ai.h4": "Multi-option generation per clause",
 
   "feat.multi.title": "Multi-Product Reach",
-  "feat.multi.headline": "One skill, three products.",
-  "feat.multi.desc": "Skills are automatically routed to the right TODO.LAW product based on their type. Contract skills power Dealroom negotiations, privacy assessments drive DPO Central, AI governance feeds AI Sentinel.",
+  "feat.multi.headline": "One skill, three destinations.",
+  "feat.multi.desc": "Skills are automatically routed to the right TODO.LAW product based on their type. Contract skills power Dealroom negotiations and privacy assessments drive DPO Central. AI governance skills are authored for AI Sentinel; its installer is planned.",
   "feat.multi.h1": "Dealroom — contract negotiation",
   "feat.multi.h2": "DPO Central — privacy compliance",
-  "feat.multi.h3": "AI Sentinel — AI governance",
+  "feat.multi.h3": "AI Sentinel — AI governance (installer planned)",
   "feat.multi.h4": "Automatic destination routing",
 
   "feat.party.title": "Flexible Document Support",

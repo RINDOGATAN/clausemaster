@@ -64,8 +64,8 @@
   "revenue.stat1.label": "Runtimes por skill",
   "revenue.stat2.value": "100%",
   "revenue.stat2.label": "Tus cláusulas y estilo",
-  "revenue.stat3.value": "3",
-  "revenue.stat3.label": "Productos TODO.LAW alcanzados",
+  "revenue.stat3.value": "2",
+  "revenue.stat3.label": "Productos TODO.LAW instalables hoy",
   "revenue.stat4.value": "$0",
   "revenue.stat4.label": "Coste de publicación",
 
@@ -82,11 +82,11 @@
   "feat.ai.h4": "Generación de opciones por cláusula",
 
   "feat.multi.title": "Alcance Multi-Producto",
-  "feat.multi.headline": "Un skill, tres productos.",
-  "feat.multi.desc": "Los skills se enrutan automáticamente al producto TODO.LAW adecuado según su tipo. Los skills de contrato alimentan Dealroom, las evaluaciones de privacidad van a DPO Central, la gobernanza IA a AI Sentinel.",
+  "feat.multi.headline": "Un skill, tres destinos.",
+  "feat.multi.desc": "Los skills se enrutan automáticamente al producto TODO.LAW adecuado según su tipo. Los skills de contrato alimentan Dealroom y las evaluaciones de privacidad van a DPO Central. Los skills de gobernanza de IA se crean para AI Sentinel; su instalador está previsto.",
   "feat.multi.h1": "Dealroom — negociación de contratos",
   "feat.multi.h2": "DPO Central — cumplimiento de privacidad",
-  "feat.multi.h3": "AI Sentinel — gobernanza IA",
+  "feat.multi.h3": "AI Sentinel — gobernanza de IA (instalador previsto)",
   "feat.multi.h4": "Enrutamiento automático de destino",
 
   "feat.party.title": "Soporte Flexible de Documentos",
