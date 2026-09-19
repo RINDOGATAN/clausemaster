@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, useSyncExternalStore } from "react";
 import { FileSearch, Blocks, Store, Globe, FileText, ClipboardCheck, Shield } from "lucide-react";
 import LandingHeader from "../LandingHeader";
 import LandingContentV2 from "./LandingContentV2";
@@ -21,6 +21,8 @@ function detectLocale(): "en" | "es" {
   return "en";
 }
 
+const subscribeNoop = () => () => {};
+
 function setLocaleCookie(locale: string) {
   const maxAge = 365 * 24 * 60 * 60;
   const domain = window.location.hostname.endsWith(".todo.law") ? ";domain=.todo.law" : "";
@@ -28,19 +30,16 @@ function setLocaleCookie(locale: string) {
 }
 
 export default function LandingPageV2() {
-  const [locale, setLocale] = useState<"en" | "es">("en");
-
-  useEffect(() => {
-    setLocale(detectLocale());
-  }, []);
+  // Server render and hydration use "en"; the client then switches to the detected locale.
+  const detected = useSyncExternalStore(subscribeNoop, detectLocale, () => "en" as const);
+  const [chosen, setChosen] = useState<"en" | "es" | null>(null);
+  const locale = chosen ?? detected;
 
   const toggleLocale = useCallback(() => {
-    setLocale((prev) => {
-      const next = prev === "en" ? "es" : "en";
-      setLocaleCookie(next);
-      return next;
-    });
-  }, []);
+    const next = locale === "en" ? "es" : "en";
+    setLocaleCookie(next);
+    setChosen(next);
+  }, [locale]);
 
   const dict = locale === "es" ? es : en;
   const authDict = locale === "es" ? authEs : authEn;

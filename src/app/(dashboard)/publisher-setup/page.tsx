@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -105,14 +105,15 @@ function ProfileStep({ onNext }: { onNext: () => void }) {
   const [bio, setBio] = useState("");
   const [website, setWebsite] = useState("");
 
-  useEffect(() => {
-    if (profile) {
-      setFirmName(profile.firmName || "");
-      setSpecialties(profile.specialties.join(", "));
-      setBio(profile.bio || "");
-      setWebsite(profile.website || "");
-    }
-  }, [profile]);
+  // Reset the form whenever a new profile arrives (adjusting state during render)
+  const [syncedProfile, setSyncedProfile] = useState<typeof profile>(undefined);
+  if (profile && profile !== syncedProfile) {
+    setSyncedProfile(profile);
+    setFirmName(profile.firmName || "");
+    setSpecialties(profile.specialties.join(", "));
+    setBio(profile.bio || "");
+    setWebsite(profile.website || "");
+  }
 
   const updateProfile = trpc.user.updatePublisherProfile.useMutation({
     onSuccess: () => {
