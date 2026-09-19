@@ -18,9 +18,10 @@ interface UploadProgressProps {
 export function UploadProgress({ documentId }: UploadProgressProps) {
   const t = useTranslations("upload");
   const router = useRouter();
-  const [stalled, setStalled] = useState(false);
+  // The status at which a stall was detected; a later status change clears it by itself.
+  const [stalledAt, setStalledAt] = useState<{ status: string | undefined } | null>(null);
   const lastStatusRef = useRef<string | undefined>(undefined);
-  const lastChangeRef = useRef(Date.now());
+  const lastChangeRef = useRef<number | null>(null);
 
   const { data: document, refetch } = trpc.document.getById.useQuery(
     { id: documentId },
@@ -34,23 +35,23 @@ export function UploadProgress({ documentId }: UploadProgressProps) {
   );
 
   const status = document?.status;
+  const stalled = stalledAt !== null && stalledAt.status === status;
 
   // Drive the analysis pipeline step by step (see use-pipeline-driver.ts)
   useAnalysisDriver(documentId, status, refetch);
 
   // Track stalled analysis
   useEffect(() => {
-    if (status !== lastStatusRef.current) {
+    if (status !== lastStatusRef.current || lastChangeRef.current === null) {
       lastStatusRef.current = status;
       lastChangeRef.current = Date.now();
-      setStalled(false);
     }
 
     if (status === "COMPLETED" || status === "FAILED") return;
 
     const interval = setInterval(() => {
-      if (Date.now() - lastChangeRef.current > STALL_TIMEOUT) {
-        setStalled(true);
+      if (lastChangeRef.current !== null && Date.now() - lastChangeRef.current > STALL_TIMEOUT) {
+        setStalledAt({ status });
       }
     }, 5000);
 
