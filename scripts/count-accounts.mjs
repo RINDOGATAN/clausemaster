@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Read-only account counts for Clausemaster.
+ * Read-only account and activity counts for Clausemaster.
  *
  * Reads a production database: do not run without the owner's go-ahead.
  *
@@ -15,8 +15,9 @@
  * DIR/clausemaster.json. On failure it prints {"error": "<error class>"} to stderr
  * and exits 1. No row value, connection string or error message is ever printed.
  *
- * Read-only by construction: the only statement issued is `user.count()`
- * (SELECT COUNT(*) on clausemaster.users).
+ * Read-only by construction: every statement issued is a Prisma `count()`
+ * (SELECT COUNT(*)) on users, documents, skill_drafts or review_requests.
+ * No row is ever selected.
  *
  * Definitions:
  *   users          every row of the users table, seed and demo rows included.
@@ -28,6 +29,13 @@
  *                  active, unexpired, non-trial entitlement and exclude
  *                  SEED_USER_IDS by id.
  *   installs       null. Nothing reports installs to this product.
+ *   activity       integer figures that show real use, keyed `_total` or `_30d`.
+ *                  A `_30d` figure counts records created in the 30 days before
+ *                  `as_of`, except skills_published_30d, which uses the publish date.
+ *                  Records owned by SEED_USER_IDS are excluded from every figure.
+ *                  active_users_30d is omitted: sessions are JWT, so the schema holds
+ *                  no last-seen, session or audit entry.
+ *   activity_labels  the same keys, each with a plain English label.
  *   null means not applicable; 0 means a measured or structural zero.
  */
 
@@ -38,32 +46,103 @@ import { pathToFileURL } from "node:url";
 export const PRODUCT = "CLAUSEMASTER";
 export const OUT_FILE = "clausemaster.json";
 
-/** Ids written by scripts/seed-demo.ts. Must be excluded from any future `paying` count. */
+/**
+ * Ids written by scripts/seed-demo.ts. Excluded from every `activity` figure, and must
+ * be excluded from any future `paying` count.
+ */
 export const SEED_USER_IDS = Object.freeze(["demo-publisher"]);
 
 export const SOURCE =
   "Clausemaster PostgreSQL database (schema clausemaster), read-only COUNT via scripts/count-accounts.mjs: " +
   "users is every row of the users table, organizations is null because there is no tenant table, " +
   "paying is 0 because there is no billing (no subscription or entitlement table), " +
-  "installs is null because nothing reports installs.";
+  "installs is null because nothing reports installs. " +
+  "activity counts documents uploaded, documents whose analysis completed, skill drafts that finished " +
+  "generating, skills published and review requests completed; a _30d figure counts records created in " +
+  "the 30 days before as_of, except skills_published_30d, which uses the publish date. " +
+  "Excluded from activity: every record owned by the demo account that scripts/seed-demo.ts creates, matched by id. " +
+  "Not excluded: users still counts the demo account, and test accounts of the owner's cannot be told apart " +
+  "from real accounts, so their records are counted. " +
+  "active_users_30d is omitted because sessions are JWT and the schema holds no last-seen, session or audit entry.";
+
+/** Every `activity` key, mapped to a plain English label of at most five words. */
+export const ACTIVITY_LABELS = Object.freeze({
+  documents_uploaded_total: "Documents uploaded",
+  documents_uploaded_30d: "Documents uploaded, 30 days",
+  documents_analyzed_total: "Documents analyzed",
+  documents_analyzed_30d: "Documents analyzed, 30 days",
+  skills_drafted_total: "Skill drafts generated",
+  skills_drafted_30d: "Skill drafts generated, 30 days",
+  skills_published_total: "Skills published",
+  skills_published_30d: "Skills published, 30 days",
+  reviews_completed_total: "Reviews completed",
+  reviews_completed_30d: "Reviews completed, 30 days",
+});
+
+const WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+
+/** A draft that finished generating: every status except GENERATING and FAILED. */
+const DRAFTED_STATUSES = ["REVIEW", "SUBMITTED", "APPROVED", "REJECTED", "EXPORTED"];
+
+function assertCount(n) {
+  if (!Number.isInteger(n) || n < 0) {
+    throw new TypeError("count is not a non-negative integer");
+  }
+  return n;
+}
 
 /**
- * @param {{ user: { count: () => Promise<number> } }} client
+ * One `count({ where })` per figure. Filters use ids, enums and dates only.
+ *
+ * @param {any} client
+ * @param {Date} asOf
+ */
+async function collectActivity(client, asOf) {
+  const since = new Date(asOf.getTime() - WINDOW_MS);
+  const notSeed = { notIn: [...SEED_USER_IDS] };
+  const document = { userId: notSeed };
+  const draft = { analysis: { document } };
+  const drafted = { ...draft, status: { in: DRAFTED_STATUSES } };
+  const review = { clientId: notSeed, status: "COMPLETED" };
+
+  const figures = {
+    documents_uploaded_total: ["document", document],
+    documents_uploaded_30d: ["document", { ...document, createdAt: { gte: since } }],
+    documents_analyzed_total: ["document", { ...document, status: "COMPLETED" }],
+    documents_analyzed_30d: ["document", { ...document, status: "COMPLETED", createdAt: { gte: since } }],
+    skills_drafted_total: ["skillDraft", drafted],
+    skills_drafted_30d: ["skillDraft", { ...drafted, createdAt: { gte: since } }],
+    skills_published_total: ["skillDraft", { ...draft, status: "EXPORTED" }],
+    skills_published_30d: ["skillDraft", { ...draft, status: "EXPORTED", exportedAt: { gte: since } }],
+    reviews_completed_total: ["reviewRequest", review],
+    reviews_completed_30d: ["reviewRequest", { ...review, createdAt: { gte: since } }],
+  };
+
+  const activity = {};
+  for (const [key, [model, where]] of Object.entries(figures)) {
+    activity[key] = assertCount(await client[model].count({ where }));
+  }
+  return activity;
+}
+
+/**
+ * @param {any} client a Prisma client; only `count()` is ever called on it
  * @param {() => Date} [now]
  */
 export async function collectCounts(client, now = () => new Date()) {
-  const users = await client.user.count();
-  if (!Number.isInteger(users) || users < 0) {
-    throw new TypeError("count is not a non-negative integer");
-  }
+  const asOf = now();
+  const users = assertCount(await client.user.count());
+  const activity = await collectActivity(client, asOf);
   return {
     product: PRODUCT,
     users,
     organizations: null,
     paying: 0,
     installs: null,
-    as_of: now().toISOString().replace(/\.\d{3}Z$/, "Z"),
+    as_of: asOf.toISOString().replace(/\.\d{3}Z$/, "Z"),
     source: SOURCE,
+    activity,
+    activity_labels: { ...ACTIVITY_LABELS },
   };
 }
 
