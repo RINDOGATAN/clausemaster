@@ -58,6 +58,7 @@ npm test             # Unit tests (node:test via tsx, tests/*.test.ts; -C import
 npx prisma db push   # Push schema to database
 npx prisma studio    # Open Prisma Studio
 node scripts/check-skill-conformance.mjs <skill-dir>   # Validate an exported skill
+node scripts/count-accounts.mjs [--out=DIR]            # Read-only account counts as one JSON object (needs COUNT_DATABASE_URL; owner's go-ahead for production)
 ```
 
 ## Environment Variables
