@@ -5,6 +5,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { Resend } from "resend";
 import prisma from "@/lib/prisma";
+import { mailFrom } from "@/lib/mail-from";
 import { isDevCredentialsEnabled, isE2ECredentialsEnabled } from "@/lib/auth-guards";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
@@ -92,7 +93,7 @@ if (isE2ECredentialsEnabled(process.env)) {
 // Magic link email (always available)
 providers.push(
   EmailProvider({
-    from: process.env.EMAIL_FROM,
+    from: mailFrom(),
     sendVerificationRequest: async ({ identifier: email, url }) => {
       if (!resend) {
         console.log(`[Auth] Magic link for ${email}: ${url}`);
@@ -100,7 +101,7 @@ providers.push(
       }
       try {
         await resend.emails.send({
-          from: process.env.EMAIL_FROM || "onboarding@resend.dev",
+          from: mailFrom(),
           to: email,
           subject: "Sign in to Clausemaster",
           html: `

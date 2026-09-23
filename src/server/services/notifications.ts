@@ -1,8 +1,8 @@
 import { Resend } from "resend";
 import prisma from "@/lib/prisma";
+import { mailFrom } from "@/lib/mail-from";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-const FROM = process.env.EMAIL_FROM || "onboarding@resend.dev";
 
 const EMAIL_WRAPPER = (body: string) => `
   <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto;">
@@ -49,7 +49,7 @@ export async function notifyAdminNewSubmission(skillDraftId: string) {
   for (const admin of admins) {
     try {
       await resend.emails.send({
-        from: FROM,
+        from: mailFrom(),
         to: admin.email,
         subject: `New marketplace submission: ${skillName}`,
         html: `
@@ -110,7 +110,7 @@ export async function notifyPublisherReviewResult(skillDraftId: string, approved
 
   try {
     await resend.emails.send({
-      from: FROM,
+      from: mailFrom(),
       to: publisherEmail,
       subject,
       html: `
@@ -162,7 +162,7 @@ export async function notifyPublishersNewReview(reviewRequestId: string) {
   for (const pub of publishers) {
     try {
       await resend.emails.send({
-        from: FROM,
+        from: mailFrom(),
         to: pub.email,
         subject: `New review request: ${contractLabel}`,
         html: EMAIL_WRAPPER(`
@@ -198,7 +198,7 @@ export async function notifyClientReviewClaimed(reviewRequestId: string) {
 
   try {
     await resend.emails.send({
-      from: FROM,
+      from: mailFrom(),
       to: request.client.email,
       subject: `Your review request has been claimed: ${request.document.fileName}`,
       html: EMAIL_WRAPPER(`
@@ -232,7 +232,7 @@ export async function notifyClientReviewCompleted(reviewRequestId: string) {
 
   try {
     await resend.emails.send({
-      from: FROM,
+      from: mailFrom(),
       to: request.client.email,
       subject: `Your lawyer review is ready: ${request.document.fileName}`,
       html: EMAIL_WRAPPER(`
