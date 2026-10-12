@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { isAuthAttempt } from "@/lib/auth-rate-limit";
 import { authRateLimiter, getClientIp, rateLimitResponse } from "@/lib/rate-limit";
+import { rejectBlockedMagicLink } from "@/lib/email-policy-server";
 
 const handler = NextAuth(authOptions);
 
@@ -22,6 +23,9 @@ async function guardedPost(request: Request, context: RouteContext) {
       });
     }
   }
+  // Refuse blocked addresses before any sign-in e-mail is sent (400).
+  const refused = await rejectBlockedMagicLink(request);
+  if (refused) return refused;
   return handler(request, context);
 }
 

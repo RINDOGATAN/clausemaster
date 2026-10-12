@@ -7,6 +7,8 @@ import { Resend } from "resend";
 import prisma from "@/lib/prisma";
 import { mailFrom } from "@/lib/mail-from";
 import { isDevCredentialsEnabled, isE2ECredentialsEnabled } from "@/lib/auth-guards";
+import { isBlockedAccountEmail } from "@/lib/email-policy";
+import { EMAIL_NOT_ACCEPTED_AUTH_ERROR } from "@/lib/email-policy-server";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -131,6 +133,19 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
+    // Sign-up e-mail policy: refuse blocked addresses for every provider
+    // (magic link, Google, credentials). Existing data is untouched.
+    async signIn({ user, account, profile }) {
+      const address = user?.email ?? (profile as { email?: string } | undefined)?.email;
+      if (isBlockedAccountEmail(address)) {
+        // Magic link: back to the form (message under the field).
+        // OAuth: the error page shows the same message.
+        return account?.type === "email"
+          ? `/sign-in?error=${EMAIL_NOT_ACCEPTED_AUTH_ERROR}`
+          : `/auth-error?error=${EMAIL_NOT_ACCEPTED_AUTH_ERROR}`;
+      }
+      return true;
+    },
     async session({ session, token }) {
       if (session.user && token.sub) {
         session.user.id = token.sub;

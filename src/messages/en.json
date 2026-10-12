@@ -36,6 +36,7 @@
     "termsOfUse": "Terms of Use",
     "privacyPolicy": "Privacy Policy",
     "failedMagicLink": "Failed to send magic link. Please try again.",
+    "emailNotAccepted": "Please use your work e-mail address, or a different personal address. We can't accept this one.",
     "unexpectedError": "An unexpected error occurred.",
     "googleSignInFailed": "Google sign-in failed.",
     "poweredBy": "AI-powered contract analysis",
