@@ -14,6 +14,8 @@ export default function SignInPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // E-mail policy refusal, shown as one sentence under the e-mail field.
+  const [emailRefused, setEmailRefused] = useState(false);
 
   // Dev login state
   const isDev = process.env.NODE_ENV === "development";
@@ -84,6 +86,7 @@ export default function SignInPage() {
 
     setIsEmailLoading(true);
     setError(null);
+    setEmailRefused(false);
 
     try {
       const result = await signIn("email", {
@@ -92,7 +95,10 @@ export default function SignInPage() {
         callbackUrl: "/documents",
       });
 
-      if (result?.error) {
+      if (result?.error === "EmailNotAccepted") {
+        setEmailRefused(true);
+        setIsEmailLoading(false);
+      } else if (result?.error) {
         setError(t("failedMagicLink"));
         setIsEmailLoading(false);
       } else {
@@ -285,10 +291,19 @@ export default function SignInPage() {
               type="email"
               placeholder="you@company.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setEmailRefused(false);
+              }}
               required
+              aria-describedby={emailRefused ? "email-refused" : undefined}
               className="bg-background"
             />
+            {emailRefused && (
+              <p id="email-refused" role="alert" className="text-sm text-muted-foreground">
+                {t("emailNotAccepted")}
+              </p>
+            )}
           </div>
 
           <button

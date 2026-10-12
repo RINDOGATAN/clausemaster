@@ -4,16 +4,20 @@ import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 function AuthErrorContent() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+  const t = useTranslations("auth");
 
   const errorMessages: Record<string, string> = {
     Configuration: "There is a problem with the server configuration.",
     AccessDenied: "Access denied. You do not have permission to sign in.",
     Verification: "The verification link has expired or has already been used.",
     Default: "An unexpected error occurred during sign in.",
+    // E-mail policy refusal (Google sign-in with a blocked address).
+    EmailNotAccepted: t("emailNotAccepted"),
   };
 
   const message = errorMessages[error || "Default"] || errorMessages.Default;
