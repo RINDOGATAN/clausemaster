@@ -3,6 +3,7 @@ import { Jost, Archivo_Black } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
+import { VisitCounter } from "@/components/VisitCounter";
 import { brand } from "@/config/brand";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
@@ -57,6 +58,7 @@ export default async function RootLayout({
             {children}
             <Toaster />
           </Providers>
+          <VisitCounter />
         </NextIntlClientProvider>
       </body>
     </html>

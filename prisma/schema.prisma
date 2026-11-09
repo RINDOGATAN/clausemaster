@@ -403,3 +403,24 @@ model ReviewRequest {
   @@map("review_requests")
   @@schema("clausemaster")
 }
+
+// ============================================================
+// PAGE VIEWS
+// ============================================================
+
+/// Daily page-view totals of the public pages (src/lib/visits.ts): one row per
+/// (day, path, three campaign labels) with a count; absent labels are "".
+/// Nothing about a person is stored. Written with one upsert per view
+/// (src/lib/visits-db.ts); read by scripts/count-visits.mjs.
+model PageViewDaily {
+  day         DateTime @db.Date
+  path        String
+  utmSource   String   @default("") @map("utm_source")
+  utmMedium   String   @default("") @map("utm_medium")
+  utmCampaign String   @default("") @map("utm_campaign")
+  views       Int      @default(1)
+
+  @@id([day, path, utmSource, utmMedium, utmCampaign], map: "page_views_daily_pk")
+  @@map("page_views_daily")
+  @@schema("clausemaster")
+}

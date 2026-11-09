@@ -59,6 +59,7 @@ npx prisma db push   # Push schema to database
 npx prisma studio    # Open Prisma Studio
 node scripts/check-skill-conformance.mjs <skill-dir>   # Validate an exported skill
 node scripts/count-accounts.mjs [--out=DIR]            # Read-only account and activity counts as one JSON object (needs COUNT_DATABASE_URL; owner's go-ahead for production)
+node scripts/count-visits.mjs [--weeks=N] [--out=DIR] # Read-only weekly page views of the public pages (needs COUNT_DATABASE_URL; writes DIR/clausemaster-visits.json)
 ```
 
 ## Environment Variables
@@ -143,6 +144,19 @@ The reference skills repo is loaded as read-only context for steps 2 and 3.
 - **PartyMode**: `TWO_PARTY` (negotiated) | `SOLO` (unilateral policies)
 - **SkillDestination**: `DEAL_ROOM` | `DPO_CENTRAL` | `AI_SENTINEL`
 - Contract skills route to Deal Room; privacy assessments to DPO Central; AI governance to AI Sentinel
+
+## Page-View Counter
+
+First-party and cookieless. `src/components/VisitCounter.tsx` (mounted once in the root layout)
+sends the path and the three `utm_*` labels of the address to `POST /api/visit` for the paths in
+`PUBLIC_VISIT_PATHS` (`src/lib/visits.ts`) only: `/`, `/sign-in`, `/verify-request` and the
+`/docs` pages (a test fails when a page under `(public)` or `(auth)` is missing). The route adds
+one to the day's row of `PageViewDaily` (`page_views_daily`, one upsert in `src/lib/visits-db.ts`)
+and stores no cookie, address, user agent or referrer. Robots are dropped by user agent at count
+time; an in-memory limiter keyed by a hash of the address caps one client at 120 an hour.
+Counting runs only when `VERCEL_ENV=production` (`VISIT_COUNTS=off` turns it off; `VISIT_COUNTS=on`
+turns it on for a local run with no `VERCEL_ENV`). Until the table is pushed the route answers 204
+and writes nothing, and `scripts/count-visits.mjs` reports null figures with a `note`.
 
 ## Landing Page
 
