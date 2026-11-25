@@ -5,8 +5,10 @@ import os from "node:os";
 import path from "node:path";
 import {
   ACTIVITY_LABELS,
+  CREATED_AT_COLUMN,
   SEED_USER_IDS,
   collectCounts,
+  createdWithin,
   errorClass,
   main,
 } from "../scripts/count-accounts.mjs";
@@ -17,6 +19,9 @@ const FIELDS = [
   "organizations",
   "paying",
   "installs",
+  "new_users_7d",
+  "new_users_30d",
+  "created_at_column",
   "as_of",
   "source",
   "activity",
@@ -26,6 +31,9 @@ const NOW = () => new Date("2026-09-20T10:11:12.345Z");
 const SINCE = new Date("2026-08-21T10:11:12.345Z"); // 30 days before NOW
 const RECENT = new Date("2026-09-10T00:00:00Z");
 const OLD = new Date("2026-01-01T00:00:00Z");
+const AS_OF = new Date("2026-09-20T10:11:12Z"); // NOW, to the second, as printed
+const WEEK_AGO = new Date("2026-09-13T10:11:12Z");
+const MONTH_AGO = new Date("2026-08-21T10:11:12Z");
 const SEED = SEED_USER_IDS[0];
 
 // Strings that exist only inside mocked rows. None may reach the output.
@@ -66,9 +74,9 @@ const review = (clientId: string, status: string, createdAt: Date): Row => ({
 
 const TABLES: Tables = {
   user: [
-    { id: SEED, ...person, stripe: "acct_rowsecret123" },
-    { id: "u1", ...person, encryptedApiKey: "sk-row-secret-key" },
-    { id: "u2", ...person },
+    { id: SEED, ...person, stripe: "acct_rowsecret123", createdAt: OLD },
+    { id: "u1", ...person, encryptedApiKey: "sk-row-secret-key", createdAt: RECENT },
+    { id: "u2", ...person, createdAt: new Date("2026-09-18T00:00:00Z") },
   ],
   document: [
     doc(SEED, "COMPLETED", RECENT),
@@ -117,7 +125,12 @@ function matches(row: unknown, where: Row): boolean {
     const c = cond as Row;
     if ("notIn" in c) return !(c.notIn as unknown[]).includes(value);
     if ("in" in c) return (c.in as unknown[]).includes(value);
-    if ("gte" in c) return value instanceof Date && value >= (c.gte as Date);
+    if ("gte" in c || "lte" in c) {
+      if (!(value instanceof Date)) return false;
+      if ("gte" in c && value < (c.gte as Date)) return false;
+      if ("lte" in c && value > (c.lte as Date)) return false;
+      return true;
+    }
     return matches(value, c);
   });
 }
@@ -129,6 +142,7 @@ function matches(row: unknown, where: Row): boolean {
 function mockClient(tables: Tables = TABLES) {
   const calls: string[] = [];
   const wheres: Row[] = [];
+  const userWheres: Row[] = [];
   const model = (name: string) =>
     new Proxy(
       {},
@@ -139,8 +153,12 @@ function mockClient(tables: Tables = TABLES) {
           return async (args?: { where?: Row }) => {
             calls.push(call);
             if (name === "user") {
-              assert.equal(args, undefined, "user count must take no filter");
-              return tables[name].length;
+              // The users total takes no filter; a new-user count takes only a createdAt window.
+              if (args === undefined) return tables[name].length;
+              assert.deepEqual(Object.keys(args), ["where"]);
+              assert.deepEqual(Object.keys(args.where ?? {}), ["createdAt"], "a new-user count filters by createdAt only");
+              userWheres.push(args.where!);
+              return tables[name].filter((row) => matches(row, args.where!)).length;
             }
             assert.deepEqual(Object.keys(args ?? {}), ["where"], "count takes a where filter and nothing else");
             wheres.push(args!.where!);
@@ -159,7 +177,7 @@ function mockClient(tables: Tables = TABLES) {
       },
     },
   );
-  return { client, calls, wheres };
+  return { client, calls, wheres, userWheres };
 }
 
 async function run(argv: string[], createClient: () => Promise<unknown>) {
@@ -174,7 +192,7 @@ async function run(argv: string[], createClient: () => Promise<unknown>) {
   return { code, out, err };
 }
 
-test("prints one JSON object with exactly the nine fields", async () => {
+test("prints one JSON object with exactly the twelve fields", async () => {
   const { client, calls } = mockClient();
   const { code, out, err } = await run([], async () => client);
 
@@ -262,6 +280,41 @@ test("filters hold only seed ids, status values and the 30-day date", async () =
   };
   assert.equal(wheres.length, Object.keys(ACTIVITY_LABELS).length);
   wheres.forEach(walk);
+});
+
+test("new_users_7d and new_users_30d count users created in the 7 and 30 days up to and including as_of", async () => {
+  const { client, userWheres } = mockClient();
+  const counts = await collectCounts(client, NOW);
+
+  // u2 (18 Sep) is inside 7 days; u1 (10 Sep) inside 30; the seed account (January) in neither.
+  assert.strictEqual(counts.new_users_7d, 1);
+  assert.strictEqual(counts.new_users_30d, 2);
+  assert.strictEqual(counts.users, 3);
+  assert.deepEqual(userWheres, [
+    { createdAt: { gte: WEEK_AGO, lte: AS_OF } },
+    { createdAt: { gte: MONTH_AGO, lte: AS_OF } },
+  ]);
+  assert.deepEqual(counts.created_at_column, { users: "users.createdAt" });
+  assert.deepEqual(counts.created_at_column, { ...CREATED_AT_COLUMN });
+  assert.ok(!("new_organizations_7d" in counts) && !("new_organizations_30d" in counts), "no tenant table");
+  assert.match(counts.source, /new_users_7d and new_users_30d/);
+});
+
+test("the new-user window includes both ends, in UTC", async () => {
+  assert.deepEqual(createdWithin(new Date("2026-03-08T00:00:00Z"), 7), {
+    createdAt: { gte: new Date("2026-03-01T00:00:00Z"), lte: new Date("2026-03-08T00:00:00Z") },
+  });
+  const edges: Tables = {
+    ...EMPTY,
+    user: [
+      { id: "a", createdAt: WEEK_AGO },
+      { id: "b", createdAt: AS_OF },
+      { id: "c", createdAt: new Date(WEEK_AGO.getTime() - 1) },
+      { id: "d", createdAt: new Date(AS_OF.getTime() + 1) },
+    ],
+  };
+  const counts = await collectCounts(mockClient(edges).client, () => AS_OF);
+  assert.strictEqual(counts.new_users_7d, 2);
 });
 
 test("the seed record never counts as paying, even with a payout account", async () => {
