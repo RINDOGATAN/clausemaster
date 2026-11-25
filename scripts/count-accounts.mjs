@@ -29,6 +29,12 @@
  *                  active, unexpired, non-trial entitlement and exclude
  *                  SEED_USER_IDS by id.
  *   installs       null. Nothing reports installs to this product.
+ *   new_users_7d, new_users_30d
+ *                  the rows counted in users (every row, seed and demo rows
+ *                  included, as in users) whose users.createdAt (written in UTC
+ *                  by Prisma) falls in the 7 or 30 days up to and including
+ *                  as_of. No new_organizations_*: there is no tenant table.
+ *   created_at_column  the column the new-account figures are counted by.
  *   activity       integer figures that show real use, keyed `_total` or `_30d`.
  *                  A `_30d` figure counts records created in the 30 days before
  *                  `as_of`, except skills_published_30d, which uses the publish date.
@@ -63,7 +69,24 @@ export const SOURCE =
   "Excluded from activity: every record owned by the demo account that scripts/seed-demo.ts creates, matched by id. " +
   "Not excluded: users still counts the demo account, and test accounts of the owner's cannot be told apart " +
   "from real accounts, so their records are counted. " +
-  "active_users_30d is omitted because sessions are JWT and the schema holds no last-seen, session or audit entry.";
+  "active_users_30d is omitted because sessions are JWT and the schema holds no last-seen, session or audit entry. " +
+  "new_users_7d and new_users_30d count the same rows as users whose createdAt falls in the 7 or 30 days up to and " +
+  "including as_of (UTC); there is no organization figure because there is no tenant table.";
+
+/** The column the new-account figures are counted by. */
+export const CREATED_AT_COLUMN = Object.freeze({ users: "users.createdAt" });
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * The Prisma filter for rows created in the `days` days up to and including `asOf`.
+ *
+ * @param {Date} asOf
+ * @param {number} days
+ */
+export function createdWithin(asOf, days) {
+  return { createdAt: { gte: new Date(asOf.getTime() - days * DAY_MS), lte: asOf } };
+}
 
 /** Every `activity` key, mapped to a plain English label of at most five words. */
 export const ACTIVITY_LABELS = Object.freeze({
@@ -132,6 +155,11 @@ async function collectActivity(client, asOf) {
 export async function collectCounts(client, now = () => new Date()) {
   const asOf = now();
   const users = assertCount(await client.user.count());
+  // as_of is printed to the second; the new-account windows end at that same instant.
+  const asOfSecond = new Date(Math.floor(asOf.getTime() / 1000) * 1000);
+  // Same rows as users (no filter), by creation time.
+  const newUsers7d = assertCount(await client.user.count({ where: createdWithin(asOfSecond, 7) }));
+  const newUsers30d = assertCount(await client.user.count({ where: createdWithin(asOfSecond, 30) }));
   const activity = await collectActivity(client, asOf);
   return {
     product: PRODUCT,
@@ -139,6 +167,9 @@ export async function collectCounts(client, now = () => new Date()) {
     organizations: null,
     paying: 0,
     installs: null,
+    new_users_7d: newUsers7d,
+    new_users_30d: newUsers30d,
+    created_at_column: { ...CREATED_AT_COLUMN },
     as_of: asOf.toISOString().replace(/\.\d{3}Z$/, "Z"),
     source: SOURCE,
     activity,
